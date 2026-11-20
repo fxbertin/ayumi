@@ -3,15 +3,10 @@
 Japonês passo a passo (歩み, *ayumi*), para falantes de português: gramática em três níveis, vocabulário por categoria, quizzes, kanji, leitura e mini games.
 HTML + CSS + JavaScript puro, sem build. Funciona direto no GitHub Pages.
 
-## Publicar no GitHub Pages
-1. Crie um repositório e envie estes arquivos na raiz.
-2. Em **Settings → Pages**, escolha **Deploy from a branch**, branch `main`, pasta `/ (root)`.
-3. O site fica em `https://SEU-USUARIO.github.io/NOME-DO-REPO/`.
-
 Para testar localmente, basta abrir o `index.html` (página inicial, com cards que levam a cada atividade) no navegador. O quiz de vocabulário fica em `vocabulario.html`.
 
 ## App instalável (PWA) e uso offline
-O site é um PWA: `manifest.json`, `sw.js` (service worker), `pwa.js` e os ícones em `icons/` (gerados por `python3 tools/gen-icons.py`; o símbolo é o 歩, e para trocar basta mudar `GLYPH` no script). Precisa de HTTPS (o GitHub Pages já tem) e de caminhos **relativos** (já são). No Chrome/Android aparece o botão "Instalar como app" na página inicial; no iPhone/iPad, Compartilhar → Adicionar à Tela de Início.
+O site é um PWA: `manifest.json`, `sw.js` (service worker), `pwa.js` e os ícones em `icons/` (gerados por `python3 tools/gen-icons.py`; o símbolo é o 歩). Precisa de HTTPS (o GitHub Pages já tem) e de caminhos **relativos** (já são). No Chrome/Android aparece o botão "Instalar como app" na página inicial; no iPhone/iPad, Compartilhar → Adicionar à Tela de Início.
 - O `sw.js` guarda os arquivos para funcionar offline e atualiza a cópia em segundo plano a cada visita (a atualização do site aparece na visita seguinte).
 - **Ao adicionar ou remover arquivos do site**, atualize a lista `CORE` e aumente `VERSION` (`kd-v2`, `kd-v3`...) em `sw.js`.
 - O progresso fica no localStorage do navegador. No iPhone, o app instalado na tela inicial tem armazenamento separado do Safari.
