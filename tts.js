@@ -10,10 +10,24 @@
                                      opts: rate, voiceFor(item)->{voice,pitch}|voice, onItem(item,i), onDone()
      AyumiTTS.cancel()               para tudo
      AyumiTTS.onVoices(fn)           chama fn quando a lista de vozes muda
+     AyumiTTS.voiceHelpUrl           página com o passo a passo para instalar uma voz (vozes.html)
+     AyumiTTS.voiceHelp(el)          escreve em el a mensagem "sem voz japonesa" com o link para a página
    Em node (testes) exporta o mesmo objeto via module.exports. */
 (function (root) {
   "use strict";
   var DEFAULT_RATE = 0.9;
+  var VOICE_HELP_URL = "vozes.html";   // caminho RELATIVO: as páginas ficam todas na raiz
+
+  // Mensagem única "sem voz japonesa" + link para o tutorial (usada por todas as páginas)
+  function voiceHelp(el, text) {
+    if (!el || !root.document) return el;
+    el.textContent = (text || "Nenhuma voz japonesa neste aparelho.") + " ";
+    var a = root.document.createElement("a");
+    a.href = VOICE_HELP_URL;
+    a.textContent = "Como instalar uma voz japonesa";
+    el.appendChild(a);
+    return el;
+  }
   var ss = null;
   try { ss = root.speechSynthesis || null; } catch (e) { ss = null; }
   var hasUtt = typeof root.SpeechSynthesisUtterance !== "undefined";
@@ -137,6 +151,7 @@
   function noVoiceNotice() {
     try {
       if (!supported() || localStorage.getItem("kd-voice-note")) return;
+      if (/vozes\.html$/.test(location.pathname)) return;   // a página do tutorial já explica
       var tries = 0;
       var check = function () {
         var all = rawVoices();
@@ -146,7 +161,8 @@
         var n = document.createElement("div");
         n.setAttribute("role", "status");
         n.style.cssText = "margin:12px 0;padding:10px 12px;border:1.5px solid var(--line);border-radius:8px;background:var(--card);font-size:.92rem";
-        n.textContent = "Este aparelho não tem uma voz japonesa instalada, então o áudio pode ficar mudo. Instale uma nas configurações de voz (texto para fala) do sistema. ";
+        voiceHelp(n, "Este aparelho não tem uma voz japonesa instalada, então o áudio pode ficar mudo.");
+        n.appendChild(document.createTextNode(" "));
         var b = document.createElement("button"); b.type = "button"; b.className = "ghost"; b.textContent = "Entendi";
         b.onclick = function () { try { localStorage.setItem("kd-voice-note", "1"); } catch (e) {} n.remove(); };
         n.appendChild(b); (document.querySelector("main") || document.body).prepend(n);
@@ -157,7 +173,7 @@
   }
 
   var api = { supported: supported, voices: voices, pick: pick, hasJa: hasJa, speak: speak,
-              speakList: speakList, cancel: cancel, onVoices: onVoices, noVoiceNotice: noVoiceNotice, DEFAULT_RATE: DEFAULT_RATE };
+              speakList: speakList, cancel: cancel, onVoices: onVoices, noVoiceNotice: noVoiceNotice, voiceHelp: voiceHelp, voiceHelpUrl: VOICE_HELP_URL, DEFAULT_RATE: DEFAULT_RATE };
   root.AyumiTTS = api;
   if (typeof module !== "undefined" && module.exports) module.exports = api;
 

@@ -150,7 +150,7 @@ $("#show").onclick=function(){streak=0;score();var r=$("#rt");r.setAttribute("po
 $("#furi").onclick=function(){furi=!furi;ls.set("kd-taxi-furi",furi);var b=$("#furi");b.setAttribute("aria-pressed",furi);b.textContent="Furigana: "+(furi?"sim":"não");showText()};
 $("#trbtn").onclick=function(){var b=$("#trbtn"),on=b.getAttribute("aria-pressed")!=="true";b.setAttribute("aria-pressed",on);b.textContent="Tradução: "+(on?"sim":"não");$("#pt").hidden=!on};
 if(!AyumiTTS.supported())$("#listen").hidden=true;
-$("#listen").onclick=function(){AyumiTTS.speak(m.text,{rate:.85,onnovoice:function(){msg("Nenhuma voz japonesa encontrada neste navegador ou sistema.")}})};
+$("#listen").onclick=function(){AyumiTTS.speak(m.text,{rate:.85,onnovoice:function(){msg("");AyumiTTS.voiceHelp($("#msg"))}})};
 document.addEventListener("keydown",function(e){
   if(e.altKey||e.ctrlKey||e.metaKey)return;var t=e.target&&e.target.tagName;if(t==="INPUT"||t==="SELECT"||t==="TEXTAREA")return;
   var k=e.key;if(k==="ArrowUp")fwd();else if(k==="ArrowRight")turn(1);else if(k==="ArrowLeft")turn(-1);else if(k==="ArrowDown")stop();else return;e.preventDefault()});

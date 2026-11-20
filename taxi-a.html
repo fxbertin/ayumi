@@ -196,7 +196,7 @@ $("#trbtn").onclick=function(){tron=!tron;var b=$("#trbtn");b.setAttribute("aria
 if(!AyumiTTS.supported())$("#listen").hidden=true;
 $("#listen").onclick=function(){if(!steps.length){msg("Monte uma instrução primeiro.");return}
   var txt=steps.map(function(st,i){return T.plain(T.say(st,i).ja)}).join(" ");
-  AyumiTTS.speak(txt,{rate:.85,onnovoice:function(){msg("Nenhuma voz japonesa encontrada neste navegador ou sistema.")}})};
+  AyumiTTS.speak(txt,{rate:.85,onnovoice:function(){msg("");AyumiTTS.voiceHelp($("#msg"))}})};
 (function(){var b=$("#furi");b.setAttribute("aria-pressed",furi);b.textContent="Furigana: "+(furi?"sim":"não")})();
 load();
 })();

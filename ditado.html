@@ -135,7 +135,7 @@ if (!TTS) { $("#tts-warn").hidden = false; $("#go").disabled = true; }
 
 // ---------- áudio ----------
 function speak(text, rate){
-  AyumiTTS.speak(text, { rate: rate, onnovoice: () => { $("#feedback").textContent = "Nenhuma voz japonesa encontrada neste navegador/sistema. Instale uma voz em japonês no sistema operacional."; } });
+  AyumiTTS.speak(text, { rate: rate, onnovoice: () => AyumiTTS.voiceHelp($("#feedback")) });
 }
 // fala sempre o kana (evita leitura errada de kanji)
 const audioText = () => { const q = S.q[S.i]; return S.src === "s" ? q.s[1] : q.w[1]; };

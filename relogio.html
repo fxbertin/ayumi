@@ -133,7 +133,7 @@ $("#furi").onchange = e => store.set("furi", e.target.checked);
 paint();
 
 const show = id => ["menu", "game", "result"].forEach(s => $("#" + s).hidden = s !== id);
-function say(t){ if (TTS) AyumiTTS.speak(R.reading(t, opts()), { onnovoice: () => { $("#feedback").textContent = "Nenhuma voz japonesa encontrada neste navegador/sistema. Instale uma voz em japonês no sistema operacional."; } }); }
+function say(t){ if (TTS) AyumiTTS.speak(R.reading(t, opts()), { onnovoice: () => AyumiTTS.voiceHelp($("#feedback")) }); }
 
 // relógio de ponteiros desenhado por código (o aria-label não revela a hora)
 function clockSVG(t){

@@ -137,7 +137,7 @@ $("#furi").onchange = e => store.set("furi", e.target.checked);
 paint();
 
 const show = id => ["menu", "game", "result"].forEach(s => $("#" + s).hidden = s !== id);
-function say(n){ if (TTS) AyumiTTS.speak(N.reading(n), { onnovoice: () => { $("#feedback").textContent = "Nenhuma voz japonesa encontrada neste navegador/sistema. Instale uma voz em japonês no sistema operacional."; } }); }
+function say(n){ if (TTS) AyumiTTS.speak(N.reading(n), { onnovoice: () => AyumiTTS.voiceHelp($("#feedback")) }); }
 
 function start(){
   const q = N.sample(level, 10);

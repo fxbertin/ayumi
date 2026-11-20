@@ -94,6 +94,9 @@ Jogo da casa e dos objetos do dia a dia em `kurashi.html`: desenhos esquemático
 ## Áudio
 Usa a Web Speech API (`speechSynthesis`, `lang = ja-JP`). A voz vem do navegador/sistema; se não houver voz japonesa instalada, os botões de áudio ficam ocultos ou usam uma voz padrão.
 
+### Vozes japonesas (`vozes.html`)
+Página com o passo a passo para instalar uma voz japonesa no Android, iPhone/iPad, Windows e Mac, mais o botão "Testar a voz" (`AyumiTTS.hasJa()` e `AyumiTTS.speak`). Os passos foram conferidos nas páginas de ajuda do Google, da Apple e da Microsoft em 2026-11-20; o Linux ficou de fora por não ter sido confirmado. O texto e o link ficam em um só lugar, `tts.js`: `AyumiTTS.voiceHelp(el)` escreve "Nenhuma voz japonesa neste aparelho. Como instalar uma voz japonesa" (com o link `AyumiTTS.voiceHelpUrl`, relativo) e é usado pelo aviso único (`noVoiceNotice`, chave `kd-voice-note`, fora do backup) e pelo `onnovoice` de app.js, ditado, numeros, relogio, taxi e taxi-a. Há um link discreto no rodapé de `index.html` e de `progresso.html`.
+
 ## Backup do progresso
 
 Em `progresso.html`, “Exportar progresso” baixa um `.json` (app, version, exportedAt, data) com `stats`, `miss`, `best:*` e todas as chaves `kd-*` (menos `kd-voice-note`). “Importar progresso” valida o arquivo, mostra um resumo e, ao confirmar, SUBSTITUI tudo o que está salvo no aparelho (não há mesclagem).

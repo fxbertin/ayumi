@@ -330,7 +330,7 @@ function finish(){
 // Áudio: Web Speech API (speechSynthesis), voz japonesa do próprio navegador/sistema
 const TTS = AyumiTTS.supported();
 function speak(text){
-  AyumiTTS.speak(text, { rate: 0.85, onnovoice: () => { $("#feedback").textContent = "Nenhuma voz japonesa encontrada neste navegador/sistema. Instale uma voz em japonês no sistema operacional."; } });
+  AyumiTTS.speak(text, { rate: 0.85, onnovoice: () => AyumiTTS.voiceHelp($("#feedback")) });
 }
 if (!TTS) $("#autowrap").hidden = true;
 $("#speak").onclick = () => speak(S.q[S.i].w[1]);

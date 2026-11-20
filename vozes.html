@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Como instalar uma voz japonesa – Ayumi</title>
+<link rel="stylesheet" href="style.css">
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#1d2742">
+<link rel="icon" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<script src="pwa.js" defer></script>
+<script src="tts.js"></script>
+<style>
+.vz{margin:14px 0;padding:12px 14px;border:1.5px solid var(--line);border-radius:8px;background:var(--card)}
+.vz h2{margin:0 0 6px;font-size:1.1rem}
+.vz ol{margin:6px 0 4px;padding-left:1.3rem}
+.vz li{margin:5px 0}
+.vz p{margin:6px 0}
+.vz .nota{color:var(--muted);font-size:.9rem}
+.vtest{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:8px 0}
+.vtest button{font:inherit;padding:10px 16px;border-radius:8px;border:1.5px solid var(--ink);background:var(--ink);color:var(--paper);cursor:pointer}
+#vstatus{margin:8px 0 0;min-height:1.4em;overflow-wrap:anywhere}
+</style>
+</head>
+<body>
+<header>
+  <h1>Como instalar uma voz japonesa</h1>
+  <p>Sem uma voz japonesa no aparelho, o botão 🔊 fica mudo. · <a href="index.html">← Ayumi</a></p>
+</header>
+<main>
+  <section class="vz" aria-labelledby="h-como">
+    <h2 id="h-como">Como funciona</h2>
+    <p>O Ayumi não traz vozes próprias: ele usa as vozes que o seu aparelho oferece ao navegador. Por isso, a solução é instalar uma voz japonesa no sistema e depois reabrir o navegador. Os nomes dos menus mudam conforme a versão do sistema e o idioma do aparelho; se algo estiver com outro nome, procure por “voz”, “fala” ou “text-to-speech”.</p>
+  </section>
+
+  <section class="vz" aria-labelledby="h-android">
+    <h2 id="h-android">Android</h2>
+    <ol>
+      <li>Abra as <b>Configurações</b> do aparelho.</li>
+      <li>Toque em <b>Acessibilidade</b> e depois em <b>Saída de conversão de texto em voz</b> (em inglês, <i>Text-to-speech output</i>).</li>
+      <li>Toque em <b>Instalar dados de voz</b> (<i>Install voice data</i>) e escolha <b>Japonês</b>.</li>
+    </ol>
+    <p class="nota">Em alguns aparelhos o caminho é Idioma e entrada → Saída de texto para voz → engrenagem ao lado de “Google Text-to-speech” → Instalar dados de voz. O mecanismo de voz padrão varia conforme o fabricante.</p>
+  </section>
+
+  <section class="vz" aria-labelledby="h-ios">
+    <h2 id="h-ios">iPhone e iPad</h2>
+    <ol>
+      <li>Abra <b>Ajustes</b> → <b>Acessibilidade</b> → <b>Conteúdo Falado</b> (<i>Spoken Content</i>).</li>
+      <li>Toque em <b>Vozes</b> e escolha <b>Japonês</b>.</li>
+      <li>Toque na voz que quiser. Se escolher a versão <i>Enhanced Quality</i>, ela será baixada.</li>
+    </ol>
+    <p class="nota">As vozes de qualidade aprimorada podem ter 100 MB ou mais: conecte-se ao Wi-Fi para baixar. No iPhone e no iPad, os navegadores usam o mecanismo do Safari, então a lista de vozes costuma ser a mesma em todos eles.</p>
+  </section>
+
+  <section class="vz" aria-labelledby="h-win">
+    <h2 id="h-win">Windows 10 e 11</h2>
+    <ol>
+      <li>Abra <b>Configurações</b> → <b>Hora e idioma</b> → <b>Idioma e região</b>.</li>
+      <li>Ao lado de “Idiomas preferenciais”, escolha <b>Adicionar um idioma</b>, procure <b>Japonês</b> e toque em <b>Avançar</b>.</li>
+      <li>Na tela de recursos, deixe marcado <b>Conversão de texto em fala</b> (<i>Text-to-speech</i>). Se não quiser o Windows em japonês, desmarque “Definir como meu idioma de exibição”.</li>
+      <li>Toque em <b>Instalar</b> e espere terminar. É preciso estar conectado à internet. Se o Windows pedir, reinicie o computador.</li>
+    </ol>
+  </section>
+
+  <section class="vz" aria-labelledby="h-mac">
+    <h2 id="h-mac">Mac</h2>
+    <ol>
+      <li>Abra o menu Apple → <b>Ajustes do Sistema</b> → <b>Acessibilidade</b> → <b>Conteúdo Falado</b> (em versões mais recentes pode se chamar <i>Ler e Falar</i>).</li>
+      <li>Abra o menu <b>Voz do sistema</b> e escolha <b>Gerenciar vozes</b> (<i>Manage Voices</i>).</li>
+      <li>Procure <b>Japonês</b>, clique no botão de baixar ao lado da voz que quiser e espere terminar o download. Clique em OK.</li>
+    </ol>
+  </section>
+
+  <section class="vz" aria-labelledby="h-nav">
+    <h2 id="h-nav">E o navegador?</h2>
+    <p>Chrome, Firefox, Safari e Edge usam, por padrão, os serviços de voz do sistema, então o passo a passo acima vale para todos. Uma exceção: o Edge também pode mostrar vozes “Microsoft … Online”, que ficam na nuvem e só funcionam com internet.</p>
+    <p>Depois de instalar, <b>feche e reabra o navegador</b> (no celular, feche o aplicativo por completo) para a nova voz aparecer na lista.</p>
+  </section>
+
+  <section class="vz" aria-labelledby="h-teste">
+    <h2 id="h-teste">Testar a voz</h2>
+    <div class="vtest"><button type="button" id="vtest">Testar a voz</button></div>
+    <p id="vstatus" role="status" aria-live="polite"></p>
+  </section>
+</main>
+<footer>Os passos foram conferidos nas páginas de ajuda do Google (Android), da Apple (iPhone, iPad e Mac) e da Microsoft (Windows e Edge). Se o seu aparelho tiver menus diferentes, procure pelo recurso de “texto para fala” do sistema.</footer>
+<script>
+(function(){
+  var st=document.getElementById("vstatus"), btn=document.getElementById("vtest");
+  function info(){
+    if(!AyumiTTS.supported()){ st.textContent="Este navegador não tem síntese de voz. Tente a versão atual do Chrome, Edge, Safari ou Firefox."; return false; }
+    if(AyumiTTS.hasJa()){ var v=AyumiTTS.pick(); st.textContent="Este aparelho já tem uma voz japonesa"+(v&&v.name?" ("+v.name+")":"")+"."; return true; }
+    st.textContent="Ainda não há voz japonesa neste navegador. Siga os passos acima, feche e reabra o navegador e teste de novo."; return false;
+  }
+  btn.onclick=function(){
+    if(!info()) return;
+    AyumiTTS.speak("こんにちは",{onnovoice:function(){ info(); }});
+    st.textContent+=" Se você não ouviu nada, confira o volume e o modo silencioso.";
+  };
+  if(AyumiTTS.supported()){ AyumiTTS.onVoices(function(){ if(!st.textContent) info(); }); setTimeout(function(){ if(!st.textContent) info(); },900); }
+  else { btn.disabled=true; info(); }
+})();
+</script>
+</body>
+</html>
