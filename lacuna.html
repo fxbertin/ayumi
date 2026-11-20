@@ -1,0 +1,261 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lacuna em frases – Ayumi</title>
+<link rel="stylesheet" href="style.css">
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#1d2742">
+<link rel="icon" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<script src="pwa.js" defer></script>
+<script src="tts.js"></script>
+<style>
+.ans{width:100%;font:inherit;font-size:1.4rem;padding:12px 14px;border:1.5px solid var(--line);border-radius:8px;background:var(--card);color:var(--ink);margin-top:14px}
+.prev{min-height:1.6em;margin:6px 2px;color:var(--muted);font-size:1.15rem}
+.sent{font-size:1.6rem;line-height:1.7;margin:6px 0}
+.gap{display:inline-block;min-width:2.6em;border-bottom:3px solid var(--muted);text-align:center;color:var(--accent,inherit)}
+.gap.p{min-width:1.4em}
+.opt small{display:block;font-size:.7em;color:var(--muted)}
+.opt.big{font-size:1.5rem}
+select{font:inherit;color:var(--ink);background:var(--card);border:1.5px solid var(--line);border-radius:8px;padding:8px 10px;max-width:100%}
+.setrow{display:flex;flex-wrap:wrap;gap:12px 20px;align-items:center;margin:12px 0}
+.ans-card{text-align:left;margin-top:8px}
+.ans-card .jp{font-size:1.4rem}
+a{color:inherit}
+</style>
+</head>
+<body>
+<header>
+  <h1><span lang="ja">穴埋め道場</span> Lacuna em frases</h1>
+  <p>Complete a frase com a palavra ou a partícula que falta. · <a href="index.html">← Ayumi</a></p>
+</header>
+
+<main>
+  <section id="menu">
+    <div class="setrow">
+      <div class="seg" role="group" aria-label="O que falta">
+        <button id="s-w" type="button">Palavras</button>
+        <button id="s-p" type="button">Partículas</button>
+      </div>
+      <div class="seg" role="group" aria-label="Modo de resposta">
+        <button id="m-pick" type="button">Escolher</button>
+        <button id="m-type" type="button">Digitar</button>
+      </div>
+    </div>
+    <div class="setrow">
+      <label>Conteúdo: <select id="scope"></select></label>
+      <button id="go" type="button" class="primary">Começar (10 perguntas)</button>
+    </div>
+    <p id="msg" class="feedback" aria-live="polite"></p>
+    <p class="hint">Só entram frases em que a lacuna tem uma resposta clara; as ambíguas ficam de fora. A tradução aparece como pista.</p>
+  </section>
+
+  <section id="game" hidden>
+    <div class="top"><span id="score"></span><span id="stamp" class="stamp">穴</span></div>
+    <div class="card">
+      <div id="sent" class="sent" lang="ja"></div>
+      <div id="pt" class="hint"></div>
+    </div>
+    <div id="typebox">
+      <input id="ans" class="ans" type="text" lang="ja" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" placeholder="digite em romaji ou kana">
+      <div id="prev" class="prev" lang="ja"></div>
+      <button id="check" type="button" class="primary">Conferir</button>
+    </div>
+    <div id="opts" class="opts"></div>
+    <p id="feedback" class="feedback" aria-live="polite"></p>
+    <div id="reveal" class="card ans-card" hidden></div>
+    <div class="row">
+      <button id="hear" type="button" class="ghost" hidden>🔊 Ouvir a frase</button>
+      <button id="next" type="button" class="primary" hidden>Próxima</button>
+    </div>
+  </section>
+
+  <section id="result" hidden>
+    <h2 id="final"></h2>
+    <p id="best"></p>
+    <div id="review"></div>
+    <div class="row">
+      <button id="again" type="button" class="primary">Jogar de novo</button>
+      <button id="home" type="button" class="ghost">Voltar ao menu</button>
+    </div>
+  </section>
+</main>
+
+<footer>Dica: "wo" ou "o" viram を, "wa" vira は, "-" vira ー. Atalhos: 1–4 escolhem, Enter confere ou avança.</footer>
+
+<script src="data/words.js"></script>
+<script src="data/sentences.js"></script>
+<script src="data/highlight.js"></script>
+<script src="data/conj.js"></script><!-- fornece toKana() e hira() -->
+<script>
+const $ = s => document.querySelector(s);
+const shuffle = a => { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
+const ls = { get(k){ try { return JSON.parse(localStorage.getItem(k)); } catch { return null; } }, set(k, v){ try { localStorage.setItem(k, JSON.stringify(v)); } catch {} } };
+const N = 10;
+const wkey = w => w[0] + "|" + w[1];
+
+const WORD = new Map();
+for (const c of CATEGORIES) for (const w of c.words) { const k = wkey(w); if (!WORD.has(k)) WORD.set(k, { w, cat: c, grp: c.group }); }
+
+const KAN=/[\u4e00-\u9faf々]/, KAT=/[\u30a0-\u30ff]/;
+function wordBlank(s,key,WORD,hira){const e=WORD.get(key);if(!e)return null;const t=e.w[0];if(t.length<2&&!KAN.test(t))return null;
+ const i=s[0].indexOf(t);if(i<0||s[0].indexOf(t,i+1)>=0)return null;const p=s[0][i-1]||"",n=s[0][i+t.length]||"";
+ if(KAN.test(t[0])&&KAN.test(p))return null;if(KAN.test(t.slice(-1))&&KAN.test(n))return null;
+ if(!hira(s[1]).includes(e.w[1]))return null;return{kind:"w",s,key,ref:e,i,len:t.length,ans:t};}
+function particles(s){const t=s[0],pt=s[2].trim(),out=[],cnt=c=>t.split(c).length-1;const add=(c,i)=>out.push({kind:"p",s,i,len:1,ans:c});
+ if(cnt("を")===1&&!/たい|好き|嫌い|分か|わか|でき|ほし|欲し|上手|下手/.test(t))add("を",t.indexOf("を"));
+ const m=t.match(/か[。？?]?$/);if(m&&pt.endsWith("?")&&cnt("か")>=1&&t.lastIndexOf("か")===t.length-m[0].length)add("か",t.length-m[0].length);
+ if(/\btambém\b/i.test(pt)&&cnt("も")===1){const i=t.indexOf("も"),p=t[i-1]||"",n=t[i+1]||"";if((KAN.test(p)||KAT.test(p))&&!/[のうっと]/.test(n))add("も",i);}
+ if(cnt("と")===1&&/と(言|思|一緒|いっしょ|いう|おも)/.test(t))add("と",t.indexOf("と"));
+ if(cnt("の")===1){const i=t.indexOf("の"),p=t[i-1]||"",n=t[i+1]||"";if((KAN.test(p)||KAT.test(p))&&(KAN.test(n)||KAT.test(n)))add("の",i);}
+ let r=/[時分]に|曜日に|日に/.exec(t);if(r&&t.split(r[0]).length===2)add("に",r.index+r[0].length-1);
+ else{r=/に(あ[りるっ]|い[まるた])/.exec(t);if(r&&cnt("に")===1)add("に",r.index);}
+ return out;}
+
+// ---------- conjuntos de lacunas ----------
+const DIST = { "を": ["に", "で", "と"], "も": ["は", "が", "を"], "と": ["に", "で", "を"], "の": ["は", "が", "を"], "か": ["の", "ね", "よ"], "に": ["で", "を", "と"] };
+const CAND_W = [], CAND_P = [];
+for (const s of SENTENCES) {
+  for (const k of s[3]) { const c = wordBlank(s, k, WORD, hira); if (c) CAND_W.push(c); }
+  CAND_P.push(...particles(s));
+}
+const scopes = [{ value: "all", label: "Tudo", test: () => true }];
+[...new Set(CATEGORIES.map(c => c.group))].forEach(g => scopes.push({ value: "g:" + g, label: g + " (todos)", test: e => e.grp === g }));
+CATEGORIES.forEach(c => scopes.push({ value: "c:" + c.id, label: c.group + " · " + c.name, test: e => e.cat.id === c.id }));
+const inScope = (c, sc) => c.kind === "w" ? sc.test(c.ref) : c.s[3].some(k => { const e = WORD.get(k); return e && sc.test(e); });
+
+const S = { src: ls.get("kd-lacuna-src") || "w", mode: ls.get("kd-lacuna-mode") || "pick", q: [], i: 0, score: 0, wrong: [], locked: true };
+function pool(scope){
+  const sc = scopes.find(x => x.value === scope) || scopes[0];
+  const by = new Map();                         // uma lacuna por frase (sorteada na hora de jogar)
+  for (const c of (S.src === "p" ? CAND_P : CAND_W)) if (inScope(c, sc)) { if (!by.has(c.s)) by.set(c.s, []); by.get(c.s).push(c); }
+  return [...by.values()];
+}
+function fillScopes(){
+  const cur = $("#scope").value || ls.get("kd-lacuna-scope") || "all";
+  $("#scope").replaceChildren(...scopes.map(sc => {
+    const o = document.createElement("option"), n = pool(sc.value).length;
+    o.value = sc.value; o.textContent = `${sc.label} – ${n}`; o.disabled = n < 4; return o;
+  }));
+  const ok = [...$("#scope").options].some(o => o.value === cur && !o.disabled);
+  $("#scope").value = ok ? cur : "all";
+}
+function paint(){
+  $("#s-w").setAttribute("aria-pressed", S.src === "w"); $("#s-p").setAttribute("aria-pressed", S.src === "p");
+  $("#m-pick").setAttribute("aria-pressed", S.mode === "pick"); $("#m-type").setAttribute("aria-pressed", S.mode === "type");
+}
+$("#s-w").onclick = () => { S.src = "w"; ls.set("kd-lacuna-src", "w"); paint(); fillScopes(); };
+$("#s-p").onclick = () => { S.src = "p"; ls.set("kd-lacuna-src", "p"); paint(); fillScopes(); };
+$("#m-pick").onclick = () => { S.mode = "pick"; ls.set("kd-lacuna-mode", "pick"); paint(); };
+$("#m-type").onclick = () => { S.mode = "type"; ls.set("kd-lacuna-mode", "type"); paint(); };
+$("#scope").onchange = e => ls.set("kd-lacuna-scope", e.target.value);
+paint(); fillScopes();
+
+// ---------- áudio ----------
+function speak(text){ AyumiTTS.speak(text); }
+
+// ---------- comparação ----------
+const VOW = {}; ["あかさたなはまやらわがざだばぱゃ", "いきしちにひみりぎじぢびぴ", "うくすつぬふむゆるぐずづぶぷゅ", "えけせてねへめれげぜでべぺ", "おこそとのほもよろをごぞどぼぽょ"]
+  .forEach((r, i) => [...r].forEach(c => VOW[c] = "あいうえお"[i]));
+function norm(s){
+  s = hira(s).replace(/[\s。、，．！？!?,.「」『』・]/g, "");
+  let o = ""; for (const c of s) o += c === "ー" ? (VOW[o.slice(-1)] || "") : c;
+  return o.replace(/は/g, "わ").replace(/へ/g, "え").replace(/を/g, "お");
+}
+
+// ---------- perguntas ----------
+function wordOptions(c){
+  const right = c.ref, isK = x => /[\u4e00-\u9faf]/.test(x.w[0]);
+  const same = [...WORD.values()].filter(e => e !== right && e.w[1] !== right.w[1] && !c.s[0].includes(e.w[0]));
+  const rank = e => (e.cat.id === right.cat.id ? 4 : e.grp === right.grp ? 2 : 0) + (isK(e) === isK(right) ? 2 : 0) + (Math.abs(e.w[1].length - right.w[1].length) <= 1 ? 1 : 0) + Math.random() * 2;
+  const d = same.map(e => [e, rank(e)]).sort((a, b) => b[1] - a[1]).slice(0, 3).map(x => x[0]);
+  return shuffle([right, ...d]).map(e => ({ text: e.w[0], sub: e.w[0] === e.w[1] ? "" : e.w[1], right: e === right }));
+}
+function start(){
+  const groups = pool($("#scope").value);
+  if (groups.length < 4) { $("#msg").textContent = "Esse conteúdo tem poucas frases. Escolha outro."; return; }
+  $("#msg").textContent = "";
+  const q = shuffle(groups).slice(0, N).map(g => g[Math.floor(Math.random() * g.length)]);
+  Object.assign(S, { q, i: 0, score: 0, wrong: [] });
+  ["menu", "game", "result"].forEach(id => $("#" + id).hidden = id !== "game");
+  render();
+}
+function render(){
+  const c = S.q[S.i]; S.locked = false;
+  $("#score").textContent = `${S.i + 1}/${S.q.length} · acertos: ${S.score}`;
+  $("#feedback").textContent = ""; $("#reveal").hidden = true; $("#next").hidden = true; $("#hear").hidden = true;
+  const t = c.s[0], sent = $("#sent"); sent.replaceChildren();
+  const gap = document.createElement("span"); gap.className = "gap" + (c.kind === "p" ? " p" : ""); gap.textContent = "　";
+  sent.append(t.slice(0, c.i), gap, t.slice(c.i + c.len));
+  $("#pt").textContent = c.s[2];
+  const pick = S.mode === "pick";
+  $("#typebox").hidden = pick; $("#opts").hidden = !pick; $("#opts").replaceChildren();
+  if (pick) {
+    const opts = c.kind === "p" ? shuffle([c.ans, ...DIST[c.ans]]).map(x => ({ text: x, sub: "", right: x === c.ans })) : wordOptions(c);
+    opts.forEach(o => {
+      const b = document.createElement("button"); b.type = "button"; b.className = "opt" + (c.kind === "p" ? " big" : ""); b.lang = "ja";
+      b.append(o.text); if (o.sub) { const sm = document.createElement("small"); sm.textContent = o.sub; b.append(sm); }
+      b.dataset.right = o.right ? "1" : ""; b.onclick = () => answer(o.right, b);
+      $("#opts").append(b);
+    });
+  } else { $("#ans").value = ""; $("#prev").textContent = ""; $("#ans").disabled = false; $("#check").disabled = false; $("#ans").focus(); }
+}
+function answer(ok, btn){
+  if (S.locked) return; S.locked = true;
+  const c = S.q[S.i];
+  if (ok) S.score++; else S.wrong.push(c);
+  if (S.mode === "pick") { [...$("#opts").children].forEach(b => { b.disabled = true; if (b.dataset.right) b.classList.add("ok"); }); if (!ok && btn) btn.classList.add("bad"); }
+  else { $("#ans").disabled = true; $("#check").disabled = true; }
+  $("#feedback").textContent = ok ? "Certo! ✓" : "Não foi dessa vez.";
+  const gap = $("#sent .gap"); gap.textContent = c.ans; gap.style.borderBottomColor = ok ? "var(--ok,green)" : "var(--bad,crimson)";
+  const r = $("#reveal"); r.hidden = false; r.innerHTML = `<div class="jp" lang="ja"></div><div></div><div class="hint"></div>`;
+  KDHL.fill(r.children[0], c.s[0], [[c.i, c.i + c.len]]); r.children[1].textContent = c.s[1];
+  r.children[2].textContent = c.kind === "w" ? `${c.ref.w[0]}${c.ref.w[0] === c.ref.w[1] ? "" : " (" + c.ref.w[1] + ")"} = ${c.ref.w[3]}` : `Partícula ${c.ans}`;
+  record(c, ok);
+  $("#hear").hidden = false; $("#hear").onclick = () => speak(c.s[1]);
+  $("#next").hidden = false; $("#next").focus();
+}
+function record(c, ok){
+  const d = new Date(), pad = n => String(n).padStart(2, "0");
+  const p = c.kind === "p", key = p ? c.ans + "|" + c.ans : c.key;
+  const st = ls.get("stats") || [];
+  st.push({ data: `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`, atividade: p ? "lacuna-particulas" : "lacuna",
+    nivel: p ? "Partículas" : c.ref.grp, categoria: p ? "particulas" : c.ref.cat.id, chave: key, acertou: ok });
+  ls.set("stats", st.slice(-5000));
+  if (!p) { const m = ls.get("miss") || {}; if (ok) { if (m[key] && --m[key] <= 0) delete m[key]; } else m[key] = Math.min(5, (m[key] || 0) + 2); ls.set("miss", m); }
+}
+function check(){
+  if (S.locked) return;
+  const raw = $("#ans").value.trim(); if (!raw) return;
+  const c = S.q[S.i], got = norm(toKana(raw.replace(/-/g, "ー"), true));
+  const want = c.kind === "p" ? [c.ans] : [c.ref.w[1], c.ref.w[0]];
+  answer(want.some(x => norm(x) === got) || want.includes(raw), null);
+}
+function finish(){
+  ["menu", "game", "result"].forEach(id => $("#" + id).hidden = id !== "result");
+  const bk = "best:lacuna" + (S.src === "p" ? "-particulas" : ""), prev = ls.get(bk) || 0;
+  $("#final").textContent = `Você acertou ${S.score} de ${S.q.length}`;
+  if (S.score > prev) { ls.set(bk, S.score); $("#best").textContent = prev ? `Novo recorde! (antes: ${prev})` : "Primeiro resultado salvo como recorde."; }
+  else $("#best").textContent = `Recorde: ${prev}`;
+  const rv = $("#review"); rv.replaceChildren();
+  if (S.wrong.length) {
+    const h = document.createElement("h2"); h.textContent = "Para revisar"; rv.append(h);
+    S.wrong.forEach(c => { const p = document.createElement("p"); p.lang = "ja"; p.textContent = `${c.s[0]} — ${c.s[2]}`; rv.append(p); });
+  }
+}
+$("#go").onclick = start; $("#again").onclick = start; $("#check").onclick = check;
+$("#home").onclick = () => { ["menu", "game", "result"].forEach(id => $("#" + id).hidden = id !== "menu"); fillScopes(); };
+$("#next").onclick = () => { if (++S.i >= S.q.length) finish(); else render(); };
+$("#ans").addEventListener("input", e => { $("#prev").textContent = toKana(e.target.value.replace(/-/g, "ー"), false); });
+document.addEventListener("keydown", e => {
+  if ($("#game").hidden || e.ctrlKey || e.metaKey || e.altKey) return;
+  if (e.key === "Enter") { e.preventDefault(); S.locked ? $("#next").click() : (S.mode === "type" && check()); }
+  else if (S.mode === "pick" && !S.locked && /^[1-4]$/.test(e.key)) $("#opts").children[+e.key - 1]?.click();
+});
+</script>
+</body>
+</html>

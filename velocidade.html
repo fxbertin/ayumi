@@ -1,0 +1,190 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Velocidade – Ayumi</title>
+<link rel="stylesheet" href="style.css">
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#1d2742">
+<link rel="icon" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<script src="pwa.js" defer></script>
+<style>
+.setrow{display:flex;flex-wrap:wrap;gap:12px 20px;align-items:center;margin:12px 0}
+select{font:inherit;color:var(--ink);background:var(--card);border:1.5px solid var(--line);border-radius:8px;padding:8px 10px;max-width:100%}
+.bar{height:10px;background:var(--line);border-radius:5px;overflow:hidden;margin:0 0 12px}
+.bar i{display:block;height:100%;width:100%;background:var(--stamp)}
+.opt.long{font-size:1rem}
+.opt.kj{font-size:1.5rem}
+a{color:inherit}
+</style>
+</head>
+<body>
+<header>
+  <h1><span lang="ja">速習道場</span> Velocidade</h1>
+  <p>60 segundos: responda o máximo que conseguir. Sequências de acertos valem mais pontos. · <a href="index.html">← Ayumi</a></p>
+</header>
+
+<main>
+  <section id="menu">
+    <div class="setrow">
+      <div class="seg" role="group" aria-label="Direção">
+        <button id="d-jp" type="button">Japonês → Português</button>
+        <button id="d-pt" type="button">Português → Japonês</button>
+      </div>
+      <label><input type="checkbox" id="reading" checked> Mostrar leitura</label>
+    </div>
+    <div class="setrow">
+      <label>Palavras: <select id="scope"></select></label>
+      <button id="go" type="button" class="primary">Começar</button>
+    </div>
+    <p id="msg" class="feedback" aria-live="polite"></p>
+    <p id="rec" class="hint"></p>
+  </section>
+
+  <section id="game" hidden>
+    <div class="bar" aria-hidden="true"><i id="fill"></i></div>
+    <div class="top"><span id="time"></span><span id="score"></span><span id="mult" class="stamp"></span></div>
+    <div class="card">
+      <div id="big" class="big" lang="ja"></div>
+      <div id="hint" class="hint" lang="ja"></div>
+    </div>
+    <div id="opts" class="opts"></div>
+  </section>
+
+  <section id="result" hidden>
+    <h2 id="final"></h2>
+    <p id="best"></p>
+    <div id="review"></div>
+    <div class="row">
+      <button id="again" type="button" class="primary">Jogar de novo</button>
+      <button id="home" type="button" class="ghost">Voltar ao menu</button>
+    </div>
+  </section>
+</main>
+
+<footer>Cada acerto vale 10 pontos × o multiplicador, que sobe 1 a cada 5 acertos seguidos (máx. ×5). Errar zera a sequência. Atalhos: 1–4 respondem.</footer>
+
+<script src="data/words.js"></script>
+<script>
+const $ = s => document.querySelector(s);
+const ls = { get(k){ try { return JSON.parse(localStorage.getItem(k)); } catch { return null; } }, set(k, v){ try { localStorage.setItem(k, JSON.stringify(v)); } catch {} } };
+const shuffle = a => { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
+const DUR = 60000;
+const ALL = CATEGORIES.flatMap((c, ci) => c.words.map(([kj, kana, , pt]) => ({ kj, kana, pt, cat: c.id, grp: c.group, ci })));
+const S = { dir: ls.get("kd-vel-dir") === "pt" ? "pt" : "jp", pool: [], deck: [], q: null, score: 0, streak: 0, maxStreak: 0, right: 0, total: 0, wrong: [], locked: true, end: 0, tick: null };
+const key = w => w.kj + "|" + w.kana;
+const mult = () => Math.min(5, 1 + Math.floor(S.streak / 5));
+const label = w => S.dir === "jp" ? w.pt : w.kj;
+
+function poolFor(v) {
+  if (v === "all") return ALL;
+  if (v.startsWith("g:")) return ALL.filter(w => w.grp === v.slice(2));
+  return ALL.filter(w => w.ci === +v.slice(2));
+}
+function nextQ() {
+  if (!S.deck.length) S.deck = shuffle(S.pool);
+  const w = S.deck.pop(), correct = label(w), used = new Set([correct]), dist = [];
+  for (const x of shuffle(S.pool.length >= 8 ? S.pool : ALL)) {
+    if (x === w || x.kana === w.kana || used.has(label(x))) continue;
+    if (S.dir === "jp" && x.pt === w.pt) continue;
+    used.add(label(x)); dist.push(x); if (dist.length === 3) break;
+  }
+  S.q = { w, opts: shuffle([{ w, ok: true }, ...dist.map(x => ({ w: x, ok: false }))]) };
+  const jp = S.dir === "jp";
+  $("#big").textContent = jp ? w.kj : w.pt;
+  $("#hint").textContent = jp && $("#reading").checked && w.kj !== w.kana ? w.kana : "";
+  const box = $("#opts"); box.replaceChildren();
+  S.q.opts.forEach((o, i) => {
+    const b = document.createElement("button");
+    b.type = "button"; b.className = "opt" + (jp ? "" : " kj"); b.lang = jp ? "pt" : "ja";
+    b.textContent = label(o.w);
+    if (!jp && $("#reading").checked && o.w.kj !== o.w.kana) { const s = document.createElement("small"); s.textContent = o.w.kana; b.append(s); }
+    b.onclick = () => answer(i);
+    box.append(b);
+  });
+  S.locked = false;
+}
+function start() {
+  S.pool = poolFor($("#scope").value);
+  if (S.pool.length < 4) { $("#msg").textContent = "Poucas palavras nessa seleção."; return; }
+  $("#msg").textContent = "";
+  ls.set("kd-vel-scope", $("#scope").value); ls.set("kd-vel-read", $("#reading").checked);
+  Object.assign(S, { deck: [], score: 0, streak: 0, maxStreak: 0, right: 0, total: 0, wrong: [], end: Date.now() + DUR });
+  ["menu", "game", "result"].forEach(id => $("#" + id).hidden = id !== "game");
+  hud(); nextQ();
+  clearInterval(S.tick); S.tick = setInterval(tick, 100);
+}
+function hud() {
+  const left = Math.max(0, S.end - Date.now());
+  $("#time").textContent = `⏱ ${Math.ceil(left / 1000)} s`;
+  $("#fill").style.width = (left / DUR * 100) + "%";
+  $("#score").textContent = `${S.score} pts · sequência ${S.streak}`;
+  $("#mult").textContent = "×" + mult();
+}
+function tick() { hud(); if (Date.now() >= S.end) finish(); }
+function answer(i) {
+  if (S.locked || Date.now() >= S.end) return; S.locked = true;
+  const o = S.q.opts[i], bs = $("#opts").children;
+  S.q.opts.forEach((x, j) => { if (bs[j]) { bs[j].disabled = true; if (x.ok) bs[j].classList.add("ok"); else if (j === i) bs[j].classList.add("bad"); } });
+  S.total++;
+  if (o.ok) { S.score += 10 * mult(); S.streak++; S.maxStreak = Math.max(S.maxStreak, S.streak); S.right++; }
+  else { S.streak = 0; S.wrong.push(S.q.w); }
+  record(S.q.w, o.ok); hud();
+  setTimeout(() => { if (Date.now() < S.end) nextQ(); }, o.ok ? 250 : 800);
+}
+function record(w, ok) {
+  const d = new Date(), pad = n => String(n).padStart(2, "0"), k = key(w);
+  const st = ls.get("stats") || [];
+  st.push({ data: `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`, atividade: "velocidade", nivel: w.grp, categoria: w.cat, chave: k, acertou: ok });
+  ls.set("stats", st.slice(-5000));
+  const m = ls.get("miss") || {}; // mesma lógica das palavras erradas do quiz
+  if (ok) { if (m[k] && --m[k] <= 0) delete m[k]; } else m[k] = Math.min(5, (m[k] || 0) + 2);
+  ls.set("miss", m);
+}
+function finish() {
+  clearInterval(S.tick); S.locked = true;
+  ["menu", "game", "result"].forEach(id => $("#" + id).hidden = id !== "result");
+  const prev = ls.get("best:vel") || 0;
+  $("#final").textContent = `${S.score} pontos · ${S.right} acertos em ${S.total} respostas · maior sequência: ${S.maxStreak}`;
+  if (S.score > prev) { ls.set("best:vel", S.score); $("#best").textContent = prev ? `Novo recorde! (antes: ${prev})` : "Primeiro resultado salvo como recorde."; }
+  else $("#best").textContent = `Recorde: ${prev}`;
+  const rv = $("#review"); rv.replaceChildren();
+  const seen = new Set(), errs = S.wrong.filter(w => !seen.has(key(w)) && seen.add(key(w)));
+  if (errs.length) {
+    const h = document.createElement("h2"); h.textContent = "Para revisar"; rv.append(h);
+    errs.forEach(w => {
+      const row = document.createElement("div"); row.className = "rev"; row.lang = "ja";
+      const a = document.createElement("span"); a.textContent = w.kj === w.kana ? w.kj : `${w.kj} (${w.kana})`;
+      const b = document.createElement("span"); b.lang = "pt"; b.textContent = w.pt;
+      row.append(a, b); rv.append(row);
+    });
+  }
+}
+function setDir(d) {
+  S.dir = d; ls.set("kd-vel-dir", d);
+  $("#d-jp").setAttribute("aria-pressed", d === "jp"); $("#d-pt").setAttribute("aria-pressed", d === "pt");
+}
+function menu() {
+  ["menu", "game", "result"].forEach(id => $("#" + id).hidden = id !== "menu");
+  const b = ls.get("best:vel"); $("#rec").textContent = b ? `Recorde: ${b} pontos` : "";
+}
+const groups = [...new Set(CATEGORIES.map(c => c.group))];
+$("#scope").innerHTML = '<option value="all">Todas as palavras</option>' +
+  '<optgroup label="Por nível">' + groups.map(g => `<option value="g:${g}">${g}</option>`).join("") + "</optgroup>" +
+  groups.map(g => `<optgroup label="${g}">` + CATEGORIES.map((c, i) => c.group === g ? `<option value="c:${i}">${c.name}</option>` : "").join("") + "</optgroup>").join("");
+const ss = ls.get("kd-vel-scope"); if (ss && [...$("#scope").options].some(o => o.value === ss)) $("#scope").value = ss;
+if (ls.get("kd-vel-read") === false) $("#reading").checked = false;
+setDir(S.dir); menu();
+$("#d-jp").onclick = () => setDir("jp");
+$("#d-pt").onclick = () => setDir("pt");
+$("#go").onclick = start;
+$("#again").onclick = start;
+$("#home").onclick = menu;
+addEventListener("keydown", e => { if (!$("#game").hidden && /^[1-4]$/.test(e.key)) answer(+e.key - 1); });
+</script>
+</body>
+</html>

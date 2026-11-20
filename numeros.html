@@ -1,0 +1,232 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>数を書こう – Ayumi</title>
+<link rel="stylesheet" href="style.css">
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#1d2742">
+<link rel="icon" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<script src="pwa.js" defer></script>
+<script src="tts.js"></script>
+<style>
+.setrow{margin:12px 0}
+.setrow h2{margin:14px 0 8px}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chips button{background:var(--card);border:1.5px solid var(--line);border-radius:8px;padding:8px 12px;color:var(--ink)}
+.chips button[aria-pressed=true]{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.ans{width:100%;font:inherit;font-size:1.4rem;padding:12px 14px;border:1.5px solid var(--line);border-radius:8px;background:var(--card);color:var(--ink);margin-top:14px}
+.prev{min-height:1.6em;margin:6px 2px;color:var(--muted);font-size:1.15rem}
+.big.kj{font-size:clamp(1.9rem,8.5vw,3.1rem);word-break:break-all}
+.big.sp{font-size:clamp(2.2rem,10vw,3.4rem)}
+.reading{margin-top:8px;font-size:1.2rem;color:var(--muted);min-height:1.5em;word-break:break-all}
+.rule{margin:4px 0 8px;color:var(--ink);background:var(--card);border:1.5px solid var(--line);border-radius:8px;padding:8px 12px}
+.parts{margin:6px 0 4px;color:var(--muted)}
+.mini{font-size:.9rem;padding:6px 12px}
+.revr{text-align:right}
+.revr button{margin-left:8px}
+a{color:inherit}
+</style>
+</head>
+<body>
+<header>
+  <h1><span lang="ja">数を書こう</span> Kazu o kakou</h1>
+  <p>Aparece um número e você escreve em japonês; ou lê o kanji, ou ouve, e digita os algarismos. · <a href="index.html">← Ayumi</a></p>
+</header>
+
+<main>
+  <section id="menu">
+    <div class="setrow">
+      <h2>Modo</h2>
+      <div class="seg" role="group" aria-label="Modo">
+        <button id="m-ja" type="button">Escrever</button>
+        <button id="m-num" type="button">Ler kanji</button>
+        <button id="m-ouvir" type="button">Ouvir</button>
+      </div>
+      <p id="mdesc" class="hint"></p>
+      <h2>Números</h2>
+      <div id="lv" class="chips" role="group" aria-label="Faixa de números"></div>
+      <div class="row"><label id="furilab"><input type="checkbox" id="furi"> Mostrar a leitura sob o kanji</label></div>
+    </div>
+    <div class="row"><button id="go" type="button" class="primary">Começar (10 números)</button></div>
+    <p id="msg" class="feedback" aria-live="polite"></p>
+    <p id="rec" class="hint"></p>
+  </section>
+
+  <section id="game" hidden>
+    <div class="top">
+      <button id="quit" type="button" class="ghost">Sair</button>
+      <span id="score"></span>
+      <span class="stamp" lang="ja">数</span>
+    </div>
+    <div class="card">
+      <div id="big" class="big" lang="ja"></div>
+      <div id="reading" class="reading" lang="ja"></div>
+      <div id="ask" class="hint"></div>
+    </div>
+    <div id="jabox">
+      <input id="ja" class="ans" type="text" lang="ja" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" placeholder="romaji, kana ou kanji">
+      <div id="prev" class="prev" lang="ja"></div>
+    </div>
+    <div id="numbox" hidden>
+      <input id="num" class="ans" type="text" inputmode="numeric" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" placeholder="os algarismos">
+    </div>
+    <div class="row">
+      <button id="check" type="button" class="primary">Conferir</button>
+      <button id="peek" type="button" class="ghost">Ver a leitura (sem ponto)</button>
+      <button id="speak" type="button" class="ghost" hidden>🔊 Ouvir</button>
+    </div>
+    <p id="feedback" class="feedback" aria-live="polite"></p>
+    <div id="rule" class="rule" hidden></div>
+    <div id="parts" class="parts" lang="ja"></div>
+    <div class="row"><button id="next" type="button" class="primary" hidden>Próximo</button></div>
+  </section>
+
+  <section id="result" hidden>
+    <h2 id="final"></h2>
+    <p id="best"></p>
+    <div id="review"></div>
+    <div class="row">
+      <button id="again" type="button" class="primary">Jogar de novo</button>
+      <button id="home" type="button" class="ghost">Voltar ao menu</button>
+    </div>
+  </section>
+</main>
+
+<footer>Escrever: digite em romaji (ex.: <i>sanbyakugojuu</i>) e o jogo converte para kana; também aceita kana e kanji (三百五十). Para ん antes de vogal ou y, digite n' (ex.: <i>sen'yon</i> = せんよん, <i>man'ichi</i>). Ler kanji e Ouvir: digite só os algarismos. Enter confere ou avança. Este jogo não grava no histórico de palavras.</footer>
+
+<script src="data/numeros-ja.js"></script>
+<script>
+const $ = s => document.querySelector(s);
+const N = NumerosJa;
+const store = { get(k, d){ try { const v = localStorage.getItem("kd-numeros-" + k); return v === null ? d : JSON.parse(v); } catch { return d; } },
+                set(k, v){ try { localStorage.setItem("kd-numeros-" + k, JSON.stringify(v)); } catch {} } };
+const lsGet = k => { try { const v = JSON.parse(localStorage.getItem(k)); return typeof v === "number" ? v : 0; } catch { return 0; } };
+const lsSet = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} };
+const esc = s => String(s).replace(/[&<>]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;" }[c]));
+
+const MODES = {
+  ja: "Aparece o número em algarismos; você o escreve em japonês (romaji, kana ou kanji).",
+  num: "Aparece o número em kanji; você digita os algarismos.",
+  ouvir: "Você ouve o número em japonês e digita os algarismos.",
+};
+const TTS = typeof AyumiTTS !== "undefined" && AyumiTTS.supported();
+let mode = store.get("modo", "ja"); if (!MODES[mode] || (mode === "ouvir" && !TTS)) mode = "ja";
+let level = store.get("nivel", 1); if (!N.LEVELS.some(l => l.id === level)) level = 1;
+const S = { q: [], i: 0, score: 0, wrong: [], done: false, peek: false };
+
+if (!TTS) $("#m-ouvir").hidden = true;
+const lvBox = $("#lv");
+N.LEVELS.forEach(l => { const b = document.createElement("button"); b.type = "button"; b.dataset.lv = l.id; b.textContent = l.name; b.onclick = () => { level = l.id; store.set("nivel", level); paint(); }; lvBox.append(b); });
+function paint(){
+  for (const m of Object.keys(MODES)) $("#m-" + m).setAttribute("aria-pressed", mode === m);
+  $("#mdesc").textContent = MODES[mode];
+  lvBox.querySelectorAll("button").forEach(b => b.setAttribute("aria-pressed", +b.dataset.lv === level));
+  $("#furilab").hidden = mode !== "num";
+  const r = lsGet(bestKey());
+  $("#rec").textContent = r ? `Recorde nesta combinação: ${r} de 10` : "";
+}
+const bestKey = () => `best:numeros-${mode}-${level}`;
+for (const m of Object.keys(MODES)) $("#m-" + m).onclick = () => { mode = m; store.set("modo", m); paint(); };
+$("#furi").checked = store.get("furi", false);
+$("#furi").onchange = e => store.set("furi", e.target.checked);
+paint();
+
+const show = id => ["menu", "game", "result"].forEach(s => $("#" + s).hidden = s !== id);
+function say(n){ if (TTS) AyumiTTS.speak(N.reading(n), { onnovoice: () => { $("#feedback").textContent = "Nenhuma voz japonesa encontrada neste navegador/sistema. Instale uma voz em japonês no sistema operacional."; } }); }
+
+function start(){
+  const q = N.sample(level, 10);
+  Object.assign(S, { q, i: 0, score: 0, wrong: [] });
+  $("#msg").textContent = "";
+  show("game"); render();
+}
+
+function render(){
+  const n = S.q[S.i]; S.done = false; S.peek = false;
+  $("#score").textContent = `${S.i + 1}/${S.q.length} · acertos: ${S.score}`;
+  const big = $("#big"); big.className = "big";
+  if (mode === "ja") { big.textContent = String(n); big.classList.add("sp"); $("#ask").textContent = "Escreva em japonês"; }
+  else if (mode === "num") { big.textContent = N.kanji(n); big.classList.add("kj"); $("#ask").textContent = "Digite os algarismos"; }
+  else { big.textContent = "🔊"; big.classList.add("sp"); $("#ask").textContent = "Ouça e digite os algarismos"; }
+  const showRead = mode === "num" && $("#furi").checked;
+  $("#reading").textContent = showRead ? N.reading(n) : "";
+  $("#peek").hidden = showRead; $("#peek").disabled = false;
+  $("#speak").hidden = mode !== "ouvir";
+  $("#feedback").textContent = ""; $("#feedback").style.color = "";
+  $("#rule").hidden = true; $("#parts").textContent = ""; $("#next").hidden = true; $("#check").hidden = false;
+  $("#jabox").hidden = mode !== "ja"; $("#numbox").hidden = mode === "ja";
+  const inp = mode === "ja" ? $("#ja") : $("#num");
+  inp.value = ""; inp.disabled = false; $("#prev").textContent = "";
+  inp.focus();
+  if (mode === "ouvir") say(n);
+}
+
+function peek(){
+  if (S.done) return; S.peek = true;
+  $("#reading").textContent = N.reading(S.q[S.i]);
+  $("#peek").disabled = true;
+  $("#feedback").textContent = "Você viu a leitura: esta não vale ponto."; $("#feedback").style.color = "var(--muted)";
+}
+
+function checkNow(){
+  if (S.done) return;
+  const n = S.q[S.i], raw = (mode === "ja" ? $("#ja") : $("#num")).value.trim();
+  if (!raw) return;
+  const r = mode === "ja" ? N.checkJa(n, raw) : N.checkDigits(n, raw);
+  if (!r.ok && r.why === "algarismos") { $("#feedback").textContent = "Aqui você escreve o número em japonês (romaji, kana ou kanji), não em algarismos."; $("#feedback").style.color = "var(--bad)"; return; }
+  if (!r.ok && r.why === "formato" && mode !== "ja") { $("#feedback").textContent = "Digite só algarismos (0 a 9)."; $("#feedback").style.color = "var(--bad)"; return; }
+  finish(r.ok, raw);
+}
+
+function finish(ok, given){
+  if (S.done) return; S.done = true;
+  const n = S.q[S.i], k = N.kanji(n), r = N.reading(n), counted = ok && !S.peek;
+  if (counted) S.score++; else S.wrong.push({ n, given, peek: S.peek && ok });
+  const fb = $("#feedback");
+  const sees = mode === "ja" ? `${k}（${r}）` : `${n} = ${k}（${r}）`;
+  fb.textContent = S.peek && ok ? `Certo, mas sem ponto: ${sees}` : ok ? `Correto! ${sees}` : `Resposta: ${sees} — você: ${given}`;
+  fb.style.color = counted ? "var(--ok)" : "var(--bad)";
+  if (!ok) { $("#rule").textContent = N.explain(n, mode === "ja" ? given : ""); $("#rule").hidden = false; }
+  $("#reading").textContent = r;
+  $("#parts").textContent = N.parts(n).length > 1 ? N.parts(n).map(p => `${p.k}（${p.r}）`).join(" + ") : "";
+  (mode === "ja" ? $("#ja") : $("#num")).disabled = true; $("#check").hidden = true; $("#peek").hidden = true;
+  if (TTS) { $("#speak").hidden = false; }
+  $("#next").textContent = S.i === S.q.length - 1 ? "Ver resultado" : "Próximo"; $("#next").hidden = false; $("#next").focus();
+  $("#score").textContent = `${S.i + 1}/${S.q.length} · acertos: ${S.score}`;
+}
+
+function next(){
+  if (S.i < S.q.length - 1) { S.i++; render(); return; }
+  const key = bestKey(), prev = lsGet(key);
+  if (S.score > prev) lsSet(key, S.score);
+  $("#final").textContent = `Você acertou ${S.score} de ${S.q.length}`;
+  $("#best").textContent = S.score > prev ? "Novo recorde!" : `Recorde: ${prev}`;
+  const rv = $("#review"); rv.replaceChildren();
+  S.wrong.forEach(w => {
+    const d = document.createElement("div"); d.className = "rev";
+    d.innerHTML = `<span lang="ja">${w.n} = ${esc(N.kanji(w.n))}</span><span class="revr" lang="ja">${esc(N.reading(w.n))}<br>${w.peek ? "visto, sem ponto" : "você: " + esc(w.given)}</span>`;
+    if (TTS) { const b = document.createElement("button"); b.type = "button"; b.className = "ghost mini"; b.textContent = "🔊"; b.setAttribute("aria-label", "Ouvir " + w.n); b.onclick = () => say(w.n); d.lastChild.append(b); }
+    rv.append(d);
+  });
+  if (!S.wrong.length) rv.textContent = "Sem erros. 🎉";
+  show("result");
+}
+
+$("#go").onclick = start; $("#again").onclick = start;
+$("#home").onclick = () => { paint(); show("menu"); }; $("#quit").onclick = () => { paint(); show("menu"); };
+$("#check").onclick = checkNow; $("#next").onclick = next; $("#peek").onclick = peek;
+$("#speak").onclick = () => say(S.q[S.i]);
+N.liveKana($("#ja"), $("#prev"));
+$("#num").addEventListener("input", e => { const v = e.target.value.replace(/[０-９]/g, c => String.fromCharCode(c.charCodeAt(0) - 0xfee0)); if (v !== e.target.value) e.target.value = v; });
+document.addEventListener("keydown", e => {
+  if ($("#game").hidden || e.isComposing) return;
+  if (e.key === "Enter") { e.preventDefault(); if (S.done) next(); else checkNow(); }
+});
+</script>
+</body>
+</html>

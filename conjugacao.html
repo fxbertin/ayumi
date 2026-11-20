@@ -1,0 +1,228 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Treino de conjugação – Ayumi</title>
+<link rel="stylesheet" href="style.css">
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#1d2742">
+<link rel="icon" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<script src="pwa.js" defer></script>
+<script src="tts.js"></script>
+<style>
+.checks{display:flex;flex-wrap:wrap;gap:6px 18px;margin:6px 0 4px}
+.checks label{white-space:nowrap}
+.mini{font-size:.85rem;padding:4px 10px}
+.ans{width:100%;font:inherit;font-size:1.4rem;padding:12px 14px;border:1.5px solid var(--line);border-radius:8px;background:var(--card);color:var(--ink);margin-top:14px}
+.prev{min-height:1.6em;margin:6px 2px;color:var(--muted);font-size:1.15rem}
+.ask{margin-top:14px;font-size:1.1rem}
+.ask b{background:var(--ink);color:var(--paper);border-radius:6px;padding:2px 10px}
+details{margin:6px 0 14px;background:var(--card);border:1.5px solid var(--line);border-radius:8px;padding:8px 14px}
+summary{cursor:pointer;color:var(--muted)}
+table{border-collapse:collapse;width:100%;margin-top:8px}
+td{padding:4px 6px;border-bottom:1px solid var(--line)}
+td:nth-child(2){font-size:1.1rem}
+td:nth-child(3){color:var(--muted)}
+tr.hl td{background:var(--ok-bg);font-weight:600}
+.tabs{display:flex;gap:8px;margin:6px 0 14px}.tabs a{padding:6px 16px;border:1.5px solid var(--line);border-radius:8px;text-decoration:none;color:var(--muted)}.tabs a[aria-current=page]{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+a{color:inherit}
+</style>
+</head>
+<body>
+<header>
+  <h1><span lang="ja">活用道場</span> Treino de conjugação</h1>
+  <p>Veja o verbo na forma de dicionário e conjugue na forma pedida. · <a href="index.html">← Ayumi</a></p>
+</header>
+<nav class="tabs" aria-label="Tipo de palavra"><a href="conjugacao.html" aria-current="page">Verbos</a><a href="conjugacao-adjetivos.html">Adjetivos</a></nav>
+
+<main>
+  <section id="menu">
+    <h2>Modo</h2>
+    <div class="seg" role="group" aria-label="Modo">
+      <button id="m-type" type="button">Digitar</button>
+      <button id="m-pick" type="button">Escolher</button>
+    </div>
+    <h2>Verbos</h2>
+    <div class="checks" id="lv">
+      <label><input type="checkbox" value="JLPT N5" checked> N5</label>
+      <label><input type="checkbox" value="JLPT N4"> N4</label>
+      <label><input type="checkbox" value="JLPT N3+"> N3 a N1</label>
+    </div>
+    <h2>Formas <button id="f5" type="button" class="ghost mini">Formas básicas</button> <button id="f4" type="button" class="ghost mini">Formas avançadas</button> <button id="fall" type="button" class="ghost mini">Todas as formas</button></h2>
+    <div class="checks" id="fm"></div>
+    <div class="checks"><label><input type="checkbox" id="showtype"> Mostrar o tipo do verbo (ichidan / godan / irregular)</label></div>
+    <div class="row"><button id="start" type="button" class="primary">Começar (10 perguntas)</button></div>
+    <p id="msg" class="feedback"></p>
+  </section>
+
+  <section id="game" hidden>
+    <div class="top">
+      <button id="quit" type="button" class="ghost">Sair</button>
+      <span id="score"></span>
+      <span id="stamp" class="stamp"></span>
+    </div>
+    <div class="card">
+      <div id="big" class="big" lang="ja"></div>
+      <div id="hint" class="hint"></div>
+      <div class="ask">Forma: <b id="ask"></b></div>
+    </div>
+    <div id="typebox">
+      <input id="ans" class="ans" type="text" lang="ja" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" placeholder="digite em romaji ou kana">
+      <div id="prev" class="prev" lang="ja"></div>
+      <button id="check" type="button" class="primary">Conferir</button>
+    </div>
+    <div id="opts" class="opts"></div>
+    <p id="feedback" class="feedback" aria-live="polite"></p>
+    <details id="tbl" hidden open><summary>Todas as formas deste verbo</summary><table id="tb"></table></details>
+    <div class="row">
+      <button id="speak" type="button" class="ghost" hidden>🔊 Ouvir</button>
+      <button id="next" type="button" class="primary" hidden>Próxima</button>
+    </div>
+  </section>
+
+  <section id="result" hidden>
+    <h2 id="final"></h2>
+    <p id="best"></p>
+    <div id="review"></div>
+    <div class="row">
+      <button id="again" type="button" class="primary">Jogar de novo</button>
+      <button id="home" type="button" class="ghost">Voltar ao menu</button>
+    </div>
+  </section>
+</main>
+
+<footer>Digite em romaji (ex.: <i>tabemasu</i>) e o jogo converte para kana; também aceita kana ou kanji. Atalhos: 1–4 escolhem, Enter confere ou avança.</footer>
+
+<script src="data/words.js"></script>
+<script src="data/conj.js"></script>
+<script src="data/conj-lista.js"></script>
+<script>
+const $ = s => document.querySelector(s);
+const shuffle = a => { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
+const store = { get(k, d){ try { const v = localStorage.getItem("kd-conj-" + k); return v === null ? d : JSON.parse(v); } catch { return d; } },
+                set(k, v){ try { localStorage.setItem("kd-conj-" + k, JSON.stringify(v)); } catch {} } };
+
+// Verbos: lista compartilhada (data/conj-lista.js).
+const VERBS = buildVerbs();
+
+const S = { mode: store.get("mode", "type"), q: [], i: 0, score: 0, wrong: [], done: false };
+const fm = $("#fm");
+FORMS.forEach(f => { const l = document.createElement("label"); l.innerHTML = `<input type="checkbox" value="${f.id}" ${f.lvl === 5 ? "checked" : ""}> ${f.name}`; fm.append(l); });
+const setForms = lvl => fm.querySelectorAll("input").forEach(x => x.checked = lvl === 0 || FORMS.find(f => f.id === x.value).lvl === lvl);
+$("#f5").onclick = () => setForms(5); $("#f4").onclick = () => setForms(4); $("#fall").onclick = () => setForms(0);
+function paintMode(){ $("#m-type").setAttribute("aria-pressed", S.mode === "type"); $("#m-pick").setAttribute("aria-pressed", S.mode === "pick"); }
+$("#m-type").onclick = () => { S.mode = "type"; store.set("mode", S.mode); paintMode(); };
+$("#m-pick").onclick = () => { S.mode = "pick"; store.set("mode", S.mode); paintMode(); };
+paintMode();
+const show = id => ["menu", "game", "result"].forEach(s => $("#" + s).hidden = s !== id);
+const TIPO = { godan: "godan", ichidan: "ichidan", suru: "irregular", kuru: "irregular" };
+$("#showtype").checked = store.get("showtype", false);
+$("#showtype").onchange = e => store.set("showtype", e.target.checked);
+const fname = id => FORMS.find(f => f.id === id).name;
+
+function start(){
+  const lv = [...document.querySelectorAll("#lv input:checked")].map(x => x.value);
+  const forms = [...fm.querySelectorAll("input:checked")].map(x => x.value);
+  const pool = VERBS.filter(v => lv.includes(v.lv));
+  if (!pool.length || !forms.length) { $("#msg").textContent = "Escolha pelo menos um nível de verbos e uma forma."; return; }
+  $("#msg").textContent = "";
+  const q = [], used = new Set(); let tries = 0;
+  const n = Math.min(10, pool.length * forms.length);
+  while (q.length < n && tries++ < 500) {
+    const v = pool[Math.floor(Math.random() * pool.length)], f = forms[Math.floor(Math.random() * forms.length)];
+    const k = v.j + v.k + f; if (used.has(k)) continue; used.add(k); q.push({ v, f });
+  }
+  Object.assign(S, { q, i: 0, score: 0, wrong: [] });
+  show("game"); render();
+}
+
+function render(){
+  const { v, f } = S.q[S.i]; S.done = false;
+  $("#score").textContent = `${S.i + 1}/${S.q.length} · acertos: ${S.score}`;
+  $("#stamp").textContent = "活用";
+  $("#big").textContent = v.j; $("#hint").textContent = `${v.k} · ${v.pt}` + ($("#showtype").checked ? ` · ${TIPO[v.cls]}` : ""); $("#ask").textContent = fname(f);
+  $("#feedback").textContent = ""; $("#feedback").className = "feedback";
+  $("#tbl").hidden = true; $("#next").hidden = true; $("#speak").hidden = true;
+  const pick = S.mode === "pick";
+  $("#typebox").hidden = pick; $("#opts").hidden = !pick; $("#opts").replaceChildren();
+  if (pick) {
+    const right = conj(v, f)[0], opts = shuffle([right, ...wrongs(v, f)]);
+    S.opts = opts;
+    opts.forEach((p, n) => {
+      const b = document.createElement("button"); b.type = "button"; b.className = "opt"; b.lang = "ja";
+      b.textContent = (v.cls === "kuru" ? p[1] : p[0]);
+      if (v.cls !== "kuru" && p[0] !== p[1]) { const s = document.createElement("small"); s.textContent = p[1]; b.append(s); }
+      b.onclick = () => finish(p[1] === right[1], p[1], b); $("#opts").append(b);
+    });
+  } else { $("#ans").value = ""; $("#prev").textContent = ""; $("#ans").disabled = false; $("#check").hidden = false; $("#ans").focus(); }
+}
+
+function checkTyped(){
+  const raw = $("#ans").value.trim(); if (!raw || S.done) return;
+  const { v, f } = S.q[S.i], acc = conj(v, f), kana = hira(toKana(raw, true));
+  const ok = acc.some(p => p[1] === kana || p[0] === raw.replace(/\s+/g, ""));
+  finish(ok, kana);
+}
+
+// Regra comum das atividades: grava em "stats" (uma entrada por resposta).
+function record(v, ok){
+  const d = new Date(), pad = n => String(n).padStart(2, "0");
+  try {
+    const st = JSON.parse(localStorage.getItem("stats") || "[]");
+    st.push({ data: `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`, atividade: "conjugacao", nivel: v.grp, categoria: v.cat, chave: v.j + "|" + v.k, acertou: ok });
+    localStorage.setItem("stats", JSON.stringify(st.slice(-5000)));
+  } catch {}
+}
+
+function finish(ok, given, btn){
+  if (S.done) return; S.done = true;
+  const { v, f } = S.q[S.i], acc = conj(v, f), main = acc[0];
+  record(v, ok);
+  if (ok) S.score++; else S.wrong.push({ v, f, given, main });
+  const fb = $("#feedback");
+  fb.textContent = ok ? `Correto! ${main[0]}（${main[1]}）` : `Resposta: ${main[0]}（${main[1]}）` + (acc[1] ? ` ou ${acc[1][0]}` : "") + ` — você: ${given}`;
+  fb.className = "feedback " + (ok ? "okmsg" : "badmsg");
+  fb.style.color = ok ? "var(--ok)" : "var(--bad)";
+  if (S.mode === "pick") {
+    [...$("#opts").children].forEach((b, n) => { b.disabled = true; if (S.opts[n][1] === main[1] || acc.some(p => p[1] === S.opts[n][1])) b.classList.add("ok"); });
+    if (btn && !ok) btn.classList.add("bad");
+  } else { $("#ans").disabled = true; $("#check").hidden = true; }
+  const trT = document.createElement("tr");
+  trT.innerHTML = `<td colspan="3"><b>Tipo:</b> ${TIPO[v.cls]}</td>`;
+  $("#tb").replaceChildren(...($("#showtype").checked ? [trT] : []), ...FORMS.map(g => { const p = conj(v, g.id)[0], tr = document.createElement("tr"); if (g.id === f) tr.className = "hl";
+    tr.innerHTML = `<td>${g.name}</td><td lang="ja">${p[0]}</td><td lang="ja">${p[1] === p[0] ? "" : p[1]}</td>`; return tr; }));
+  $("#tbl").hidden = false;
+  $("#speak").hidden = !AyumiTTS.supported(); $("#speak").onclick = () => say(main[0]);
+  $("#next").textContent = S.i === S.q.length - 1 ? "Ver resultado" : "Próxima"; $("#next").hidden = false; $("#next").focus();
+  $("#score").textContent = `${S.i + 1}/${S.q.length} · acertos: ${S.score}`;
+}
+
+function say(t){ AyumiTTS.speak(t); }
+
+function next(){
+  if (S.i < S.q.length - 1) { S.i++; render(); return; }
+  const best = store.get("best", 0); if (S.score > best) store.set("best", S.score);
+  $("#final").textContent = `Você acertou ${S.score} de ${S.q.length}`;
+  $("#best").textContent = S.score > best ? "Novo recorde!" : `Recorde: ${best}`;
+  $("#review").replaceChildren(...S.wrong.map(w => { const d = document.createElement("div"); d.className = "rev";
+    d.innerHTML = `<span lang="ja">${w.v.j} → ${fname(w.f)}</span><span lang="ja">${w.main[0]}（${w.main[1]}）<br>você: ${w.given}</span>`; return d; }));
+  if (!S.wrong.length) $("#review").textContent = "Sem erros. 🎉";
+  show("result");
+}
+
+$("#start").onclick = start; $("#again").onclick = start;
+$("#home").onclick = () => show("menu"); $("#quit").onclick = () => show("menu");
+$("#check").onclick = checkTyped; $("#next").onclick = next;
+liveKana($("#ans"), $("#prev"));
+document.addEventListener("keydown", e => {
+  if ($("#game").hidden) return;
+  if (e.key === "Enter") { e.preventDefault(); if (S.done) next(); else if (S.mode === "type") checkTyped(); }
+  else if (S.mode === "pick" && !S.done && /^[1-4]$/.test(e.key)) { const b = $("#opts").children[+e.key - 1]; if (b) b.click(); }
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,162 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Takushii no Bouken – Ayumi</title>
+<link rel="stylesheet" href="style.css">
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#1d2742">
+<link rel="icon" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<script src="pwa.js" defer></script>
+<script src="tts.js"></script>
+<style>
+.ins{margin:10px 0}.ins .jp{font-size:1.3rem;line-height:2}.ins .jp span{display:block}
+#mapwrap{background:var(--card);border:1.5px solid var(--line);border-radius:8px;padding:6px;margin:10px 0}
+#map{width:100%;height:auto;display:block}
+ruby rt{font-size:.5em}
+#car{transition:transform .28s ease}
+@media (prefers-reduced-motion:reduce){#car{transition:none}}
+.pad{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:10px 0}
+.pad button{padding:14px 6px;border:1.5px solid var(--line);border-radius:8px;background:var(--card);font-size:1.05rem}
+.pad button:hover{border-color:var(--ink)}
+.pad button small{display:block;color:var(--muted);font-size:.8rem}
+@media (max-width:480px){.pad{grid-template-columns:1fr 1fr}}
+#msg{min-height:3em;margin:8px 0}
+#msg.ok{color:var(--ok);font-weight:700}#msg.bad{color:var(--bad)}
+.stat{color:var(--muted)}
+</style>
+</head>
+<body>
+<header>
+  <h1><span lang="ja">タクシーの冒険</span> Takushii no Bouken</h1>
+  <p>Leia as etapas em japonês (kanji com furigana; no Avançado, furigana só nos kanji além do N5), desvie das ruas fechadas e leve o táxi até o destino. · <a href="taxi-a.html">Modo A: você dá as instruções</a> · <a href="index.html">← Ayumi</a></p>
+</header>
+<main>
+  <section aria-labelledby="ih">
+    <h2 id="ih">Instrução</h2>
+    <div class="row"><label for="lvl">Dificuldade:</label> <select id="lvl"><option value="facil">Fácil (1 curva, 1 rua fechada)</option><option value="medio">Médio (2 curvas, até 2 ruas fechadas)</option><option value="dificil">Difícil (3 a 4 curvas, até 3 ruas fechadas)</option><option value="avancado">Avançado (4 a 5 curvas, 2 a 4 ruas fechadas, pedido formal)</option></select></div>
+    <div class="card ins"><div class="jp" id="jp" lang="ja"></div><p class="stat">Siga as etapas na ordem. Conte as esquinas a partir de onde o táxi está agora: a 1ª esquina é o primeiro cruzamento à frente (a esquina em que você acabou de virar não conta). 突き当たり é onde a rua acaba: a borda do mapa ou uma rua fechada. O táxi não entra nas ruas fechadas (🚧). Os pontos brancos marcam o meio das quadras, onde o táxi pode parar.</p><div id="pt" class="stat" hidden></div></div>
+    <div class="row">
+      <button id="listen" type="button" class="ghost">🔊 Ouvir</button>
+      <button id="furi" type="button" class="ghost" aria-pressed="true">Furigana: sim</button>
+      <button id="trbtn" type="button" class="ghost" aria-pressed="false">Tradução: não</button>
+    </div>
+  </section>
+
+  <div id="mapwrap"><svg id="map" role="img" aria-label="Mapa da cidade visto de cima"></svg></div>
+  <p id="closed" class="stat"></p>
+  <p id="where" class="stat" aria-live="polite"></p>
+
+  <div class="pad" role="group" aria-label="Controles do táxi">
+    <button id="bF" type="button"><span lang="ja">まっすぐ</span><small>↑ avançar meia quadra</small></button>
+    <button id="bR" type="button"><span lang="ja">みぎ</span><small>→ virar à direita (na esquina)</small></button>
+    <button id="bL" type="button"><span lang="ja">ひだり</span><small>← virar à esquerda (na esquina)</small></button>
+    <button id="bS" type="button"><span lang="ja">とめる</span><small>↓ parar aqui (no meio da quadra)</small></button>
+  </div>
+  <p id="msg" aria-live="polite"></p>
+  <div class="row">
+    <button id="retry" type="button" class="ghost">Voltar ao início</button>
+    <button id="show" type="button" class="ghost">Mostrar a rota</button>
+    <button id="next" type="button" class="primary">Novo mapa</button>
+  </div>
+  <p class="stat" id="sc"></p>
+</main>
+<footer>Teclado: <b>↑</b> avança meia quadra (de uma esquina à próxima são 2 passos), <b>←</b> e <b>→</b> viram o táxi no lugar, só nas esquinas, e <b>↓</b> para.</footer>
+
+<script src="data/taxi.js"></script>
+<script>
+(function(){
+var T=TAXI,$=function(s){return document.querySelector(s)},NS="http://www.w3.org/2000/svg";
+var ls={get:function(k){try{return JSON.parse(localStorage.getItem(k))}catch(e){return null}},set:function(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
+var S=40,B=110,M=50; // margem, quadra
+function X(x){return M+x*B}function Y(y){return M+y*B}
+var seed=(+ls.get("kd-taxi-seed")||1),m,pos,prev,hd,ang,moved,done,turned=false,streak=0,best=0,lv=ls.get("kd-taxi-level"),cnt=0,furi=ls.get("kd-taxi-furi")!==false;if(["facil","medio","dificil","avancado"].indexOf(lv)<0)lv="facil";var BK=function(){return "best:taxi-"+lv};
+try{localStorage.removeItem("best:taxi-basico");var oldb=ls.get("best:taxi-intermediario");if(oldb&&ls.get("best:taxi-facil")===null)ls.set("best:taxi-facil",oldb);localStorage.removeItem("best:taxi-intermediario")}catch(e){}
+var bm={};
+var DIRN=["norte","leste","sul","oeste"];
+function el(n,a,p){var e=document.createElementNS(NS,n);for(var k in a)e.setAttribute(k,a[k]);if(p)p.appendChild(e);return e}
+function tx(p,x,y,s,c){var t=el("text",{x:x,y:y,"text-anchor":"middle","font-size":s||13,fill:c||"#2b3140"},p);return t}
+function icon(g,id,cx,cy){
+  var a=function(n,at){return el(n,at,g)};
+  if(id==="hospital"){a("rect",{x:cx-28,y:cy-24,width:56,height:44,fill:"#fff",stroke:"#8a93a0"});a("rect",{x:cx-4,y:cy-18,width:8,height:28,fill:"#d64545"});a("rect",{x:cx-10,y:cy-8,width:20,height:8,fill:"#d64545"})}
+  else if(id==="station"){a("rect",{x:cx-32,y:cy-26,width:64,height:6,fill:"#4f6a88"});a("rect",{x:cx-28,y:cy-20,width:56,height:40,fill:"#8fa8c4",stroke:"#4f6a88"});a("circle",{cx:cx,cy:cy-6,r:8,fill:"#fff",stroke:"#4f6a88"});a("path",{d:"M"+cx+" "+(cy-11)+"V"+(cy-6)+"H"+(cx+4),fill:"none",stroke:"#2b3140"})}
+  else if(id==="bank"){a("polygon",{points:(cx-30)+","+(cy-10)+" "+cx+","+(cy-28)+" "+(cx+30)+","+(cy-10),fill:"#c9a66b"});a("rect",{x:cx-26,y:cy-10,width:52,height:30,fill:"#e6d3a8",stroke:"#c9a66b"});[-18,-3,12].forEach(function(o){a("rect",{x:cx+o,y:cy-6,width:6,height:22,fill:"#c9a66b"})})}
+  else if(id==="park"){a("rect",{x:cx-32,y:cy-22,width:64,height:42,rx:8,fill:"#cfe3b4",stroke:"#8fb36b"});[[-16,0,10],[2,-6,12],[20,2,10]].forEach(function(o){a("circle",{cx:cx+o[0],cy:cy+o[1],r:o[2],fill:"#5f9f45"})})}
+  else if(id==="store"){a("rect",{x:cx-28,y:cy-6,width:56,height:26,fill:"#f4f4f0",stroke:"#8a93a0"});for(var i=0;i<4;i++)a("rect",{x:cx-28+i*14,y:cy-20,width:14,height:14,fill:i%2?"#fff":"#f08a24",stroke:"#f08a24","stroke-width":.5})}
+  else if(id==="post"){a("rect",{x:cx-30,y:cy-22,width:60,height:42,fill:"#e9b9b6",stroke:"#c9605c"});a("rect",{x:cx-12,y:cy-10,width:24,height:16,fill:"#fff",stroke:"#c9605c"});a("polyline",{points:(cx-12)+","+(cy-10)+" "+cx+","+(cy-1)+" "+(cx+12)+","+(cy-10),fill:"none",stroke:"#c9605c"})}
+  else if(id==="school"){a("rect",{x:cx-32,y:cy-12,width:64,height:32,fill:"#d9a38b",stroke:"#a86a4f"});a("rect",{x:cx-8,y:cy-28,width:16,height:16,fill:"#e8c4b0",stroke:"#a86a4f"});[-22,-8,8,22].forEach(function(o){a("rect",{x:cx+o-3,y:cy-4,width:6,height:8,fill:"#fff"})})}
+  else{a("rect",{x:cx-24,y:cy-28,width:48,height:48,fill:"#b9a5d6",stroke:"#7a63a8"});for(var j=0;j<3;j++)for(var k=0;k<3;k++)a("rect",{x:cx-16+k*13,y:cy-20+j*13,width:7,height:8,fill:"#fff"})}
+}
+function PX(p){return M+p*B/2}
+function draw(){
+  var svg=$("#map"),W=M*2+B*(T.C-1),H=M*2+B*(T.R-1),i,j;svg.textContent="";svg.setAttribute("viewBox","0 0 "+W+" "+H);
+  el("rect",{x:0,y:0,width:W,height:H,fill:"#e9eddf"},svg);
+  for(i=0;i<T.R;i++)el("rect",{x:0,y:Y(i)-13,width:W,height:26,fill:"#aeb4bd"},svg);
+  for(i=0;i<T.C;i++)el("rect",{x:X(i)-13,y:0,width:26,height:H,fill:"#aeb4bd"},svg);
+  for(i=0;i<T.R;i++)for(j=0;j<T.C-1;j++)el("circle",{cx:X(j)+B/2,cy:Y(i),r:3,fill:"#fff",opacity:.9},svg);
+  for(i=0;i<T.C;i++)for(j=0;j<T.R-1;j++)el("circle",{cx:X(i),cy:Y(j)+B/2,r:3,fill:"#fff",opacity:.9},svg);
+  m.blocks.forEach(function(b){var x1=X(b[0]),y1=Y(b[1]),x2=X(b[2]),y2=Y(b[3]);
+    el("line",{x1:x1,y1:y1,x2:x2,y2:y2,stroke:"#fff","stroke-width":20},svg);
+    el("line",{x1:x1,y1:y1,x2:x2,y2:y2,stroke:"#d64545","stroke-width":20,"stroke-dasharray":"9 9"},svg);
+    var t=tx(svg,(x1+x2)/2,(y1+y2)/2+7,22);t.textContent="🚧"});
+  var g=el("g",{},svg);
+  m.marks.forEach(function(k){var cx=X(k.x)+B/2,cy=Y(k.y)+B/2-6;icon(g,k.id,cx,cy);tx(g,cx,cy+44,17).textContent=k.kj});
+  el("polyline",{id:"rt",points:"",fill:"none",stroke:"#2f6fdd","stroke-width":4,"stroke-dasharray":"10 8","stroke-linecap":"round","stroke-linejoin":"round",display:"none"},svg);
+  var c=el("g",{id:"car"},svg),q=function(n,a){return el(n,a,c)};
+  [[-11,-12],[8,-12],[-11,6],[8,6]].forEach(function(o){q("rect",{x:o[0],y:o[1],width:3,height:9,rx:1,fill:"#2b2f36"})});
+  q("rect",{x:-9,y:-17,width:18,height:34,rx:5,fill:"#f5c518",stroke:"#8a6d00"});q("rect",{x:-7,y:-10,width:14,height:7,rx:1.5,fill:"#5b7a99"});q("rect",{x:-7,y:6,width:14,height:5,rx:1.5,fill:"#5b7a99"});q("rect",{x:-5,y:-2,width:10,height:6,rx:1,fill:"#fff",stroke:"#8a6d00","stroke-width":.5});
+  q("circle",{cx:-5,cy:-16,r:1.8,fill:"#fff"});q("circle",{cx:5,cy:-16,r:1.8,fill:"#fff"});
+}
+function isNode(){return pos[0]%2===0&&pos[1]%2===0}
+function place(){$("#car").setAttribute("transform","translate("+PX(pos[0])+","+PX(pos[1])+") rotate("+ang+") scale(1.25)");
+  $("#where").textContent="O táxi está virado para o "+DIRN[((hd%4)+4)%4]+" · "+(isNode()?"numa esquina":"no meio da quadra")+" · esquinas desde a última curva (ou do início): "+cnt+"."}
+function msg(t,c){var e=$("#msg");e.textContent=t;e.className=c||""}
+function reset(){pos=[2*m.start.x,2*m.start.y];hd=m.start.d;ang=hd*90;moved=false;done=false;cnt=0;turned=false;$("#rt").setAttribute("display","none");place();msg("")}
+function rub(s){return s.replace(/\[([^|\]]+)\|([^\]]+)\]/g,"$1").replace(/\{([^|}]+)\|([^}]+)\}/g,function(_,k,r){return furi?"<ruby>"+k+"<rt>"+r+"</rt></ruby>":k})} // [k|r]: kanji do N5, sempre sem furigana
+function showText(){var sp=$("#jp").children;for(var i=0;i<sp.length;i++)sp[i].innerHTML=rub(m.sentences[i])}
+function load(){
+  m=T.make(seed,lv);ls.set("kd-taxi-seed",seed);bm={};m.blocks.forEach(function(b){bm[(b[0]+b[2])+","+(b[1]+b[3])]=1});best=ls.get(BK())||0;
+  var n=m.blocks.length;$("#closed").textContent=n===1?"Há 1 rua fechada (🚧).":"Há "+n+" ruas fechadas (🚧).";
+  var jp=$("#jp");jp.textContent="";m.sentences.forEach(function(s){var sp=document.createElement("span");sp.innerHTML=rub(s);jp.appendChild(sp)});
+  $("#pt").textContent=m.pt.join(" ");draw();reset();score()}
+function score(){$("#sc").textContent="Acertos seguidos: "+streak+" · Recorde ("+({facil:"fácil",medio:"médio",dificil:"difícil",avancado:"avançado"})[lv]+"): "+best}
+function fwd(){
+  if(done)return;
+  var d=((hd%4)+4)%4,nx=pos[0]+T.DX[d],ny=pos[1]+T.DY[d];
+  if(nx<0||ny<0||nx>2*(T.C-1)||ny>2*(T.R-1)){msg("A rua acaba aqui: o táxi não pode sair do mapa.","bad");return}
+  if(isNode()&&bm[nx+","+ny]){msg("Rua fechada! O táxi não pode entrar aqui (🚧). Siga a instrução por outro caminho.","bad");return}
+  pos=[nx,ny];moved=true;if(isNode())cnt++;place();msg("")}
+function turn(t){
+  if(done)return;
+  if(!isNode()){msg("Só dá para virar em uma esquina. Siga em frente até o cruzamento.","bad");return}
+  hd+=t;ang+=t*90;cnt=0;turned=true;place();msg("")}
+function stop(){
+  if(done)return;
+  if(!moved){msg("O táxi ainda não saiu do lugar.","bad");return}
+  if(isNode()){msg("O táxi está numa esquina. Pare no meio da quadra, bem em frente ao lugar.","bad");return}
+  if(pos[0]===m.stop[0]&&pos[1]===m.stop[1]){
+    done=true;streak++;if(streak>best){best=streak;ls.set(BK(),best)}
+    msg("Chegou! O táxi parou bem em frente a "+m.target.kj+" ("+m.target.pt+").","ok");score()}
+  else{streak=0;score();msg("Ainda não: este não é o ponto da instrução. Releia as etapas, na ordem, e volte ao início.","bad")}}
+$("#bF").onclick=fwd;$("#bR").onclick=function(){turn(1)};$("#bL").onclick=function(){turn(-1)};$("#bS").onclick=stop;
+$("#retry").onclick=reset;
+$("#next").onclick=function(){seed=seed+1;load()};
+$("#lvl").value=lv;$("#lvl").onchange=function(){lv=$("#lvl").value;ls.set("kd-taxi-level",lv);streak=0;load()};
+$("#show").onclick=function(){streak=0;score();var r=$("#rt");r.setAttribute("points",m.route.map(function(p){return PX(p[0])+","+PX(p[1])}).join(" "));r.setAttribute("display","");msg("Rota mostrada. O recorde de acertos seguidos recomeça do zero.")};
+$("#furi").onclick=function(){furi=!furi;ls.set("kd-taxi-furi",furi);var b=$("#furi");b.setAttribute("aria-pressed",furi);b.textContent="Furigana: "+(furi?"sim":"não");showText()};
+$("#trbtn").onclick=function(){var b=$("#trbtn"),on=b.getAttribute("aria-pressed")!=="true";b.setAttribute("aria-pressed",on);b.textContent="Tradução: "+(on?"sim":"não");$("#pt").hidden=!on};
+if(!AyumiTTS.supported())$("#listen").hidden=true;
+$("#listen").onclick=function(){AyumiTTS.speak(m.text,{rate:.85,onnovoice:function(){msg("Nenhuma voz japonesa encontrada neste navegador ou sistema.")}})};
+document.addEventListener("keydown",function(e){
+  if(e.altKey||e.ctrlKey||e.metaKey)return;var t=e.target&&e.target.tagName;if(t==="INPUT"||t==="SELECT"||t==="TEXTAREA")return;
+  var k=e.key;if(k==="ArrowUp")fwd();else if(k==="ArrowRight")turn(1);else if(k==="ArrowLeft")turn(-1);else if(k==="ArrowDown")stop();else return;e.preventDefault()});
+(function(){var b=$("#furi");b.setAttribute("aria-pressed",furi);b.textContent="Furigana: "+(furi?"sim":"não")})();
+load();
+})();
+</script>
+</body>
+</html>

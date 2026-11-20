@@ -1,0 +1,20 @@
+const fs=require('fs');
+const F='data/kanji.js';let s=fs.readFileSync(F,'utf8');
+const old=new Function(s+';return KANJI')();
+const seen=new Set(old.map(k=>k[0]));
+const rows=require(require('path').resolve(process.argv[2]));
+let bad=0;const err=(...a)=>{bad++;console.log('ERRO',...a)};
+rows.forEach(r=>{const [k,lv,kun,on,m]=r;
+  if([...k].length!==1)err('não é 1 caractere',k);
+  if(!/^N[1-4]$/.test(lv))err(k,'nível',lv);
+  if(!Array.isArray(kun)||!Array.isArray(on)||kun.length+on.length===0)err(k,'sem leituras');
+  kun.forEach(x=>{if(!/^[ぁ-ん]+(\([ぁ-んっ]+\))?$/.test(x))err(k,'kun inválida',x)});
+  on.forEach(x=>{if(!/^[ァ-ヶー]+$/.test(x))err(k,'on inválida',x)});
+  if(!m||typeof m!=='string')err(k,'sem significado');
+  if(seen.has(k))err(k,'já existe');seen.add(k);
+});
+if(bad){console.log('nada gravado');process.exit(1)}
+const lines=rows.map(r=>JSON.stringify(r)+',').join('\n');
+if(!s.endsWith('\n];\n'))throw new Error('fim inesperado de kanji.js');
+s=s.slice(0,-'];\n'.length)+lines+'\n];\n';
+fs.writeFileSync(F,s);console.log('adicionados',rows.length,'total',old.length+rows.length);

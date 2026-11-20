@@ -1,0 +1,178 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Contadores – Ayumi</title>
+<link rel="stylesheet" href="style.css">
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#1d2742">
+<link rel="icon" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<script src="pwa.js" defer></script>
+<script src="tts.js"></script>
+<style>
+.checks{display:flex;flex-wrap:wrap;gap:6px 18px;margin:6px 0 4px}
+.checks label{white-space:nowrap}
+.emoji{font-size:4rem;line-height:1.1;text-align:center;min-height:1.1em}
+.ask{margin-top:14px;font-size:1.1rem}
+.opt small{display:block;font-size:.7em;color:var(--muted)}
+.opt.big{font-size:1.8rem}
+.ans-card{text-align:left;margin-top:8px}
+a{color:inherit}
+</style>
+</head>
+<body>
+<header>
+  <h1><span lang="ja">数え方道場</span> Contadores</h1>
+  <p>Veja o objeto e escolha o contador certo. · <a href="index.html">← Ayumi</a></p>
+</header>
+
+<main>
+  <section id="menu">
+    <h2>Níveis</h2>
+    <div class="checks" id="lv"></div>
+    <div class="row"><button id="start" type="button" class="primary">Começar (10 perguntas)</button></div>
+    <p id="msg" class="feedback" aria-live="polite"></p>
+    <p class="hint">Os níveis são aproximados. Só entram objetos com um contador inequívoco; no que pode variar, a tradução indica o contexto (por exemplo, "café (uma xícara)").</p>
+  </section>
+
+  <section id="game" hidden>
+    <div class="top">
+      <button id="quit" type="button" class="ghost">Sair</button>
+      <span id="score"></span>
+      <span id="stamp" class="stamp">数</span>
+    </div>
+    <div class="card">
+      <div id="emoji" class="emoji" aria-hidden="true"></div>
+      <div id="big" class="big" lang="ja"></div>
+      <div id="hint" class="hint"></div>
+      <div class="ask">Qual é o contador?</div>
+    </div>
+    <div id="opts" class="opts"></div>
+    <p id="feedback" class="feedback" aria-live="polite"></p>
+    <div id="reveal" class="card ans-card" hidden></div>
+    <div class="row">
+      <button id="speak" type="button" class="ghost" hidden>🔊 Ouvir</button>
+      <button id="next" type="button" class="primary" hidden>Próxima</button>
+    </div>
+  </section>
+
+  <section id="result" hidden>
+    <h2 id="final"></h2>
+    <p id="best"></p>
+    <div id="review"></div>
+    <div class="row">
+      <button id="again" type="button" class="primary">Jogar de novo</button>
+      <button id="home" type="button" class="ghost">Voltar ao menu</button>
+    </div>
+  </section>
+</main>
+
+<footer>Atalhos: 1–4 escolhem, Enter avança.</footer>
+
+<script src="data/words.js"></script>
+<script src="data/counters.js"></script>
+<script>
+const $ = s => document.querySelector(s);
+const shuffle = a => { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
+const ls = { get(k, d){ try { const v = JSON.parse(localStorage.getItem(k)); return v === null ? d : v; } catch { return d; } }, set(k, v){ try { localStorage.setItem(k, JSON.stringify(v)); } catch {} } };
+const ACT = "contadores", NV = { 5: "JLPT N5", 4: "JLPT N4", 3: "JLPT N3", 2: "JLPT N2" };
+const hira = s => s.replace(/[ァ-ヶ]/g, ch => String.fromCharCode(ch.charCodeAt(0) - 0x60));
+
+// chave "japonês|kana" igual à do words.js quando o objeto já existe lá (para o progresso reconhecer a palavra)
+const WK = new Map();
+for (const c of CATEGORIES) for (const w of c.words) { if (!WK.has(w[0])) WK.set(w[0], []); WK.get(w[0]).push(w); }
+const keyOf = r => { const m = (WK.get(r[0]) || []).find(w => hira(w[1]) === r[1]); return m ? m[0] + "|" + m[1] : r[0] + "|" + r[1]; };
+
+const lvBox = $("#lv");
+[[5, "N5 (本 枚 個 匹 冊 台 人 杯)"], [4, "N4 (軒 羽 足 着 通)"], [3, "N3 (頭 粒 脚 曲 部)"], [2, "N2 (棟 基 件)"]].forEach(([n, t], i) => {
+  const l = document.createElement("label"), x = document.createElement("input");
+  x.type = "checkbox"; x.value = n; x.checked = n === 5; l.append(x, " " + t); lvBox.append(l);
+});
+
+const S = { q: [], i: 0, score: 0, wrong: [], done: false };
+const show = id => ["menu", "game", "result"].forEach(s => $("#" + s).hidden = s !== id);
+
+function options(r, sel){
+  const mn = Math.min(...sel), right = r[3], bl = new Set([right]);
+  COUNTER_CONFLICTS.forEach(g => { if (g.includes(right)) g.forEach(x => bl.add(x)); });
+  const pool = Object.keys(COUNTER_INFO).filter(c => COUNTER_INFO[c].lv >= mn && !bl.has(c));
+  return shuffle([right, ...shuffle(pool).slice(0, 3)]);
+}
+function start(){
+  const sel = [...lvBox.querySelectorAll("input:checked")].map(x => +x.value);
+  if (!sel.length) { $("#msg").textContent = "Escolha pelo menos um nível."; return; }
+  const objs = COUNTERS.filter(r => sel.includes(COUNTER_INFO[r[3]].lv));
+  $("#msg").textContent = "";
+  // sorteia sem favorecer o contador com mais objetos: primeiro o contador, depois o objeto
+  const byC = {}; objs.forEach(r => (byC[r[3]] = byC[r[3]] || []).push(r));
+  const q = [], used = new Set(); let tries = 0, n = Math.min(10, objs.length);
+  while (q.length < n && tries++ < 500) {
+    const cs = Object.keys(byC), c = cs[Math.floor(Math.random() * cs.length)], l = byC[c], r = l[Math.floor(Math.random() * l.length)];
+    if (used.has(r)) continue; used.add(r); q.push({ r, opts: options(r, sel) });
+  }
+  Object.assign(S, { q, i: 0, score: 0, wrong: [] });
+  show("game"); render();
+}
+function render(){
+  const { r, opts } = S.q[S.i]; S.done = false;
+  $("#score").textContent = `${S.i + 1}/${S.q.length} · acertos: ${S.score}`;
+  $("#emoji").textContent = r[5]; $("#big").textContent = r[0];
+  $("#hint").textContent = r[1] === r[0] ? r[2] : `${r[1]} · ${r[2]}`;
+  $("#feedback").textContent = ""; $("#reveal").hidden = true; $("#next").hidden = true; $("#speak").hidden = true;
+  $("#opts").replaceChildren(...opts.map(c => {
+    const b = document.createElement("button"); b.type = "button"; b.className = "opt big"; b.lang = "ja"; b.dataset.c = c;
+    b.append(c); const s = document.createElement("small"); s.textContent = COUNTER_INFO[c].kana; b.append(s);
+    b.onclick = () => finish(c, b); return b;
+  }));
+}
+function record(r, ok){
+  const d = new Date(), pad = n => String(n).padStart(2, "0");
+  const st = ls.get("stats", []);
+  st.push({ data: `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`, atividade: ACT, nivel: NV[COUNTER_INFO[r[3]].lv], categoria: "contadores", chave: keyOf(r), acertou: ok });
+  ls.set("stats", st.slice(-5000));
+}
+function finish(c, btn){
+  if (S.done) return; S.done = true;
+  const { r } = S.q[S.i], ok = c === r[3];
+  if (ok) S.score++; else S.wrong.push({ r, given: c });
+  record(r, ok);
+  [...$("#opts").children].forEach(b => { b.disabled = true; if (b.dataset.c === r[3]) b.classList.add("ok"); });
+  if (!ok) btn.classList.add("bad");
+  $("#feedback").textContent = ok ? `Correto! ${r[0]} → ${r[3]}（${r[4]}）` : `Resposta: ${r[3]}（${r[4]}） — você: ${c}`;
+  $("#feedback").style.color = ok ? "var(--ok)" : "var(--bad)";
+  const info = COUNTER_INFO[r[3]], ex = COUNTERS.filter(x => x[3] === r[3] && x !== r).slice(0, 4).map(x => x[0]).join("、");
+  const rv = $("#reveal"); rv.hidden = false; rv.replaceChildren();
+  const a = document.createElement("div"), b = document.createElement("div");
+  a.lang = "ja"; a.style.fontSize = "1.3rem"; a.textContent = `${r[3]}（${r[4]}）`;
+  b.className = "hint"; b.textContent = `Usado para ${info.uso}.` + (ex ? ` Outros exemplos: ${ex}.` : "");
+  rv.append(a, b);
+  $("#speak").hidden = !AyumiTTS.supported(); $("#speak").onclick = () => say(r[1] + "、" + r[4]);
+  $("#next").textContent = S.i === S.q.length - 1 ? "Ver resultado" : "Próxima"; $("#next").hidden = false; $("#next").focus();
+  $("#score").textContent = `${S.i + 1}/${S.q.length} · acertos: ${S.score}`;
+}
+function say(t){ AyumiTTS.speak(t); }
+function next(){
+  if (S.i < S.q.length - 1) { S.i++; render(); return; }
+  const bk = "best:" + ACT, best = ls.get(bk, 0); if (S.score > best) ls.set(bk, S.score);
+  $("#final").textContent = `Você acertou ${S.score} de ${S.q.length}`;
+  $("#best").textContent = S.score > best ? "Novo recorde!" : `Recorde: ${best}`;
+  $("#review").replaceChildren(...S.wrong.map(w => { const d = document.createElement("div"); d.className = "rev";
+    const l = document.createElement("span"), m = document.createElement("span"); l.lang = m.lang = "ja";
+    l.textContent = `${w.r[5]} ${w.r[0]}`; m.textContent = `${w.r[3]}（${w.r[4]}） — você: ${w.given}`; d.append(l, m); return d; }));
+  if (!S.wrong.length) $("#review").textContent = "Sem erros. 🎉";
+  show("result");
+}
+$("#start").onclick = start; $("#again").onclick = start; $("#next").onclick = next;
+$("#home").onclick = () => show("menu"); $("#quit").onclick = () => show("menu");
+document.addEventListener("keydown", e => {
+  if ($("#game").hidden || e.ctrlKey || e.metaKey || e.altKey) return;
+  if (e.key === "Enter") { e.preventDefault(); if (S.done) next(); }
+  else if (!S.done && /^[1-4]$/.test(e.key)) $("#opts").children[+e.key - 1]?.click();
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,217 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Prova de gramática – Ayumi</title>
+<link rel="stylesheet" href="style.css">
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#1d2742">
+<link rel="icon" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<script src="pwa.js" defer></script>
+<style>
+a{color:inherit}
+a.primary,a.ghost{display:inline-block;text-decoration:none}
+.gq-bar{height:8px;background:var(--line);border-radius:4px;overflow:hidden;margin:6px 0 14px}
+.gq-bar i{display:block;height:100%;width:0;background:var(--ok)}
+.gq-q{text-align:left;font-size:1.25rem;line-height:1.7;padding:22px 18px}
+.gq-q:focus-visible,#final:focus-visible{outline:3px solid var(--stamp);outline-offset:2px}
+#opts{grid-template-columns:1fr}
+.opt.gq-opt{display:flex;gap:12px;align-items:baseline;text-align:left;font-size:1.1rem}
+.gq-k{flex:none;min-width:1.6em;text-align:center;border:1.5px solid var(--line);border-radius:5px;font-size:.8rem;color:var(--muted)}
+.gq-why{margin-top:6px;color:var(--muted)}
+.gq-rq{font-size:1.1rem;margin:6px 0}
+.gq-bad{color:var(--bad)}
+.gq-good{color:var(--ok)}
+.gt-note{color:var(--muted);font-size:.9rem;margin-top:4px}
+.gq-lv .cat{width:100%}
+.empty{color:var(--muted)}
+@media (prefers-reduced-motion:no-preference){.gq-bar i{transition:width .25s}}
+</style>
+</head>
+<body>
+<header>
+  <h1><span lang="ja">文法試験</span> Prova de gramática</h1>
+  <p>Perguntas de múltipla escolha sobre os tópicos do nível. · <a href="grammar.html">← Gramática</a></p>
+</header>
+
+<main>
+  <section id="pick" hidden>
+    <p id="pick-msg" class="empty"></p>
+    <div id="levels" class="cats gq-lv"></div>
+  </section>
+
+  <section id="exam" hidden>
+    <div class="top">
+      <button id="quit" type="button" class="ghost">Sair</button>
+      <span id="qn"></span>
+      <span id="score"></span>
+    </div>
+    <div class="gq-bar" id="barwrap" role="progressbar" aria-label="Progresso da prova" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><i id="bar"></i></div>
+    <div id="gq-q" class="card gq-q" tabindex="-1"></div>
+    <div id="opts" class="opts" role="group" aria-label="Alternativas"></div>
+    <p id="feedback" class="feedback" aria-live="polite"></p>
+    <button id="next" type="button" class="primary" hidden>Próxima</button>
+  </section>
+
+  <section id="result" hidden>
+    <h2 id="final" tabindex="-1"></h2>
+    <p id="best"></p>
+    <div id="review"></div>
+    <div class="row">
+      <button id="again" type="button" class="primary">Refazer com novas questões</button>
+      <a class="ghost" href="grammar.html">Voltar à gramática</a>
+    </div>
+  </section>
+</main>
+
+<footer>Atalhos: teclas 1 a 4 para responder. A prova não mexe no histórico de palavras; ela só guarda a sua melhor nota de cada nível, neste navegador.</footer>
+
+<script src="data/grammar.js"></script>
+<script src="data/grammar-quiz.js"></script>
+<script src="gram-quiz.js"></script>
+<script>
+(function(){
+"use strict";
+var LEVELS=[{id:"basico",name:"Básico"},{id:"intermediario",name:"Intermediário"},{id:"avancado",name:"Avançado"}];
+var S={level:null,exam:null,i:0,right:0,wrong:[],answered:false};
+var $=function(id){return document.getElementById(id)};
+
+function esc(s){return String(s).replace(/[&<>"]/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})}
+function fmt(s){return esc(s).replace(/\{([^|}]+)\|([^}]+)\}/g,"<ruby>$1<rt>$2</rt></ruby>").replace(/\*\*(.+?)\*\*/g,"<b>$1</b>")}
+
+function lsGet(k){try{return JSON.parse(localStorage.getItem(k))}catch(e){return null}}
+function lsSet(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}
+function loadSeen(l){var v=lsGet("kd-gram-quiz-seen:"+l);return Array.isArray(v)?v:[]}
+function loadBest(l){var v=lsGet("kd-gram-quiz-best:"+l);return typeof v==="number"?v:null}
+
+function group(l){for(var i=0;i<GRAMMAR.length;i++)if(GRAMMAR[i].id===l)return GRAMMAR[i];return null}
+function bankOf(l){return (typeof GRAMMAR_QUIZ!=="undefined"&&GRAMMAR_QUIZ[l])||[]}
+function levelName(l){for(var i=0;i<LEVELS.length;i++)if(LEVELS[i].id===l)return LEVELS[i].name;return l}
+function topicTitle(l,id){var g=group(l);if(g)for(var i=0;i<g.topics.length;i++)if(g.topics[i].id===id)return g.topics[i].title;return id}
+function ready(l){var g=group(l);return !!g&&g.topics.length>0&&KDQuiz.available(bankOf(l))}
+
+function show(name){["pick","exam","result"].forEach(function(n){$(n).hidden=(n!==name)})}
+
+function showPick(msg){
+  show("pick");
+  $("pick-msg").textContent=msg||"Escolha o nível da prova.";
+  var h="";
+  LEVELS.forEach(function(L){
+    if(ready(L.id)){
+      var b=loadBest(L.id);
+      h+='<a class="cat" href="#'+L.id+'"><b>'+esc(L.name)+'</b><small>'+(b!==null?"✓ concluída · melhor nota "+b+"%":"Ainda não feita")+'</small></a>';
+    }else{
+      h+='<div class="cat" aria-disabled="true"><b>'+esc(L.name)+'</b><small>Em breve</small></div>';
+    }
+  });
+  $("levels").innerHTML=h;
+}
+
+function start(l){
+  var g=group(l);
+  S.level=l;
+  S.exam=KDQuiz.buildExam(bankOf(l),g.topics.map(function(t){return t.id}),loadSeen(l),KDQuiz.QUIZ_N,Math.random);
+  S.i=0;S.right=0;S.wrong=[];S.answered=false;
+  show("exam");
+  question();
+}
+
+function question(){
+  var n=S.exam.items.length,q=S.exam.items[S.i];
+  S.answered=false;
+  $("qn").textContent="Pergunta "+(S.i+1)+" de "+n;
+  $("score").textContent="Acertos: "+S.right;
+  $("bar").style.width=Math.round(S.i/n*100)+"%";
+  $("barwrap").setAttribute("aria-valuenow",String(Math.round(S.i/n*100)));
+  $("gq-q").innerHTML=fmt(q.q);
+  $("opts").innerHTML=q.opts.map(function(o,i){
+    return '<button type="button" class="opt gq-opt" data-i="'+i+'"><span class="gq-k" aria-hidden="true">'+(i+1)+'</span><span>'+fmt(o)+'</span></button>';
+  }).join("");
+  $("feedback").innerHTML="";
+  $("next").hidden=true;
+  $("gq-q").focus();
+}
+
+function answer(i){
+  if(S.answered||!S.exam)return;
+  var q=S.exam.items[S.i];
+  if(i<0||i>=q.opts.length)return;
+  S.answered=true;
+  var ok=(i===q.ans),btns=$("opts").querySelectorAll?$("opts").querySelectorAll("button"):[];
+  for(var k=0;k<btns.length;k++){
+    btns[k].disabled=true;
+    if(k===q.ans)btns[k].classList.add("ok");
+    else if(k===i)btns[k].classList.add("bad");
+  }
+  if(ok)S.right++;else S.wrong.push({q:q,chosen:i});
+  $("score").textContent="Acertos: "+S.right;
+  $("feedback").innerHTML=(ok?'<b class="gq-good">Certo!</b>':'<b class="gq-bad">Errado.</b> A resposta certa é a '+(q.ans+1)+'.')+'<div class="gq-why">'+fmt(q.why)+'</div>';
+  $("next").textContent=(S.i+1>=S.exam.items.length)?"Ver resultado":"Próxima";
+  $("next").hidden=false;
+  $("next").focus();
+}
+
+function next(){
+  if(!S.answered)return;
+  S.i++;
+  if(S.i>=S.exam.items.length)finish();else question();
+}
+
+function finish(){
+  var n=S.exam.items.length,l=S.level,pct=KDQuiz.percent(S.right,n);
+  lsSet("kd-gram-quiz-seen:"+l,S.exam.seen);
+  var prev=loadBest(l),first=(prev===null),best=(prev===null||pct>prev)?pct:prev;
+  lsSet("kd-gram-quiz-best:"+l,best);
+  show("result");
+  $("bar").style.width="100%";
+  $("final").textContent="Nota: "+S.right+" de "+n+" ("+pct+"%)";
+  $("best").textContent="Melhor nota no "+levelName(l)+": "+best+"%."
+    +(first?" Prova concluída: ela já aparece no seu progresso.":(pct>prev?" Novo recorde!":""));
+  var h="";
+  if(!S.wrong.length)h='<p class="gq-good"><b>Nenhum erro. Parabéns!</b></p>';
+  else{
+    h='<h2>Para revisar ('+S.wrong.length+')</h2>';
+    S.wrong.forEach(function(w){
+      var q=w.q;
+      h+='<div class="ex"><div class="gq-rq">'+fmt(q.q)+'</div>'
+        +'<div class="gq-bad">Sua resposta: '+fmt(q.opts[w.chosen])+'</div>'
+        +'<div class="gq-good">Resposta certa: '+fmt(q.opts[q.ans])+'</div>'
+        +'<div class="gt-note">'+fmt(q.why)+'</div>'
+        +'<div class="gt-note"><a href="grammar.html#t-'+esc(q.topic)+'">Revisar o tópico: '+fmt(topicTitle(l,q.topic))+'</a></div></div>';
+    });
+  }
+  $("review").innerHTML=h;
+  $("final").focus();
+}
+
+function route(){
+  var m=(location.hash||"").match(/^#(basico|intermediario|avancado)$/);
+  if(!m){showPick();return}
+  if(!ready(m[1])){showPick("A prova do "+levelName(m[1])+" ainda não está disponível. Em breve!");return}
+  start(m[1]);
+}
+
+$("opts").addEventListener("click",function(e){
+  var b=e.target.closest?e.target.closest("button"):null;
+  if(b&&b.getAttribute("data-i")!==null)answer(parseInt(b.getAttribute("data-i"),10));
+});
+$("next").addEventListener("click",next);
+$("again").addEventListener("click",function(){if(S.level)start(S.level)});
+$("quit").addEventListener("click",function(){
+  if(S.i>0&&window.confirm&&!window.confirm("Sair da prova? As respostas desta prova serão perdidas."))return;
+  location.href="grammar.html";
+});
+document.addEventListener("keydown",function(e){
+  if(e.ctrlKey||e.metaKey||e.altKey||$("exam").hidden||S.answered)return;
+  if(e.key>="1"&&e.key<="4"){e.preventDefault();answer(parseInt(e.key,10)-1)}
+});
+window.addEventListener("hashchange",route);
+route();
+})();
+</script>
+</body>
+</html>

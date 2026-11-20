@@ -1,0 +1,368 @@
+const $ = s => document.querySelector(s);
+const store = {
+  get(k){ try { return JSON.parse(localStorage.getItem(k)); } catch { return null; } },
+  set(k,v){ try { localStorage.setItem(k, JSON.stringify(v)); } catch {} }
+};
+const bestKey = (id, n) => "best:" + id + (n === 10 ? "" : ":" + n);
+let ROUNDS = [10, 20, 50].includes(store.get("rounds")) ? store.get("rounds") : 10;
+const MORA = /[^ゃゅょぁぃぅぇぉャュョァィゥェォ][ゃゅょぁぃぅぇぉャュョァィゥェォ]?/g;
+function pitch(w){
+  const a = ACCENT[w[0]], m = w[1].match(MORA);
+  if (a === undefined || !m) return w[1];
+  return a === 0 ? w[1] + "→" : m.slice(0, a).join("") + "↓" + m.slice(a).join("");
+}
+const SENT = {};
+if (typeof SENTENCES !== "undefined") for (const s of SENTENCES) for (const k of s[3]) (SENT[k] = SENT[k] || []).push(s);
+const shuffle = a => { a = [...a]; for (let i = a.length-1; i > 0; i--) { const j = Math.floor(Math.random()*(i+1)); [a[i],a[j]] = [a[j],a[i]]; } return a; };
+const show = id => ["menu","game","study","feed","result"].forEach(s => $("#"+s).hidden = s !== id);
+
+const S = { mode: store.get("mode") === "study" ? "study" : "play", cat:null, dir: store.get("dir") || "jp2pt", reading: store.get("reading") !== false, auto: store.get("auto") === true,
+            q:[], i:0, score:0, wrong:[], locked:false, correct:0 };
+
+function setDir(d){
+  S.dir = d; store.set("dir", d);
+  $("#d-jp2pt").setAttribute("aria-pressed", d === "jp2pt");
+  $("#d-pt2jp").setAttribute("aria-pressed", d === "pt2jp");
+}
+
+function setRounds(n){
+  ROUNDS = n; store.set("rounds", n); $("#nq").textContent = n;
+  for (const b of $("#rounds").children) b.setAttribute("aria-pressed", +b.dataset.n === n);
+}
+
+function setMode(m){
+  S.mode = m; store.set("mode", m);
+  $("#m-play").setAttribute("aria-pressed", m === "play");
+  $("#m-study").setAttribute("aria-pressed", m === "study");
+}
+
+function sentRows(w){
+  const out = [];
+  for (const s of SENT[w[0] + "|" + w[1]] || []) {
+    const e = document.createElement("div"); e.className = "sw-ex";
+    const t = document.createElement("div");
+    const j = document.createElement("div"); j.lang = "ja"; j.className = "sw-exj"; KDHL.fill(j, s[0], KDHL.find(s[0], w[0] + "|" + w[1]));
+    const k = document.createElement("div"); k.lang = "ja"; k.className = "sw-exk"; k.textContent = s[1]; k.hidden = !S.reading;
+    const p = document.createElement("div"); p.textContent = s[2];
+    t.append(j, k, p); e.append(t);
+    if (TTS) { const b = document.createElement("button"); b.type = "button"; b.className = "ghost"; b.textContent = "🔊"; b.setAttribute("aria-label", "Ouvir frase"); b.onclick = () => speak(s[0]); e.append(b); }
+    out.push(e);
+  }
+  return out;
+}
+
+function wordRow(w, tag, noEx){
+  const r = document.createElement("div"); r.className = "sw";
+  const ja = document.createElement("span"); ja.className = "sw-ja"; ja.lang = "ja"; ja.textContent = w[0];
+  const rd = document.createElement("span"); rd.className = "sw-rd"; rd.lang = "ja"; rd.textContent = `${pitch(w)}  ${w[2]}`;
+  const pt = document.createElement("span"); pt.className = "sw-pt"; pt.textContent = w[3];
+  r.append(ja, rd, pt);
+  if (TTS) { const b = document.createElement("button"); b.type = "button"; b.className = "ghost"; b.textContent = "🔊"; b.setAttribute("aria-label", "Ouvir " + w[1]); b.onclick = () => speak(w[1]); r.append(b); }
+  if (!noEx) r.append(...sentRows(w));
+  if (tag) { const c = document.createElement("span"); c.className = "sw-cat"; c.textContent = tag; r.insertBefore(c, r.children[3] || null); }
+  return r;
+}
+
+function study(cat){
+  S.cat = cat;
+  $("#study-title").textContent = `${cat.group}: ${cat.name}`;
+  $("#study-count").textContent = `${cat.words.length} palavras`;
+  const list = $("#study-list"); list.replaceChildren();
+  list.append(...cat.words.map(w => wordRow(w)));
+  show("study"); window.scrollTo(0, 0);
+}
+
+// Categoria virtual com todas as palavras de um nível JLPT (sem repetir "japonês|kana").
+function levelCat(g){
+  const seen = new Set(), words = [];
+  for (const c of CATEGORIES) if (c.group === g) for (const w of c.words) { const k = w[0] + "|" + w[1]; if (!seen.has(k)) { seen.add(k); words.push(w); } }
+  return { id: "lvl-" + g.slice(-2).toLowerCase(), group: g, name: "Todos os tópicos", words, all: true };
+}
+
+// Rolagem infinita: mostra cartões de palavras sem parar; ao acabar, recomeça (embaralhando ou não).
+let FEED = null;
+function feedPool(scope){
+  const seen = new Set(), out = [];
+  for (const c of CATEGORIES) if (scope === "all" || scope === "g:" + c.group || scope === "c:" + c.id)
+    for (const w of c.words) { const k = w[0] + "|" + w[1]; if (!seen.has(k)) { seen.add(k); out.push(w); } }
+  return out;
+}
+function feedInit(){
+  const sel = $("#feed-scope"), add = (p, v, t) => { const o = document.createElement("option"); o.value = v; o.textContent = t; p.append(o); };
+  add(sel, "all", "Todas as palavras");
+  const groups = [...new Set(CATEGORIES.map(c => c.group))];
+  const og = document.createElement("optgroup"); og.label = "Por grupo";
+  for (const g of groups) add(og, "g:" + g, g);
+  sel.append(og);
+  for (const g of groups) {
+    const o = document.createElement("optgroup"); o.label = g;
+    for (const c of CATEGORIES.filter(c => c.group === g)) add(o, "c:" + c.id, c.name);
+    sel.append(o);
+  }
+  const cfg = store.get("feed") || {};
+  sel.value = cfg.scope || "all";
+  if (sel.value !== (cfg.scope || "all")) sel.value = "all";
+  $("#feed-shuffle").checked = cfg.shuffle !== false;
+}
+function feedCard(w){
+  const r = wordRow(w, null, true); r.classList.add("sw-card");
+  if (SENT[w[0] + "|" + w[1]]) {
+    const t = document.createElement("button"); t.type = "button"; t.className = "ghost sw-more"; t.textContent = "Frases ▾";
+    let open = null;
+    t.onclick = () => { if (open) { open.forEach(x => x.remove()); open = null; t.textContent = "Frases ▾"; } else { open = sentRows(w); r.append(...open); t.textContent = "Frases ▴"; } };
+    r.append(t);
+  }
+  return r;
+}
+function feedMore(n){
+  const list = $("#feed-list");
+  for (let k = 0; k < n; k++) {
+    if (FEED.i >= FEED.order.length) {
+      FEED.order = FEED.cfg.shuffle ? shuffle(FEED.pool) : FEED.pool.slice(); FEED.i = 0; FEED.round++;
+      $("#feed-info").textContent = `Rodada ${FEED.round} · ${FEED.pool.length} palavras`;
+      if (FEED.round > 1) { const d = document.createElement("div"); d.className = "feed-sep"; d.textContent = `Rodada ${FEED.round}`; list.append(d); }
+    }
+    list.append(feedCard(FEED.order[FEED.i++]));
+  }
+  if (list.children.length > 120) {   // mantém a página leve, sem mexer na posição da rolagem
+    const keep = list.children[40], before = keep.getBoundingClientRect().top;
+    for (let k = 0; k < 40; k++) list.children[0].remove();
+    window.scrollBy(0, keep.getBoundingClientRect().top - before);
+  }
+}
+function feedStart(){
+  const cfg = { scope: $("#feed-scope").value, shuffle: $("#feed-shuffle").checked };
+  store.set("feed", cfg);
+  if (FEED && FEED.io) FEED.io.disconnect();
+  FEED = { pool: feedPool(cfg.scope), cfg, order: [], i: 0, round: 0, io: null };
+  $("#feed-list").replaceChildren();
+  show("feed"); window.scrollTo(0, 0);
+  if (!FEED.pool.length) return;
+  feedMore(15);
+  if ("IntersectionObserver" in window) {
+    const end = $("#feed-end");
+    FEED.io = new IntersectionObserver(es => { if (es[0].isIntersecting) { feedMore(10); FEED.io.unobserve(end); FEED.io.observe(end); } }, { rootMargin: "800px" });
+    FEED.io.observe(end);
+  }
+}
+
+// Busca: kana (hiragana ou katakana), romaji, japonês ou português (sem acento / maiúsculas).
+const norm = t => t.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim();
+const hira = t => t.replace(/[\u30a1-\u30f6]/g, c => String.fromCharCode(c.charCodeAt(0) - 0x60));
+let INDEX = null;
+function search(q){
+  const box = $("#results"), qq = norm(q);
+  $("#groups").hidden = !!qq; box.hidden = !qq; box.replaceChildren();
+  if (!qq) return;
+  INDEX = INDEX || CATEGORIES.flatMap(c => c.words.map(w => ({ w, tag: `${c.group}: ${c.name}`, h: [w[0], hira(w[1]), norm(w[2]), norm(w[3])] })));
+  const qh = hira(qq), hits = [];
+  for (const e of INDEX) {
+    let best = 9;
+    e.h.forEach((f, i) => { const t = i === 1 ? qh : qq; const p = f.indexOf(t); if (p >= 0) best = Math.min(best, f === t ? 0 : p === 0 ? 1 : 2); });
+    if (best < 9) hits.push([best, e]);
+  }
+  hits.sort((a, b) => a[0] - b[0]);
+  const info = document.createElement("p"); info.className = "sw-info";
+  info.textContent = hits.length ? `${hits.length} resultado(s)` + (hits.length > 60 ? " (mostrando 60)" : "") : "Nada encontrado.";
+  box.append(info, ...hits.slice(0, 60).map(([, e]) => wordRow(e.w, e.tag)));
+}
+
+// Grupos abertos no menu (padrão: só o JLPT N5).
+const openGroups = () => store.get("open") || ["JLPT N5"];
+
+function renderMenu(){
+  updateErr();
+  const box = $("#groups"); box.replaceChildren();
+  const groups = [...new Set(CATEGORIES.map(c => c.group))];
+  const jl = g => g.startsWith("JLPT");
+  groups.sort((a, b) => jl(a) && jl(b) ? b.localeCompare(a) : jl(b) - jl(a));
+  for (const g of groups) {
+    const det = document.createElement("details"); det.className = "grp";
+    det.open = openGroups().includes(g);
+    const sum = document.createElement("summary");
+    const all = CATEGORIES.filter(c => c.group === g);
+    sum.textContent = `${g} · ${all.length} tópicos, ${all.reduce((n, c) => n + c.words.length, 0)} palavras`;
+    det.append(sum);
+    det.ontoggle = () => { const o = openGroups().filter(x => x !== g); if (det.open) o.push(g); store.set("open", o); };
+    const grid = document.createElement("div"); grid.className = "cats";
+    for (const c of (jl(g) ? [levelCat(g)] : []).concat(CATEGORIES.filter(c => c.group === g))) {
+      const b = document.createElement("button"); b.className = "cat" + (c.all ? " all" : ""); b.type = "button";
+      const best = store.get(bestKey(c.id, ROUNDS));
+      b.innerHTML = "<b></b><small></small>";
+      b.firstChild.textContent = c.name;
+      b.lastChild.textContent = `${c.words.length} palavras` + (best != null ? `, melhor: ${best}/${Math.min(ROUNDS, c.words.length)}` : "");
+      b.onclick = () => S.mode === "study" ? study(c) : start(c);
+      grid.append(b);
+    }
+    det.append(grid); box.append(det);
+  }
+  show("menu");
+}
+
+// Palavras erradas: "japonês|kana" -> pontos de erro (erro +2, acerto -1, máx. 5). Quanto mais pontos, mais chance de cair no quiz.
+const missMap = () => store.get("miss") || {};
+const wkey = w => w[0] + "|" + w[1];
+function pick(words, n){
+  const m = missMap();
+  return words.map(w => [Math.pow(Math.random(), 1 / (1 + 3 * (m[wkey(w)] || 0))), w]).sort((a, b) => b[0] - a[0]).slice(0, n).map(x => x[1]);
+}
+// Regra comum das atividades: grava em "stats" (categoria e nível reais da palavra, mesmo no modo "erros" ou por nível).
+let WINFO = null;
+function recordStat(w, ok){
+  if (!WINFO) { WINFO = new Map(); for (const c of CATEGORIES) for (const x of c.words) { const k = wkey(x); if (!WINFO.has(k)) WINFO.set(k, c); } }
+  const k = wkey(w), c = WINFO.get(k); if (!c) return;
+  const d = new Date(), pad = n => String(n).padStart(2, "0"), st = store.get("stats") || [];
+  st.push({ data: `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`, atividade: "quiz", nivel: c.group, categoria: c.id, chave: k, acertou: ok });
+  store.set("stats", st.slice(-5000));
+}
+function missWords(){
+  const m = missMap(), by = new Map();
+  for (const c of CATEGORIES) for (const w of c.words) by.set(wkey(w), w);
+  return Object.keys(m).filter(k => by.has(k)).map(k => by.get(k));
+}
+function updateErr(){
+  const n = missWords().length;
+  $("#err-open").hidden = $("#err-clear").hidden = !n;
+  $("#err-open").textContent = `Revisar meus erros (${n})`;
+}
+function startErrors(){
+  const words = missWords();
+  if (words.length) start({ id: "erros", group: "Revisão", name: "Meus erros", words, pool: CATEGORIES.flatMap(c => c.words), errors: true });
+}
+
+function start(cat){
+  S.cat = cat; S.n = ROUNDS;
+  const words = shuffle(pick(cat.words, ROUNDS));
+  S.q = words.map(w => {
+    const others = shuffle((cat.pool || cat.words).filter(x => x !== w && x[3] !== w[3])).slice(0, 3);
+    return { w, opts: shuffle([w, ...others]) };
+  });
+  S.i = 0; S.score = 0; S.wrong = [];
+  show("game"); render();
+}
+
+function render(){
+  const { w, opts } = S.q[S.i];
+  const jp = S.dir === "jp2pt";
+  S.locked = false; S.correct = opts.indexOf(w);
+  $("#stamp").textContent = `${S.i+1}/${S.q.length}`;
+  $("#score").textContent = `Acertos: ${S.score}`;
+  const big = $("#big"); big.textContent = jp ? w[0] : w[3]; big.lang = jp ? "ja" : "pt-BR";
+  const hint = $("#hint");
+  hint.textContent = jp && S.reading ? `${pitch(w)}  ${w[2]}` : "";
+  const box = $("#opts"); box.replaceChildren();
+  opts.forEach((o, n) => {
+    const b = document.createElement("button"); b.type = "button"; b.className = "opt";
+    const main = document.createElement("span");
+    main.textContent = jp ? o[3] : o[0];
+    b.append(main);
+    if (!jp) {
+      main.lang = "ja";
+      if (o[1] !== o[0]) { const s = document.createElement("small"); s.textContent = pitch(o); b.append(s); }
+    }
+    b.onclick = () => answer(n);
+    box.append(b);
+  });
+  $("#feedback").textContent = "";
+  $("#ex").hidden = true; S.sent = null;
+  $("#next").hidden = true;
+  $("#speak").hidden = !TTS || !jp;
+  if (S.auto && jp) speak(w[1]);
+}
+
+function answer(n){
+  if (S.locked) return;
+  S.locked = true;
+  const { w } = S.q[S.i];
+  const btns = [...$("#opts").children];
+  btns[S.correct].classList.add("ok");
+  const m = missMap(), k = wkey(w);
+  if (n === S.correct) { S.score++; if (m[k] && --m[k] <= 0) delete m[k]; }
+  else { btns[n].classList.add("bad"); S.wrong.push(w); m[k] = Math.min(5, (m[k] || 0) + 2); }
+  store.set("miss", m);
+  recordStat(w, n === S.correct);
+  $("#score").textContent = `Acertos: ${S.score}`;
+  $("#feedback").textContent = `${w[0]} (${pitch(w)}, ${w[2]}) = ${w[3]}`;
+  showExample(w);
+  $("#next").textContent = S.i === S.q.length-1 ? "Ver resultado" : "Próxima";
+  $("#next").hidden = false;
+  $("#speak").hidden = !TTS;
+  if (S.auto && S.dir === "pt2jp") speak(w[1]);
+}
+
+function showExample(w){
+  const list = SENT[w[0] + "|" + w[1]];
+  if (!list) return;
+  const s = S.sent = list[Math.floor(Math.random() * list.length)];
+  KDHL.fill($("#ex-jp"), s[0], KDHL.find(s[0], w[0] + "|" + w[1]));
+  $("#ex-kana").textContent = s[1];
+  $("#ex-kana").hidden = !S.reading;
+  $("#ex-pt").textContent = s[2];
+  $("#ex-speak").hidden = !TTS;
+  $("#ex").hidden = false;
+}
+
+function next(){
+  if (!S.locked) return;
+  if (++S.i < S.q.length) render(); else finish();
+}
+
+function finish(){
+  const total = S.q.length;
+  $("#final").textContent = `${S.score} de ${total} acertos em ${S.cat.group}: ${S.cat.name}`;
+  const key = bestKey(S.cat.id, S.n), prev = store.get(key);
+  if (S.cat.errors) $("#best").textContent = "";
+  else if (prev == null || S.score > prev) { store.set(key, S.score); $("#best").textContent = prev == null ? "Primeira pontuação salva." : "Novo recorde!"; }
+  else $("#best").textContent = `Seu recorde: ${prev}/${total}`;
+  const rv = $("#review"); rv.replaceChildren();
+  if (S.wrong.length) {
+    const h = document.createElement("h2"); h.textContent = "Para revisar"; rv.append(h);
+    for (const w of S.wrong) {
+      const r = document.createElement("div"); r.className = "rev";
+      const a = document.createElement("span"); a.lang = "ja"; a.textContent = `${w[0]}  ${pitch(w)}  ${w[2]}`;
+      const b = document.createElement("span"); b.textContent = w[3];
+      r.append(a, b); rv.append(r);
+    }
+  }
+  show("result");
+}
+
+// Áudio: Web Speech API (speechSynthesis), voz japonesa do próprio navegador/sistema
+const TTS = AyumiTTS.supported();
+function speak(text){
+  AyumiTTS.speak(text, { rate: 0.85, onnovoice: () => { $("#feedback").textContent = "Nenhuma voz japonesa encontrada neste navegador/sistema. Instale uma voz em japonês no sistema operacional."; } });
+}
+if (!TTS) $("#autowrap").hidden = true;
+$("#speak").onclick = () => speak(S.q[S.i].w[1]);
+$("#ex-speak").onclick = () => { if (S.sent) speak(S.sent[0]); };
+$("#auto").checked = S.auto;
+$("#auto").onchange = e => { S.auto = e.target.checked; store.set("auto", S.auto); };
+for (const b of $("#rounds").children) b.onclick = () => { setRounds(+b.dataset.n); renderMenu(); };
+$("#q").oninput = e => search(e.target.value);
+$("#feed-open").onclick = feedStart;
+$("#err-open").onclick = startErrors;
+$("#err-clear").onclick = () => { if (confirm("Limpar a lista de palavras erradas?")) { store.set("miss", {}); updateErr(); } };
+$("#feed-scope").onchange = $("#feed-shuffle").onchange = feedStart;
+$("#feed-back").onclick = () => { if (FEED && FEED.io) FEED.io.disconnect(); renderMenu(); };
+$("#study-feed").onclick = () => { $("#feed-scope").value = S.cat.all ? "g:" + S.cat.group : "c:" + S.cat.id; feedStart(); };
+$("#m-play").onclick = () => setMode("play");
+$("#m-study").onclick = () => setMode("study");
+$("#study-back").onclick = renderMenu;
+$("#study-play").onclick = () => start(S.cat);
+$("#d-jp2pt").onclick = () => setDir("jp2pt");
+$("#d-pt2jp").onclick = () => setDir("pt2jp");
+$("#reading").checked = S.reading;
+$("#reading").onchange = e => { S.reading = e.target.checked; store.set("reading", S.reading); if (S.sent) $("#ex-kana").hidden = !S.reading; };
+$("#next").onclick = next;
+$("#quit").onclick = renderMenu;
+$("#home").onclick = renderMenu;
+$("#again").onclick = () => start(S.cat);
+
+document.addEventListener("keydown", e => {
+  if ($("#game").hidden) return;
+  if (e.key >= "1" && e.key <= "4") { const b = $("#opts").children[+e.key-1]; if (b) answer(+e.key-1); }
+  else if (e.key === "Enter" && S.locked) { e.preventDefault(); next(); }
+});
+
+setDir(S.dir); setMode(S.mode); setRounds(ROUNDS); feedInit();
+renderMenu();

@@ -1,0 +1,37 @@
+/* Estilo base dos jogos de zonas (data/zonas.js). As cores dos desenhos (classes c-*) ficam na página de cada jogo. */
+.setrow{display:flex;flex-wrap:wrap;gap:12px 20px;align-items:center;margin:12px 0}
+.setrow>span{color:var(--muted)}
+a{color:inherit}
+.kgrid{display:grid;grid-template-columns:minmax(0,290px) minmax(0,1fr);gap:16px;align-items:start}
+#stagebox{background:var(--card);border:1.5px solid var(--line);border-radius:8px;padding:6px 6px 2px;transition:transform .12s ease-in}
+#stage{display:block;width:100%;height:auto;aspect-ratio:2/3;max-height:68vh;margin:0 auto;touch-action:manipulation}
+.tag{text-align:center;color:var(--muted);font-size:.85rem;padding:2px 0 6px;min-height:1.7em}
+.v{stroke:#6b5240;stroke-width:1.5;stroke-linejoin:round;vector-effect:non-scaling-stroke}
+.c-ln{fill:none;stroke:rgba(70,50,40,.55);stroke-width:2.5;stroke-linecap:round;vector-effect:non-scaling-stroke}
+.c-nos{stroke:none}
+.pl{fill:rgba(200,55,45,.28);stroke:var(--stamp);stroke-width:4;stroke-linejoin:round;pointer-events:none;vector-effect:non-scaling-stroke}
+@media (prefers-reduced-motion:no-preference){.pl{animation:pl 1s ease-in-out infinite}}
+@keyframes pl{50%{fill:rgba(200,55,45,.5);stroke-width:7}}
+.pl.ok{fill:rgba(47,125,91,.38);stroke:#2f7d5b;animation:none}
+.pl.bad{fill:rgba(184,58,52,.38);stroke:#b83a34;animation:none}
+.h{fill:transparent;stroke:transparent;stroke-width:12;pointer-events:none;vector-effect:non-scaling-stroke;touch-action:manipulation}
+#stage.tap .h{pointer-events:all;cursor:pointer}
+.h:focus{outline:none}
+.h:focus-visible{stroke:var(--stamp);stroke-width:5}
+.ask{margin:0 0 10px;color:var(--muted)}
+.tapword{font-size:2.4rem;line-height:1.7;font-weight:600}
+.tapword rt{font-size:.9rem;font-weight:400}
+.opt .wd{font-size:1.5rem}
+.opt rt{font-size:.7rem}
+#typed{display:flex;gap:8px;flex-wrap:wrap}
+#ans{flex:1 1 160px;min-width:0;padding:10px 12px;border:1.5px solid var(--line);border-radius:8px;font:inherit;font-size:1.2rem;background:var(--card);color:var(--ink)}
+.fb{min-height:3.2em;margin:10px 0 6px;padding:8px 12px;border-radius:8px;border:1.5px solid transparent}
+.fb:empty{padding:0;border:0}
+.fb.ok{background:var(--ok-bg);border-color:var(--ok)}
+.fb.bad{background:var(--bad-bg);border-color:var(--bad)}
+.fb .wd{font-size:1.35rem}
+.fb button{margin-left:8px;padding:2px 8px}
+.top .stamp{font-size:.95rem}
+.rec{color:var(--muted)}
+/* a media query vem DEPOIS das regras base de #stage (senão elas a sobrescrevem) */
+@media (max-width:620px){.kgrid{grid-template-columns:1fr}#stage{max-height:40vh}#game[data-modo=tocar] #stage{max-height:56vh}#opts.opts{grid-template-columns:1fr 1fr;margin:8px 0}.tapword{font-size:2rem}}

@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Vocabulário – Ayumi</title>
+<link rel="stylesheet" href="style.css">
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#1d2742">
+<link rel="icon" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<script src="pwa.js" defer></script>
+<script src="tts.js"></script>
+</head>
+<body>
+<header>
+  <h1><span lang="ja">語彙</span> Vocabulário</h1>
+  <p>Escolha uma categoria e responda <span id="nq">10</span> perguntas. · <a href="index.html">← Ayumi</a></p>
+</header>
+
+<main>
+  <section id="menu">
+    <div class="settings">
+      <div class="seg" role="group" aria-label="Modo">
+        <button id="m-play" type="button">Jogar</button>
+        <button id="m-study" type="button">Só estudar</button>
+      </div>
+      <div class="seg" role="group" aria-label="Direção do quiz">
+        <button id="d-jp2pt" type="button">Japonês → Português</button>
+        <button id="d-pt2jp" type="button">Português → Japonês</button>
+      </div>
+      <div class="seg" role="group" aria-label="Perguntas por sessão" id="rounds">
+        <button type="button" data-n="10">10</button>
+        <button type="button" data-n="20">20</button>
+        <button type="button" data-n="50">50</button>
+      </div>
+      <label><input type="checkbox" id="reading" checked> Mostrar leitura (kana e romaji)</label>
+      <label id="autowrap"><input type="checkbox" id="auto"> Tocar áudio automaticamente</label>
+    </div>
+    <div class="row"><button id="feed-open" type="button" class="primary">∞ Rolagem infinita</button>
+      <button id="err-open" type="button" class="primary" hidden>Revisar meus erros</button>
+      <button id="err-clear" type="button" class="ghost" hidden>Limpar erros</button></div>
+    <input type="search" id="q" placeholder="Buscar palavra (kana, romaji, japonês ou português)" aria-label="Buscar palavra" autocomplete="off">
+    <div id="results" hidden></div>
+    <div id="groups"></div>
+  </section>
+
+  <section id="game" hidden>
+    <div class="top">
+      <button id="quit" type="button" class="ghost">Sair</button>
+      <span id="score"></span>
+      <span id="stamp" class="stamp"></span>
+    </div>
+    <div class="card">
+      <div id="big" class="big"></div>
+      <div id="hint" class="hint" lang="ja"></div>
+      <button id="speak" type="button" class="ghost">🔊 Ouvir</button>
+    </div>
+    <div id="opts" class="opts"></div>
+    <p id="feedback" class="feedback" aria-live="polite"></p>
+    <div id="ex" class="ex" hidden>
+      <div class="ex-head"><b>Exemplo</b><button id="ex-speak" type="button" class="ghost">🔊 Ouvir frase</button></div>
+      <div id="ex-jp" class="ex-jp" lang="ja"></div>
+      <div id="ex-kana" class="ex-kana" lang="ja"></div>
+      <div id="ex-pt" class="ex-pt"></div>
+    </div>
+    <button id="next" type="button" class="primary" hidden>Próxima</button>
+  </section>
+
+  <section id="study" hidden>
+    <div class="top">
+      <button id="study-back" type="button" class="ghost">← Menu</button>
+      <b id="study-title"></b>
+      <span id="study-count"></span>
+    </div>
+    <div id="study-list"></div>
+    <div class="row"><button id="study-play" type="button" class="primary">Jogar esta categoria</button>
+      <button id="study-feed" type="button" class="ghost">∞ Rolar esta categoria</button></div>
+  </section>
+
+  <section id="feed" hidden>
+    <div class="feedbar">
+      <button id="feed-back" type="button" class="ghost">← Menu</button>
+      <select id="feed-scope" aria-label="Quais palavras"></select>
+      <label><input type="checkbox" id="feed-shuffle" checked> Embaralhar</label>
+      <span id="feed-info"></span>
+    </div>
+    <div id="feed-list"></div>
+    <div id="feed-end" aria-hidden="true"></div>
+  </section>
+
+  <section id="result" hidden>
+    <h2 id="final"></h2>
+    <p id="best"></p>
+    <div id="review"></div>
+    <div class="row">
+      <button id="again" type="button" class="primary">Jogar de novo</button>
+      <button id="home" type="button" class="ghost">Voltar ao menu</button>
+    </div>
+  </section>
+</main>
+
+<footer>Atalhos: teclas 1–4 para responder, Enter para avançar.<br>Setas na leitura: <b>↓</b> = a altura da voz cai depois dessa sílaba (acento tônico); <b>→</b> = sem queda (heiban).</footer>
+
+<script src="data/words.js"></script>
+<script src="data/accent.js"></script>
+<script src="data/sentences.js"></script>
+<script src="data/highlight.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

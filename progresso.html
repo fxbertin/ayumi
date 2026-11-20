@@ -1,0 +1,286 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Progresso – Ayumi</title>
+<link rel="stylesheet" href="style.css">
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#1d2742">
+<link rel="icon" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<script src="pwa.js" defer></script>
+<style>
+.pr{display:grid;grid-template-columns:7.5rem 1fr auto;gap:4px 12px;align-items:center;padding:8px 0;border-bottom:1px solid var(--line)}
+.pr small{color:var(--muted)}
+.pbar{height:10px;background:var(--line);border-radius:5px;overflow:hidden}
+.pbar i{display:block;height:100%;background:var(--ok)}
+.pbar.w i{background:var(--stamp)}
+.pn{text-align:right;white-space:nowrap}
+.dd{grid-template-columns:4.5rem 1fr auto}
+.sub{grid-column:2 / -1;color:var(--muted);font-size:.8rem}
+.recs{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:8px}
+.rec{background:var(--card);border:1.5px solid var(--line);border-radius:8px;padding:8px 12px}
+.rec small{display:block;color:var(--muted)}
+.sum{display:flex;flex-wrap:wrap;gap:8px}
+.sum div{flex:1 1 130px;background:var(--card);border:1.5px solid var(--line);border-radius:8px;padding:8px 12px}
+.sum small{display:block;color:var(--muted)}
+.sum b{font-size:1.4rem}
+a{color:inherit}
+.feedback.bad{color:var(--bad,#b3261e)}
+</style>
+</head>
+<body>
+<header>
+  <h1><span lang="ja">進捗</span> Progresso</h1>
+  <p>Seu avanço nas atividades, salvo só neste navegador. · <a href="index.html">← Ayumi</a></p>
+</header>
+<main>
+  <p id="empty" class="hint" hidden>Ainda não há respostas salvas. Faça algumas atividades e volte aqui.</p>
+  <section id="body">
+    <div id="sum" class="sum"></div>
+    <h2>Palavras dominadas por nível</h2>
+    <div id="lv"></div>
+    <h2>Categorias mais fracas</h2>
+    <div id="weak"></div>
+    <h2>Últimos dias</h2>
+    <div id="days"></div>
+    <h2>Gramática</h2>
+    <div id="gram"></div>
+    <h2>Leitura</h2>
+    <div id="leit"></div>
+    <h2>Recordes</h2>
+    <div id="recs" class="recs"></div>
+  </section>
+  <h2>Backup do progresso</h2>
+  <p class="hint">Baixe um arquivo com todo o seu progresso e preferências para guardar ou levar a outro aparelho (por exemplo, do navegador para o app instalado). Importar <b>substitui</b> o progresso deste aparelho pelo do arquivo.</p>
+  <div class="row">
+    <button id="exp" type="button" class="primary">Exportar progresso</button>
+    <button id="imp" type="button" class="ghost">Importar progresso…</button>
+    <input id="impfile" type="file" accept=".json,application/json" hidden>
+  </div>
+  <div id="impbox" class="card" hidden>
+    <p id="impsum"></p>
+    <div class="row">
+      <button id="impok" type="button" class="primary">Substituir meu progresso</button>
+      <button id="impno" type="button" class="ghost">Cancelar</button>
+    </div>
+  </div>
+  <p id="bmsg" class="feedback" aria-live="polite"></p>
+  <div class="row"><button id="reset" type="button" class="ghost">Zerar progresso</button></div>
+  <p id="msg" class="feedback" aria-live="polite"></p>
+</main>
+<footer>Uma palavra conta como dominada com pelo menos 3 respostas, 80% de acerto nas últimas 5 e fora da lista de palavras erradas. O histórico guarda as últimas 5000 respostas.</footer>
+
+<script src="data/words.js"></script>
+<script src="data/reading.js"></script>
+<script>
+const $ = s => document.querySelector(s);
+const ls = { get(k, d){ try { const v = localStorage.getItem(k); return v === null ? d : JSON.parse(v); } catch { return d; } } };
+const lsKeys = () => { const a = []; try { for (let i = 0; i < localStorage.length; i++) a.push(localStorage.key(i)); } catch {} return a; };
+const GROUPS = ["JLPT N5", "JLPT N4", "JLPT N3", "JLPT N2", "JLPT N1", "Cotidiano", "Vocabulário"];
+const ACT = { quiz: "Quiz", ditado: "Ditado", lacuna: "Lacuna", "lacuna-particulas": "Lacuna de partículas", "conjugacao-adjetivos": "Adjetivos", conjugacao: "Verbos", contadores: "Contadores", "kana-drop": "Kana Drop", "kana-blaster": "Kana Blaster", kanji: "Kanji", velocidade: "Velocidade" };
+const BEST = { "taxi-facil": "Takushii no Bouken fácil (acertos seguidos)", "taxi-medio": "Takushii no Bouken médio (acertos seguidos)", "taxi-dificil": "Takushii no Bouken difícil (acertos seguidos)", "taxi-avancado": "Takushii no Bouken avançado (acertos seguidos)", "taxia-facil": "Takushii no Bouken modo A fácil (acertos seguidos)", "taxia-medio": "Takushii no Bouken modo A médio (acertos seguidos)", "taxia-dificil": "Takushii no Bouken modo A difícil (acertos seguidos)", "kotonoha-facil": "Kotonoha 言の葉 fácil (pontos)", "kotonoha-medio": "Kotonoha 言の葉 médio (pontos)", "kotonoha-dificil": "Kotonoha 言の葉 difícil (pontos)", "kotonoha-ochiba-facil": "Kotonoha 落ち葉 fácil (pontos)", "kotonoha-ochiba-medio": "Kotonoha 落ち葉 médio (pontos)", "kotonoha-ochiba-dificil": "Kotonoha 落ち葉 difícil (pontos)", ditado: "Ditado (palavras)", "ditado-frases": "Ditado (frases)", lacuna: "Lacuna", "lacuna-particulas": "Lacuna de partículas", contadores: "Contadores", "kana-drop": "Kana Drop", kanji: "Kanji (leitura)", "kanji-inverso": "Kanji (inverso)", "corpo-corpo": "Karada Meguri 体めぐり corpo (acertos em 10)", "corpo-rosto": "Karada Meguri 体めぐり rosto (acertos em 10)", "corpo-orgaos": "Karada Meguri 体めぐり órgãos (acertos em 8)", "corpo-tudo": "Karada Meguri 体めぐり tudo misturado (acertos em 10)", "kurashi-casa": "Kurashi Meguri 暮らしめぐり casa (acertos em 10)", "kurashi-moveis": "Kurashi Meguri 暮らしめぐり móveis (acertos em 10)", "kurashi-cozinha": "Kurashi Meguri 暮らしめぐり cozinha (acertos em 10)", "kurashi-banheiro": "Kurashi Meguri 暮らしめぐり banheiro (acertos em 10)", "kurashi-objetos": "Kurashi Meguri 暮らしめぐり objetos (acertos em 10)", "kurashi-tudo": "Kurashi Meguri 暮らしめぐり tudo misturado (acertos em 10)", vel: "Velocidade", "conjugacao-adjetivos": "Adjetivos" };
+{ const L = { 1: "em ponto", 2: "quartos e meia", 3: "de 5 em 5", 4: "qualquer minuto", 5: "午前/午後 e digital" };
+  for (const l in L) BEST["relogio-" + l] = `時計の練習 ${L[l]} (acertos em 10)`; }
+{ const M = { ja: "escrever", num: "ler kanji", ouvir: "ouvir" }, L = { 1: "0 a 10", 2: "11 a 99", 3: "100 a 999", 4: "1000 a 9999", 5: "10000 a 99999", 6: "tudo misturado" };
+  for (const m in M) for (const l in L) BEST["numeros-" + m + "-" + l] = `数を書こう ${M[m]} ${L[l]} (acertos em 10)`; }
+const OUTROS = { particulas: "Partículas", contadores: "Contadores" };
+const catInfo = {}, wordInfo = {}, totals = {};
+for (const c of CATEGORIES) {
+  catInfo[c.id] = c; totals[c.group] = totals[c.group] || new Set();
+  for (const w of c.words) { const k = w[0] + "|" + w[1]; if (!wordInfo[k]) wordInfo[k] = c.group; totals[c.group].add(k); }
+}
+const catName = id => catInfo[id] ? `${catInfo[id].name} (${catInfo[id].group})` : /^kanji-/.test(id) ? "Kanji " + id.slice(6).toUpperCase() : OUTROS[id] || id;
+const pct = (a, b) => b ? Math.round(a / b * 100) : 0;
+
+function analyze(stats, miss) {
+  const byKey = new Map(), byCat = new Map(), byDay = new Map();
+  for (const e of stats) {
+    if (!e || !e.chave) continue;
+    (byKey.get(e.chave) || byKey.set(e.chave, []).get(e.chave)).push(!!e.acertou);
+    const c = byCat.get(e.categoria) || byCat.set(e.categoria, { n: 0, ok: 0 }).get(e.categoria); c.n++; if (e.acertou) c.ok++;
+    const d = byDay.get(e.data) || byDay.set(e.data, { n: 0, ok: 0, acts: {} }).get(e.data); d.n++; if (e.acertou) d.ok++; d.acts[e.atividade] = (d.acts[e.atividade] || 0) + 1;
+  }
+  const lv = {}; for (const g of GROUPS) lv[g] = { total: totals[g] ? totals[g].size : 0, seen: 0, mastered: 0 };
+  const extra = { seen: 0, mastered: 0 };
+  for (const [k, arr] of byKey) {
+    const last = arr.slice(-5), mastered = arr.length >= 3 && last.filter(Boolean).length / last.length >= 0.8 && !(miss && miss[k] > 0);
+    const g = wordInfo[k];
+    if (g) { lv[g].seen++; if (mastered) lv[g].mastered++; } else { extra.seen++; if (mastered) extra.mastered++; }
+  }
+  const weak = [...byCat].filter(([, v]) => v.n >= 5).map(([id, v]) => ({ id, n: v.n, ok: v.ok, p: v.ok / v.n })).sort((a, b) => a.p - b.p || b.n - a.n).slice(0, 8);
+  const days = [...byDay].sort((a, b) => b[0].localeCompare(a[0])).slice(0, 14).map(([data, v]) => ({ data, ...v }));
+  return { lv, extra, weak, days, total: stats.length, ok: stats.filter(e => e && e.acertou).length, words: byKey.size };
+}
+
+function el(tag, cls, text) { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; }
+function bar(p, warn) { const b = el("div", "pbar" + (warn ? " w" : "")), i = document.createElement("i"); i.style.width = p + "%"; b.append(i); return b; }
+function row(cls, left, p, right, warn, sub) {
+  const r = el("div", "pr " + cls); r.append(el("span", "", left), bar(p, warn), el("span", "pn", right));
+  if (sub) r.append(el("span", "sub", sub)); return r;
+}
+const fdate = s => { const [y, m, d] = String(s).split("-"); return d && m ? `${d}/${m}` : s; };
+const bestName = k => { const r = k.slice(5); if (BEST[r]) return BEST[r]; const m = r.match(/^(.+?)(?::(\d+))?$/), c = catInfo[m[1]]; return c ? `Quiz: ${c.name}` + (m[2] ? ` (${m[2]} perguntas)` : "") : "Quiz: " + r; };
+
+function render() {
+  const stats = ls.get("stats", []), miss = ls.get("miss", {}), A = analyze(Array.isArray(stats) ? stats : [], miss || {});
+  $("#empty").hidden = A.total > 0;
+  const sum = $("#sum"); sum.replaceChildren();
+  const dom = Object.values(A.lv).reduce((s, x) => s + x.mastered, 0) + A.extra.mastered;
+  [[A.total, "respostas salvas"], [pct(A.ok, A.total) + "%", "de acerto"], [A.words, "itens praticados"], [dom, "itens dominados"], [Object.keys(miss || {}).length, "na lista de erros"]].forEach(([v, l]) => { const d = el("div"); d.append(el("b", "", v), el("small", "", l)); sum.append(d); });
+  const lv = $("#lv"); lv.replaceChildren();
+  for (const g of GROUPS) { const x = A.lv[g]; lv.append(row("", g, pct(x.mastered, x.total), `${x.mastered} / ${x.total}`, false, x.seen ? `${x.seen} já praticadas` : "")); }
+  if (A.extra.seen) lv.append(row("", "Outros", pct(A.extra.mastered, A.extra.seen), `${A.extra.mastered} / ${A.extra.seen}`, false, "partículas, contadores e kanji (dominados / praticados)"));
+  const wk = $("#weak"); wk.replaceChildren();
+  if (!A.weak.length) wk.append(el("p", "hint", "Precisa de pelo menos 5 respostas em uma categoria."));
+  A.weak.forEach(w => wk.append(row("", catName(w.id), Math.round(w.p * 100), `${Math.round(w.p * 100)}% · ${w.n}`, w.p < 0.6)));
+  const dy = $("#days"); dy.replaceChildren();
+  if (!A.days.length) dy.append(el("p", "hint", "Sem histórico ainda."));
+  A.days.forEach(d => dy.append(row("dd", fdate(d.data), pct(d.ok, d.n), `${pct(d.ok, d.n)}% · ${d.n}`, pct(d.ok, d.n) < 60, Object.entries(d.acts).map(([a, n]) => `${ACT[a] || a} ${n}`).join(" · "))));
+  const gm = $("#gram"); gm.replaceChildren();
+  const gdone = [["basico", "Gramática básica"], ["intermediario", "Gramática intermediária"], ["avancado", "Gramática avançada"]]
+    .map(([id, n]) => [n, ls.get("kd-gram-quiz-best:" + id, null)]).filter(([, b]) => typeof b === "number");
+  if (!gdone.length) gm.append(el("p", "hint", "Faça a prova de um nível, na página Gramática, para ver sua nota aqui."));
+  gdone.forEach(([n, b]) => gm.append(row("", n + " – concluída", b, `melhor nota ${b}%`, b < 60)));
+  const lt = $("#leit"); lt.replaceChildren();
+  const ldone = ls.get("kd-leitura-done", {}), lread = (typeof READING !== "undefined" ? READING : []).filter(t => ldone && ldone[t.id] && typeof ldone[t.id].best === "number");
+  if (!lread.length) lt.append(el("p", "hint", "Termine as perguntas de um texto, na página Leitura, para ver sua nota aqui."));
+  else lt.append(el("p", "hint", `${lread.length} de ${READING.length} textos lidos`));
+  lread.forEach(t => { const d = ldone[t.id], tot = d.total || 1, ti = String(t.title).replace(/\{([^|}]+)\|[^}]+\}/g, "$1"); lt.append(row("", ti + " – " + t.titlePt, pct(d.best, tot), `melhor nota ${d.best}/${tot}`, pct(d.best, tot) < 60)); });
+  const rc = $("#recs"); rc.replaceChildren();
+  const bests = lsKeys().filter(k => k.startsWith("best:")).sort();
+  const shown = bests.filter(k => ls.get(k, 0) > 0);
+  if (!shown.length) rc.append(el("p", "hint", "Nenhum recorde ainda."));
+  shown.forEach(k => { const d = el("div", "rec"); d.append(el("b", "", String(ls.get(k, 0))), el("small", "", bestName(k))); rc.append(d); });
+}
+
+$("#reset").onclick = () => {
+  if (!confirm("Zerar TUDO: o histórico, a lista de palavras erradas, os recordes, as notas das provas de gramática, os tópicos de gramática marcados como estudados e os textos de leitura lidos? Suas preferências ficam. Isso não pode ser desfeito. Se quiser guardar uma cópia, cancele e use “Exportar progresso” antes.")) return;
+  try { ["stats", "miss", "kd-gram-done", "kd-leitura-done", ...lsKeys().filter(k => k.startsWith("best:") || k.startsWith("kd-gram-quiz-"))].forEach(k => localStorage.removeItem(k)); } catch {}
+  $("#msg").textContent = "Progresso zerado."; render();
+};
+
+/* ===== Backup: exportar e importar (importar SUBSTITUI) ===== */
+const BK_APP = "ayumi", BK_VER = 1, BK_MAX = 5000;
+const bkAllowed = k => k === "stats" || k === "miss" || k.startsWith("best:") || (k.startsWith("kd-") && k !== "kd-voice-note");
+const isObj = v => v && typeof v === "object" && !Array.isArray(v);
+function bkCheck(k, raw) {
+  if (typeof raw !== "string") return "valor não é texto";
+  let v; try { v = JSON.parse(raw); } catch { return "valor inválido"; }
+  if (k === "stats") {
+    if (!Array.isArray(v)) return "histórico inválido";
+    if (v.length > BK_MAX) return "histórico com mais de " + BK_MAX + " respostas";
+    if (v.some(r => !isObj(r) || typeof r.chave !== "string" || typeof r.acertou !== "boolean")) return "histórico com registros inválidos";
+  } else if (k === "miss") {
+    if (!isObj(v) || Object.values(v).some(n => !Number.isInteger(n) || n < 0 || n > 5)) return "lista de erros inválida";
+  } else if (k.startsWith("best:")) {
+    if (typeof v !== "number" || !isFinite(v)) return "recorde inválido";
+  } else if (k === "kd-gram-done") {
+    if (!Array.isArray(v) || v.some(x => typeof x !== "string")) return "tópicos estudados inválidos";
+  } else if (k.startsWith("kd-gram-quiz-best:")) {
+    if (typeof v !== "number") return "nota de prova inválida";
+  } else if (k.startsWith("kd-gram-quiz-seen:")) {
+    if (!Array.isArray(v) || v.some(x => typeof x !== "string")) return "prova inválida";
+  } else if (k === "kd-corpo-vista") {
+    if (!["corpo", "rosto", "orgaos", "tudo"].includes(v)) return "vista do Karada Meguri inválida";
+  } else if (k === "kd-corpo-modo") {
+    if (!["escolher", "digitar", "tocar"].includes(v)) return "modo do Karada Meguri inválido";
+  } else if (k === "kd-corpo-furi") {
+    if (typeof v !== "boolean") return "furigana do Karada Meguri inválido";
+  } else if (k === "kd-kurashi-vista") {
+    if (!["casa", "moveis", "cozinha", "banheiro", "objetos", "tudo"].includes(v)) return "vista do Kurashi Meguri inválida";
+  } else if (k === "kd-kurashi-modo") {
+    if (!["escolher", "digitar", "tocar"].includes(v)) return "modo do Kurashi Meguri inválido";
+  } else if (k === "kd-kurashi-furi") {
+    if (typeof v !== "boolean") return "furigana do Kurashi Meguri inválido";
+  } else if (k === "kd-numeros-modo") {
+    if (!["ja", "num", "ouvir"].includes(v)) return "modo do 数を書こう inválido";
+  } else if (k === "kd-numeros-nivel") {
+    if (![1, 2, 3, 4, 5, 6].includes(v)) return "faixa do 数を書こう inválida";
+  } else if (k === "kd-numeros-furi") {
+    if (typeof v !== "boolean") return "leitura do 数を書こう inválida";
+  } else if (k === "kd-relogio-nivel") {
+    if (![1, 2, 3, 4, 5].includes(v)) return "nível do 時計の練習 inválido";
+  } else if (k === "kd-relogio-furi") {
+    if (typeof v !== "boolean") return "leitura do 時計の練習 inválida";
+  } else if (k === "kd-kotonoha-level") {
+    if (!["facil", "medio", "dificil"].includes(v)) return "nível do Kotonoha inválido";
+  } else if (k === "kd-kotonoha-modo") {
+    if (!["classico", "ochiba"].includes(v)) return "modo do Kotonoha inválido";
+  } else if (k === "kd-kotonoha-min") {
+    if (![2, 3, 4].includes(v)) return "tamanho mínimo do Kotonoha inválido";
+  } else if (k === "kd-kotonoha-seed") {
+    if (!Number.isInteger(v) || v < 0 || v > 1e9) return "semente do Kotonoha inválida";
+  } else if (k === "kd-leitura-done") {
+    if (!isObj(v) || Object.values(v).some(d => !isObj(d) || typeof d.best !== "number")) return "leituras inválidas";
+  }
+  return "";
+}
+function bkSnapshot() {
+  const d = {};
+  try { for (const k of lsKeys()) if (bkAllowed(k)) { const v = localStorage.getItem(k); if (v !== null) d[k] = v; } } catch {}
+  return d;
+}
+function bkMsg(t, bad) { const m = $("#bmsg"); m.textContent = t; m.classList.toggle("bad", !!bad); }
+$("#exp").onclick = () => {
+  const data = bkSnapshot();
+  const out = { app: BK_APP, version: BK_VER, exportedAt: new Date().toISOString(), data };
+  const txt = JSON.stringify(out, null, 1), d = new Date(), pad = n => String(n).padStart(2, "0");
+  const name = `ayumi-progresso-${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}.json`;
+  try {
+    const url = URL.createObjectURL(new Blob([txt], { type: "application/json" }));
+    const a = document.createElement("a"); a.href = url; a.download = name; document.body.append(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 2000);
+    bkMsg(`Arquivo ${name} gerado (${Object.keys(data).length} itens).`);
+  } catch { bkMsg("Não foi possível baixar o arquivo neste navegador.", true); }
+};
+let bkPending = null;
+$("#imp").onclick = () => { $("#impfile").value = ""; $("#impfile").click(); };
+$("#impno").onclick = () => { bkPending = null; $("#impbox").hidden = true; bkMsg("Importação cancelada."); };
+$("#impfile").onchange = async e => {
+  bkPending = null; $("#impbox").hidden = true; bkMsg("");
+  const f = e.target.files && e.target.files[0]; e.target.value = ""; if (!f) return;
+  if (f.size > 20 * 1024 * 1024) return bkMsg("Arquivo grande demais para ser um backup do Ayumi.", true);
+  let o; try { o = JSON.parse(await f.text()); } catch { return bkMsg("Esse arquivo não é um JSON válido.", true); }
+  if (!isObj(o) || o.app !== BK_APP) return bkMsg("Esse arquivo não é um backup do Ayumi.", true);
+  if (!Number.isInteger(o.version) || o.version > BK_VER) return bkMsg("Backup de uma versão mais nova que esta página. Atualize o app e tente de novo.", true);
+  if (!isObj(o.data)) return bkMsg("Backup sem dados.", true);
+  const keys = Object.keys(o.data);
+  for (const k of keys) {
+    if (!bkAllowed(k)) return bkMsg(`Chave não reconhecida no arquivo: ${k.slice(0, 40)}.`, true);
+    const why = bkCheck(k, o.data[k]); if (why) return bkMsg(`Backup recusado (${k.slice(0, 40)}): ${why}.`, true);
+  }
+  if (!keys.length) return bkMsg("O backup está vazio.", true);
+  const j = k => JSON.parse(o.data[k]), n = fn => keys.filter(fn).length;
+  const st = o.data.stats ? j("stats").length : 0, ms = o.data.miss ? Object.keys(j("miss")).length : 0;
+  const ld = o.data["kd-leitura-done"] ? Object.keys(j("kd-leitura-done")).length : 0;
+  const gd = o.data["kd-gram-done"] ? j("kd-gram-done").length : 0;
+  const when = o.exportedAt && !isNaN(Date.parse(o.exportedAt)) ? new Date(o.exportedAt).toLocaleString("pt-BR") : "data desconhecida";
+  const cur = bkSnapshot();
+  bkPending = keys;
+  $("#impsum").textContent = `Backup de ${when}: ${st} respostas no histórico, ${ms} palavras na lista de erros, ${n(k => k.startsWith("best:"))} recordes, ${n(k => k.startsWith("kd-gram-quiz-best:"))} provas de gramática concluídas, ${gd} tópicos estudados, ${ld} textos lidos e ${n(k => k.startsWith("kd-") && !k.startsWith("kd-gram-") && k !== "kd-leitura-done")} preferências. Ao confirmar, TUDO o que está salvo neste aparelho (${Object.keys(cur).length} itens) será substituído por isso. Não dá para desfazer.`;
+  $("#impbox").hidden = false; bkFile = o;
+};
+let bkFile = null;
+$("#impok").onclick = () => {
+  if (!bkPending || !bkFile) return;
+  const old = bkSnapshot(), data = bkFile.data;
+  try {
+    for (const k of Object.keys(old)) localStorage.removeItem(k);
+    for (const k of bkPending) localStorage.setItem(k, data[k]);
+  } catch {
+    try { for (const k of bkPending) localStorage.removeItem(k); for (const k of Object.keys(old)) localStorage.setItem(k, old[k]); } catch {}
+    bkPending = null; bkFile = null; $("#impbox").hidden = true;
+    return bkMsg("Não foi possível gravar (armazenamento cheio ou bloqueado). Seu progresso anterior foi mantido.", true);
+  }
+  const n = bkPending.length; bkPending = null; bkFile = null; $("#impbox").hidden = true;
+  bkMsg(`Progresso importado (${n} itens).`); render();
+};
+
+render();
+</script>
+</body>
+</html>

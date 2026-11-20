@@ -1,0 +1,481 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Leitura – Ayumi</title>
+<link rel="stylesheet" href="style.css">
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#1d2742">
+<link rel="icon" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<script src="pwa.js" defer></script>
+<script src="tts.js"></script>
+<style>
+a{color:inherit}
+a.cat{display:block;text-decoration:none}
+a.cat small{display:block}
+.empty{color:var(--muted)}
+.settings label{display:inline-flex;gap:8px;align-items:center}
+.settings select,.vox select{font:inherit;max-width:100%;padding:6px 8px;border:1.5px solid var(--line);border-radius:8px;background:var(--card);color:var(--ink)}
+#items{margin-top:14px}
+.dif{letter-spacing:.12em}
+.rd-meta{color:var(--muted);font-size:.9rem;margin:2px 0}
+#rtitle{font-size:1.5rem;margin:.6em 0 .1em}
+#rtitle:focus-visible{outline:3px solid var(--stamp);outline-offset:2px}
+.rd-tools{margin:12px 0}
+.rd-tools .ghost[aria-pressed=true]{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.vox{margin:8px 0 4px}
+.vox summary{cursor:pointer;color:var(--muted)}
+.vox label{display:flex;flex-wrap:wrap;gap:6px 10px;align-items:center;margin:8px 0}
+.vox p{margin:6px 0}
+#text{margin:10px 0}
+.para{display:grid;grid-template-columns:1fr auto;gap:2px 10px;align-items:start;background:var(--card);border:1.5px solid var(--line);border-radius:8px;padding:10px 14px;margin:10px 0}
+.para .jp{font-size:1.3rem;line-height:2.1}
+.para .who{grid-column:1/-1;font-size:.85rem;color:var(--muted)}
+.para .who b{color:var(--ink)}
+.para .tr{grid-column:1/-1;display:none;color:var(--muted);font-size:.95rem;margin-top:2px}
+.para .trs{grid-column:1/-1;color:var(--muted);font-size:.95rem}
+.para .trs div{margin-top:4px;padding:4px 0 4px 10px;border-left:3px solid var(--stamp)}
+.sn{cursor:pointer;border-radius:4px}
+.sn:hover{background:var(--line)}
+.sn.open{box-shadow:inset 0 -3px 0 var(--stamp)}
+.sn:focus-visible{outline:2px solid var(--stamp);outline-offset:1px}
+.showtr .para .tr{display:block}
+.para .sp{padding:6px 10px}
+.para.now{border-color:var(--stamp);box-shadow:0 0 0 2px var(--stamp)}
+.ln.sp0{border-left:5px solid var(--stamp)}
+.ln.sp1{border-left:5px solid var(--ok)}
+.nofuri rt{display:none}
+#wlist .w{display:grid;grid-template-columns:auto 1fr;gap:2px 14px;padding:6px 0;border-bottom:1px solid var(--line)}
+#wlist .w b{font-size:1.1rem}
+#wlist .w span{color:var(--muted)}
+.gq-bar{height:8px;background:var(--line);border-radius:4px;overflow:hidden;margin:6px 0 14px}
+.gq-bar i{display:block;height:100%;width:0;background:var(--ok)}
+#qa h2,#res h2{margin-top:1.4em}
+.gq-q{text-align:left;font-size:1.2rem;line-height:1.9;padding:18px 16px}
+.gq-q:focus-visible,#final:focus-visible{outline:3px solid var(--stamp);outline-offset:2px}
+#qopts{grid-template-columns:1fr}
+.opt.gq-opt{display:flex;gap:12px;align-items:baseline;text-align:left;font-size:1.05rem;line-height:1.7}
+.gq-k{flex:none;min-width:1.6em;text-align:center;border:1.5px solid var(--line);border-radius:5px;font-size:.8rem;color:var(--muted)}
+.gq-why{margin-top:6px;color:var(--muted)}
+.gq-bad{color:var(--bad)}
+.gq-good{color:var(--ok)}
+.gq-rq{font-size:1.05rem;margin:6px 0;line-height:1.8}
+.gt-note{color:var(--muted);font-size:.9rem;margin-top:4px}
+@media (prefers-reduced-motion:no-preference){.gq-bar i{transition:width .25s}}
+</style>
+</head>
+<body>
+<header>
+  <h1><span lang="ja">読解</span> Leitura</h1>
+  <p>Histórias e diálogos em japonês, com perguntas de compreensão. · <a href="index.html">← Ayumi</a></p>
+</header>
+
+<main>
+  <section id="list">
+    <div class="settings">
+      <label>Tipo
+        <select id="f-kind">
+          <option value="">Todos</option>
+          <option value="historia">Histórias</option>
+          <option value="dialogo">Diálogos</option>
+        </select>
+      </label>
+      <label>Dificuldade
+        <select id="f-diff">
+          <option value="">Todas</option>
+          <option value="1">★☆☆ Simples</option>
+          <option value="2">★★☆ Média</option>
+          <option value="3">★★★ Complexa</option>
+        </select>
+      </label>
+    </div>
+    <p id="list-info" class="empty" aria-live="polite"></p>
+    <div id="items" class="cats"></div>
+  </section>
+
+  <section id="reader" hidden>
+    <div class="top">
+      <button id="back" type="button" class="ghost">← Lista</button>
+      <span id="rmeta" class="rd-meta"></span>
+    </div>
+    <h2 id="rtitle" tabindex="-1"></h2>
+    <p id="rsub" class="rd-meta"></p>
+    <p id="rintro" class="rd-meta"></p>
+
+    <div class="row rd-tools">
+      <button id="furi" type="button" class="ghost" aria-pressed="true">Furigana: sim</button>
+      <button id="playall" type="button" class="ghost">🔊 Ouvir tudo</button>
+      <button id="trbtn" type="button" class="ghost" aria-pressed="false" hidden>Tradução: não</button>
+    </div>
+    <p id="hint" class="rd-meta">Toque numa frase para ver a tradução dela.</p>
+    <p id="audio-note" class="rd-meta" hidden>Seu navegador não tem voz de japonês ou não oferece áudio. A leitura funciona normalmente, só sem som.</p>
+
+    <details id="voxbox" class="vox" hidden>
+      <summary>Vozes dos personagens</summary>
+      <div id="voxlist"></div>
+    </details>
+
+    <div id="text"></div>
+
+    <details id="words" class="grp" hidden>
+      <summary>Palavras novas</summary>
+      <div id="wlist"></div>
+    </details>
+    <p id="topics" class="rd-meta"></p>
+
+    <section id="qa">
+      <h2>Perguntas</h2>
+      <div class="top">
+        <span id="qn"></span>
+        <span id="score"></span>
+      </div>
+      <div class="gq-bar" id="barwrap" role="progressbar" aria-label="Progresso das perguntas" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><i id="bar"></i></div>
+      <div id="qtext" class="card gq-q" tabindex="-1"></div>
+      <div id="qopts" class="opts" role="group" aria-label="Alternativas"></div>
+      <p id="feedback" class="feedback" aria-live="polite"></p>
+      <button id="next" type="button" class="primary" hidden>Próxima</button>
+    </section>
+
+    <section id="res" hidden>
+      <h2 id="final" tabindex="-1"></h2>
+      <p id="best"></p>
+      <div id="review"></div>
+      <div class="row">
+        <button id="again" type="button" class="primary">Refazer as perguntas</button>
+        <button id="tohome" type="button" class="ghost">Voltar à lista</button>
+      </div>
+    </section>
+  </section>
+</main>
+
+<footer>Atalhos: teclas 1 a 4 para responder. O áudio usa as vozes do seu navegador; em geral há mais de uma voz de japonês no Edge, no Windows e em aparelhos Apple e Android. Toque numa frase para ver a tradução dela. A tradução do texto inteiro só aparece depois que você responde às perguntas. O site guarda sua melhor nota de cada texto neste navegador.</footer>
+
+<script src="data/grammar.js"></script>
+<script src="data/reading.js"></script>
+<script>
+(function(){
+"use strict";
+var $=function(id){return document.getElementById(id)};
+var TEXTS=(typeof READING!=="undefined"&&READING)||[];
+var KIND={historia:"História",dialogo:"Diálogo"};
+var DIF={1:"Simples",2:"Média",3:"Complexa"};
+var S={t:null,qs:[],i:0,right:0,wrong:[],answered:false,done:false};
+
+function esc(s){return String(s).replace(/[&<>"]/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})}
+function fmt(s){return esc(s).replace(/\{([^|}]+)\|([^}]+)\}/g,"<ruby>$1<rt>$2</rt></ruby>").replace(/\*\*(.+?)\*\*/g,"<b>$1</b>")}
+function lsGet(k){try{return JSON.parse(localStorage.getItem(k))}catch(e){return null}}
+function lsSet(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}
+function stars(n){return "★★★".slice(0,n)+"☆☆☆".slice(0,3-n)}
+function find(id){for(var i=0;i<TEXTS.length;i++)if(TEXTS[i].id===id)return TEXTS[i];return null}
+function doneMap(){var v=lsGet("kd-leitura-done");return (v&&typeof v==="object"&&!Array.isArray(v))?v:{}}
+function topicTitle(id){
+  if(typeof GRAMMAR==="undefined")return id;
+  for(var g=0;g<GRAMMAR.length;g++)for(var i=0;i<GRAMMAR[g].topics.length;i++)if(GRAMMAR[g].topics[i].id===id)return GRAMMAR[g].topics[i].title;
+  return id;
+}
+function plain(s){return String(s).replace(/\{[^|}]+\|([^}]+)\}/g,"$1")}
+function sentHTML(src,i){
+  return splitSentences(src).map(function(x,j){
+    return '<span class="sn" role="button" tabindex="0" aria-expanded="false" data-i="'+i+'" data-s="'+j+'">'+fmt(x)+'</span>';
+  }).join("");
+}
+
+/* ---------- áudio ---------- */
+var HAS_TTS=AyumiTTS.supported();
+var JV=[],gen=0,nowEl=null;
+function loadVoices(){
+  if(!HAS_TTS){JV=[];return}
+  JV=AyumiTTS.voices().slice();
+}
+function spoken(s){
+  return plain(s).replace(/\*\*/g,"").replace(/……/g,"、").replace(/[\s「」]/g,"");
+}
+function voiceFor(si){
+  var saved=lsGet("kd-leitura-voz-"+si);
+  if(typeof saved==="string"&&saved){
+    for(var i=0;i<JV.length;i++)if(JV[i].name===saved)return {v:JV[i],auto:false};
+  }
+  if(JV.length>=2)return {v:JV[si%JV.length],auto:true};
+  return {v:JV[0]||null,auto:true};
+}
+function mark(el){
+  if(nowEl)nowEl.classList.remove("now");
+  nowEl=el||null;
+  if(nowEl)nowEl.classList.add("now");
+}
+function setPlaying(on){
+  $("playall").textContent=on?"⏹ Parar":"🔊 Ouvir tudo";
+  $("playall").setAttribute("aria-pressed",on?"true":"false");
+}
+function stopSpeech(){
+  gen++;
+  AyumiTTS.cancel();
+  mark(null);setPlaying(false);
+}
+function speakList(list,isAll){
+  if(!HAS_TTS)return;
+  stopSpeech();
+  var my=gen,i=0;
+  if(isAll)setPlaying(true);
+  (function next(){
+    if(my!==gen)return;
+    if(i>=list.length){mark(null);setPlaying(false);return}
+    var it=list[i++];
+    mark(it.el);
+    var vf=voiceFor(it.si),o={rate:0.9};
+    if(vf.v)o.voice=vf.v;
+    if(vf.auto&&JV.length<2&&S.t&&S.t.kind==="dialogo")o.pitch=(it.si===1)?1.35:0.8;
+    o.onend=next;
+    o.onerror=function(){if(my===gen)next()};
+    AyumiTTS.speak(it.text,o);
+  })();
+}
+function items(){
+  var t=S.t,out=[],els=$("text").querySelectorAll(".para");
+  for(var i=0;i<t.body.length;i++){
+    var b=t.body[i];
+    out.push(t.kind==="dialogo"?{text:spoken(b[1]),si:b[0],el:els[i]}:{text:spoken(b),si:0,el:els[i]});
+  }
+  return out;
+}
+function refreshVoiceUI(){
+  var t=S.t;
+  if(!t)return;
+  var note=$("audio-note");
+  note.hidden=HAS_TTS&&JV.length>0;
+  $("playall").hidden=!HAS_TTS;
+  var box=$("voxbox");
+  if(t.kind!=="dialogo"||!HAS_TTS||!JV.length){box.hidden=true;return}
+  box.hidden=false;
+  var h="";
+  t.speakers.forEach(function(sp,si){
+    var saved=lsGet("kd-leitura-voz-"+si);
+    var opts='<option value="">Automática</option>'+JV.map(function(v){
+      return '<option value="'+esc(v.name)+'"'+(v.name===saved?" selected":"")+'>'+esc(v.name)+'</option>';
+    }).join("");
+    h+='<label><span>Voz de '+esc(sp.pt)+' (<span lang="ja">'+fmt(sp.name)+'</span>)</span><select data-sp="'+si+'" aria-label="Voz de '+esc(sp.pt)+'">'+opts+'</select></label>';
+  });
+  if(JV.length<2)h+='<p class="gt-note">Só há uma voz de japonês neste aparelho; os personagens se diferenciam pelo tom de voz, quando o navegador permite.</p>';
+  $("voxlist").innerHTML=h;
+}
+
+/* ---------- lista ---------- */
+function showList(){
+  stopSpeech();
+  S.t=null;
+  $("reader").hidden=true;$("list").hidden=false;
+  document.title="Leitura – Ayumi";
+  var k=$("f-kind").value,d=$("f-diff").value,dm=doneMap(),h="",n=0;
+  TEXTS.forEach(function(t){
+    if(k&&t.kind!==k)return;
+    if(d&&String(t.difficulty)!==d)return;
+    n++;
+    var r=dm[t.id],st=(r&&typeof r.best==="number")?"✓ lido · melhor nota "+r.best+"/"+r.total:"Ainda não lido";
+    h+='<a class="cat" href="#'+esc(t.id)+'"><b lang="ja">'+fmt(t.title)+'</b><small>'+esc(t.titlePt)+'</small><small>'+KIND[t.kind]+' · <span class="dif" role="img" aria-label="Dificuldade '+DIF[t.difficulty]+'">'+stars(t.difficulty)+'</span></small><small>'+st+'</small></a>';
+  });
+  $("items").innerHTML=h;
+  $("list-info").textContent=n?(n+(n===1?" texto":" textos")+". Escolha um para ler."):"Nenhum texto com esse filtro.";
+}
+
+/* ---------- leitor ---------- */
+function openText(t){
+  stopSpeech();
+  S.t=t;S.done=false;
+  $("list").hidden=true;$("reader").hidden=false;
+  document.title=plain(t.title)+" – Leitura – Ayumi";
+  $("rtitle").innerHTML=fmt(t.title);
+  $("rtitle").setAttribute("lang","ja");
+  $("rsub").textContent=t.titlePt;
+  $("rintro").textContent=t.intro||"";
+  $("rmeta").innerHTML=KIND[t.kind]+' · <span class="dif" role="img" aria-label="Dificuldade '+DIF[t.difficulty]+'">'+stars(t.difficulty)+'</span> '+DIF[t.difficulty];
+  var h="";
+  t.body.forEach(function(b,i){
+    if(t.kind==="dialogo"){
+      var sp=t.speakers[b[0]];
+      h+='<div class="para ln sp'+b[0]+'" data-i="'+i+'"><div class="who"><b lang="ja">'+fmt(sp.name)+'</b> · '+esc(sp.pt)+'</div><div class="jp" lang="ja">'+sentHTML(b[1],i)+'</div><button type="button" class="ghost sp" data-play="'+i+'" aria-label="Ouvir a fala '+(i+1)+'">🔊</button><div class="trs" aria-live="polite"></div><div class="tr">'+esc(t.tr[i].join(" "))+'</div></div>';
+    }else{
+      h+='<div class="para" data-i="'+i+'"><div class="jp" lang="ja">'+sentHTML(b,i)+'</div><button type="button" class="ghost sp" data-play="'+i+'" aria-label="Ouvir o parágrafo '+(i+1)+'">🔊</button><div class="trs" aria-live="polite"></div><div class="tr">'+esc(t.tr[i].join(" "))+'</div></div>';
+    }
+  });
+  $("text").innerHTML=h;
+  $("text").classList.remove("showtr");
+  $("wlist").innerHTML=(t.words||[]).map(function(w){return '<div class="w"><b lang="ja">'+esc(w[0])+'</b><span><span lang="ja">'+esc(w[1])+'</span> · '+esc(w[2])+'</span></div>'}).join("");
+  $("words").hidden=!(t.words&&t.words.length);
+  $("words").open=false;
+  $("topics").innerHTML=(t.topics&&t.topics.length)?('Gramática relacionada: '+t.topics.map(function(id){return '<a href="grammar.html#t-'+esc(id)+'">'+esc(plain(topicTitle(id)))+'</a>'}).join(", ")+'.'):"";
+  var seen=doneMap()[t.id];
+  var canTr=!!(seen&&typeof seen.best==="number");
+  $("trbtn").hidden=!canTr;
+  setTr(false);
+  refreshVoiceUI();
+  startQuiz();
+  window.scrollTo(0,0);
+  $("rtitle").focus();
+}
+function setTr(on){
+  $("text").classList.toggle("showtr",on);
+  $("trbtn").setAttribute("aria-pressed",on?"true":"false");
+  $("trbtn").textContent="Tradução: "+(on?"sim":"não");
+}
+function applyFuri(){
+  var on=lsGet("kd-leitura-furigana");
+  on=(on===null)?true:!!on;
+  document.body.classList.toggle("nofuri",!on);
+  $("furi").setAttribute("aria-pressed",on?"true":"false");
+  $("furi").textContent="Furigana: "+(on?"sim":"não");
+}
+
+/* ---------- perguntas ---------- */
+function shuffle(a){for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1)),x=a[i];a[i]=a[j];a[j]=x}return a}
+function prepQ(q){
+  var idx=shuffle([0,1,2,3].slice(0,q.opts.length));
+  return {q:q.q,why:q.why,opts:idx.map(function(i){return q.opts[i]}),ans:idx.indexOf(q.ans)};
+}
+function startQuiz(){
+  var t=S.t;
+  S.qs=t.q.map(prepQ);S.i=0;S.right=0;S.wrong=[];S.answered=false;
+  $("qa").hidden=false;$("res").hidden=true;
+  question(false);
+}
+function question(focus){
+  var n=S.qs.length,q=S.qs[S.i];
+  S.answered=false;
+  $("qn").textContent="Pergunta "+(S.i+1)+" de "+n;
+  $("score").textContent="Acertos: "+S.right;
+  var pct=Math.round(S.i/n*100);
+  $("bar").style.width=pct+"%";
+  $("barwrap").setAttribute("aria-valuenow",String(pct));
+  $("qtext").innerHTML=fmt(q.q);
+  $("qopts").innerHTML=q.opts.map(function(o,i){
+    return '<button type="button" class="opt gq-opt" data-i="'+i+'"><span class="gq-k" aria-hidden="true">'+(i+1)+'</span><span>'+fmt(o)+'</span></button>';
+  }).join("");
+  $("feedback").innerHTML="";
+  $("next").hidden=true;
+  if(focus)$("qtext").focus();
+}
+function answer(i){
+  if(S.answered||!S.t||$("qa").hidden)return;
+  var q=S.qs[S.i];
+  if(i<0||i>=q.opts.length)return;
+  S.answered=true;
+  var ok=(i===q.ans),btns=$("qopts").querySelectorAll("button");
+  for(var k=0;k<btns.length;k++){
+    btns[k].disabled=true;
+    if(k===q.ans)btns[k].classList.add("ok");
+    else if(k===i)btns[k].classList.add("bad");
+  }
+  if(ok)S.right++;else S.wrong.push({q:q,chosen:i});
+  $("score").textContent="Acertos: "+S.right;
+  $("feedback").innerHTML=(ok?'<b class="gq-good">Certo!</b>':'<b class="gq-bad">Errado.</b> A resposta certa é a '+(q.ans+1)+'.')+'<div class="gq-why">'+fmt(q.why)+'</div>';
+  $("next").textContent=(S.i+1>=S.qs.length)?"Ver resultado":"Próxima";
+  $("next").hidden=false;
+  $("next").focus();
+}
+function next(){
+  if(!S.answered)return;
+  if(S.i+1>=S.qs.length){finish();return}
+  S.i++;question(true);
+}
+function finish(){
+  var t=S.t,n=S.qs.length;
+  S.done=true;
+  $("bar").style.width="100%";
+  $("barwrap").setAttribute("aria-valuenow","100");
+  var dm=doneMap(),prev=dm[t.id],best=S.right;
+  if(prev&&typeof prev.best==="number"&&prev.total===n&&prev.best>best)best=prev.best;
+  dm[t.id]={best:best,total:n};
+  lsSet("kd-leitura-done",dm);
+  $("qa").hidden=true;$("res").hidden=false;
+  $("final").textContent="Você acertou "+S.right+" de "+n+".";
+  $("best").textContent="Melhor nota neste texto: "+best+" de "+n+". A tradução já está liberada no botão acima do texto.";
+  $("review").innerHTML=S.wrong.length?('<h2>Para revisar</h2>'+S.wrong.map(function(w){
+    return '<div class="rev-item"><div class="gq-rq">'+fmt(w.q.q)+'</div><div class="gq-bad">Sua resposta: '+fmt(w.q.opts[w.chosen])+'</div><div class="gq-good">Certa: '+fmt(w.q.opts[w.q.ans])+'</div><div class="gq-why">'+fmt(w.q.why)+'</div></div>';
+  }).join("")):'<p class="gq-good"><b>Todas certas!</b></p>';
+  $("trbtn").hidden=false;
+  $("final").focus();
+}
+
+/* ---------- eventos ---------- */
+function route(){
+  var id=decodeURIComponent((location.hash||"").replace(/^#/,""));
+  var t=id?find(id):null;
+  if(t)openText(t);else showList();
+}
+$("f-kind").addEventListener("change",showList);
+$("f-diff").addEventListener("change",showList);
+window.addEventListener("hashchange",route);
+$("back").addEventListener("click",function(){stopSpeech();location.hash=""; if(!location.hash)route()});
+$("tohome").addEventListener("click",function(){stopSpeech();location.hash="";if(!location.hash)route()});
+$("furi").addEventListener("click",function(){
+  var on=document.body.classList.contains("nofuri");
+  lsSet("kd-leitura-furigana",on);applyFuri();
+});
+$("trbtn").addEventListener("click",function(){setTr(!$("text").classList.contains("showtr"))});
+$("playall").addEventListener("click",function(){
+  if(!S.t)return;
+  if($("playall").getAttribute("aria-pressed")==="true"){stopSpeech();return}
+  speakList(items(),true);
+});
+$("text").addEventListener("click",function(e){
+  var b=e.target.closest?e.target.closest("button[data-play]"):null;
+  if(!b||!S.t)return;
+  var it=items()[Number(b.getAttribute("data-play"))];
+  if(it)speakList([it],false);
+});
+function toggleSentence(el){
+  if(!el||!S.t)return;
+  var open=el.classList.toggle("open");
+  el.setAttribute("aria-expanded",open?"true":"false");
+  var para=el.closest(".para"),i=Number(el.getAttribute("data-i")),box=para.querySelector(".trs"),h="";
+  var sn=para.querySelectorAll(".sn");
+  for(var k=0;k<sn.length;k++){
+    if(sn[k].classList.contains("open")){
+      var tr=S.t.tr[i][Number(sn[k].getAttribute("data-s"))];
+      h+="<div>"+esc(tr)+"</div>";
+    }
+  }
+  box.innerHTML=h;
+}
+$("text").addEventListener("click",function(e){
+  var el=e.target.closest?e.target.closest(".sn"):null;
+  if(el)toggleSentence(el);
+});
+$("text").addEventListener("keydown",function(e){
+  var el=e.target;
+  if(el&&el.classList&&el.classList.contains("sn")&&(e.key==="Enter"||e.key===" ")){e.preventDefault();toggleSentence(el)}
+});
+$("voxlist").addEventListener("change",function(e){
+  var s=e.target;
+  if(!s||s.tagName!=="SELECT")return;
+  lsSet("kd-leitura-voz-"+s.getAttribute("data-sp"),s.value);
+});
+$("qopts").addEventListener("click",function(e){
+  var b=e.target.closest?e.target.closest("button[data-i]"):null;
+  if(b)answer(Number(b.getAttribute("data-i")));
+});
+$("next").addEventListener("click",next);
+$("again").addEventListener("click",function(){startQuiz();$("qa").scrollIntoView();$("qtext").focus()});
+document.addEventListener("keydown",function(e){
+  if(e.ctrlKey||e.metaKey||e.altKey)return;
+  var tg=e.target&&e.target.tagName;
+  if(tg==="SELECT"||tg==="INPUT"||tg==="TEXTAREA")return;
+  if(!S.t||$("qa").hidden)return;
+  if(/^[1-4]$/.test(e.key)&&!S.answered){answer(Number(e.key)-1)}
+});
+window.addEventListener("pagehide",stopSpeech);
+
+if(HAS_TTS){
+  loadVoices();
+  var onv=function(){loadVoices();refreshVoiceUI()};
+  AyumiTTS.onVoices(onv);
+}
+applyFuri();
+route();
+})();
+</script>
+</body>
+</html>

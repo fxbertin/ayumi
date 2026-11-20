@@ -1,0 +1,205 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Gramática – Ayumi</title>
+<link rel="stylesheet" href="style.css">
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#1d2742">
+<link rel="icon" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<script src="pwa.js" defer></script>
+<script src="tts.js"></script>
+<style>
+a{color:inherit}
+.gt{background:var(--card);border:1.5px solid var(--line);border-radius:8px;margin:8px 0}
+.gt>summary{cursor:pointer;padding:12px 14px;display:grid;grid-template-columns:1fr auto;gap:2px 10px;align-items:center;list-style:none}
+.gt>summary::-webkit-details-marker{display:none}
+.gt>summary:focus-visible{outline:3px solid var(--stamp);outline-offset:2px}
+.gt-t{font-weight:700;font-size:1.05rem}
+.gt-t::before{content:"▸ ";color:var(--muted)}
+.gt[open] .gt-t::before{content:"▾ "}
+.gt-s{grid-column:1;color:var(--muted);font-size:.9rem}
+.gt-ok{grid-column:2;grid-row:1 / span 2;color:var(--ok);font-weight:700;min-width:1.2em;text-align:center}
+.gt[open]>summary{border-bottom:1.5px solid var(--line)}
+.gt-body{padding:4px 14px 16px}
+.gt-body h3{font-size:.95rem;margin:1.3em 0 .4em}
+.gt-body ul{margin:.3em 0;padding-left:1.2em}
+.gt-body li{margin:.35em 0}
+.gt-note{color:var(--muted);font-size:.9rem;margin-top:4px}
+.gt .ex{background:var(--paper);margin:8px 0}
+.gt-links{display:flex;flex-wrap:wrap;gap:8px}
+.gt-links a{border:1.5px solid var(--line);border-radius:8px;padding:6px 12px;text-decoration:none}
+.gt-links a:hover{border-color:var(--ink)}
+.kc-t{font-weight:700;margin:1em 0 .3em;font-size:.9rem}
+.kchart{display:grid;gap:4px;margin:4px 0 12px}
+.kc{border:1px solid var(--line);border-radius:6px;padding:4px 2px;text-align:center;background:var(--paper);color:inherit;font:inherit}
+button.kc:hover{border-color:var(--ink)}
+.kc b{display:block;font-size:1.5rem;font-weight:600;line-height:1.2}
+.kc small{display:block;color:var(--muted);font-size:.75rem}
+.kc.e{border:0;background:none}
+.gt .ex-jp{line-height:2}
+.gt ruby rt{font-size:.5em;color:var(--muted)}
+.speak{padding:2px 8px}
+.nospeak .speak{display:none}
+.gt-done{margin-top:16px}
+.tbl-wrap{overflow-x:auto;margin:4px 0 14px}
+.gtbl{border-collapse:collapse;width:100%;min-width:560px}
+.gtbl th,.gtbl td{border:1px solid var(--line);padding:4px 8px;text-align:center;white-space:nowrap;line-height:2}
+.gtbl thead th,.gtbl tbody th{background:var(--paper);font-weight:700}
+.gtbl thead th{font-size:.85rem}
+a.primary{display:inline-block;text-decoration:none}
+.gt-quiz{margin:14px 0 6px;display:flex;flex-wrap:wrap;align-items:center;gap:8px 14px}
+.empty{color:var(--muted)}
+</style>
+</head>
+<body>
+<header>
+  <h1><span lang="ja">文法道場</span> Gramática</h1>
+  <p>Tópicos de gramática por nível, com exemplos. · <a href="index.html">← Ayumi</a></p>
+</header>
+
+<main>
+  <input type="search" id="q" placeholder="Buscar tópico" aria-label="Buscar tópico" autocomplete="off">
+  <div id="list"></div>
+</main>
+
+<footer>Os tópicos marcados como estudados e a melhor nota de cada prova ficam salvos só neste navegador.</footer>
+
+<script src="data/grammar.js"></script>
+<script src="data/grammar-quiz.js"></script>
+<script src="gram-quiz.js"></script>
+<script>
+(function(){
+"use strict";
+var DONE_KEY="kd-gram-done";
+function loadDone(){try{var v=JSON.parse(localStorage.getItem(DONE_KEY)||"[]");return Array.isArray(v)?v:[]}catch(e){return []}}
+function saveDone(a){try{localStorage.setItem(DONE_KEY,JSON.stringify(a))}catch(e){}}
+var done={};loadDone().forEach(function(id){done[id]=true});
+var openIds={};
+var query="";
+
+function esc(s){return String(s).replace(/[&<>"]/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})}
+function fmt(s,hl){return esc(s).replace(/\{([^|}]+)\|([^}]+)\}/g,"<ruby>$1<rt>$2</rt></ruby>").replace(/\*\*(.+?)\*\*/g,hl?'<mark class="hl">$1</mark>':"<b>$1</b>")}
+function plain(s){return String(s).replace(/\*\*/g,"").replace(/\{([^|}]+)\|([^}]+)\}/g,"$2")}
+function norm(s){return String(s).toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"")}
+
+function chartHTML(c){
+  var kata=c.script==="kata";
+  var h='<div class="kc-t">'+esc(c.title)+'</div><div class="kchart" style="grid-template-columns:repeat('+c.cols+',1fr)">';
+  c.rows.forEach(function(row){row.forEach(function(cell){
+    if(!cell){h+='<div class="kc e"></div>';return}
+    var p=cell.split("|");
+    var ch=kata?p[1]:p[0];
+    var say=(!kata&&"はへを".indexOf(p[0])>=0)?p[1]:ch;
+    h+='<button type="button" class="kc" data-say="'+esc(say)+'" aria-label="Ouvir '+esc(ch)+' ('+esc(p[2])+')"><b lang="ja">'+esc(ch)+'</b><small>'+esc(p[2])+'</small></button>';
+  })});
+  return h+'</div>';
+}
+function tableHTML(tb){
+  var h='<div class="kc-t">'+esc(tb.title)+'</div><div class="tbl-wrap"><table class="gtbl" aria-label="'+esc(tb.title)+'"><thead><tr>'
+    +tb.head.map(function(c){return '<th scope="col">'+fmt(c)+'</th>'}).join("")+'</tr></thead><tbody>';
+  tb.rows.forEach(function(r){
+    h+='<tr>'+r.map(function(c,i){return i===0?'<th scope="row" lang="ja">'+fmt(c)+'</th>':'<td lang="ja">'+fmt(c)+'</td>'}).join("")+'</tr>';
+  });
+  return h+'</tbody></table></div>';
+}
+function listHTML(title,items){
+  if(!items||!items.length)return "";
+  return '<h3>'+esc(title)+'</h3><ul>'+items.map(function(s){return '<li>'+fmt(s)+'</li>'}).join("")+'</ul>';
+}
+function topicHTML(t){
+  var h='<details class="gt" id="t-'+esc(t.id)+'" data-id="'+esc(t.id)+'"'+(openIds[t.id]?" open":"")+'>'
+    +'<summary><span class="gt-t">'+fmt(t.title)+'</span><span class="gt-s">'+esc(t.summary)+'</span>'
+    +'<span class="gt-ok" aria-label="Estudado">'+(done[t.id]?"✓":"")+'</span></summary><div class="gt-body">';
+  h+=listHTML("Quando usar",t.use);
+  h+=listHTML("Como formar",t.form);
+  (t.charts||[]).forEach(function(c){h+=chartHTML(c)});
+  (t.tables||[]).forEach(function(tb){h+=tableHTML(tb)});
+  if(t.ex&&t.ex.length){
+    h+='<h3>Exemplos</h3>';
+    t.ex.forEach(function(e,i){
+      var say=plain(e[0]).replace(/\s|[「」]/g,"");
+      h+='<div class="ex"><div class="ex-head"><span>Exemplo '+(i+1)+'</span>'
+        +'<button type="button" class="ghost speak" data-say="'+esc(say)+'" aria-label="Ouvir o exemplo '+(i+1)+'">🔊</button></div>'
+        +'<div class="ex-jp" lang="ja">'+fmt(e[0],true)+'</div>'
+        +(e[1]?'<div class="ex-kana" lang="ja">'+esc(e[1])+'</div>':'')
+        +'<div class="ex-pt">'+fmt(e[2])+'</div>'
+        +(e[3]?'<div class="gt-note">'+fmt(e[3])+'</div>':'')+'</div>';
+    });
+  }
+  h+=listHTML("Cuidados",t.care);
+  if(t.practice&&t.practice.length){
+    h+='<h3>Praticar</h3><div class="gt-links">'+t.practice.map(function(p){return '<a href="'+esc(p[1])+'">'+esc(p[0])+'</a>'}).join("")+'</div>';
+  }
+  h+='<button type="button" class="ghost gt-done" data-done="'+esc(t.id)+'" aria-pressed="'+(done[t.id]?"true":"false")+'">'
+    +(done[t.id]?"✓ Estudado":"Marcar como estudado")+'</button>';
+  return h+'</div></details>';
+}
+function loadBest(id){try{var v=JSON.parse(localStorage.getItem("kd-gram-quiz-best:"+id));return typeof v==="number"?v:null}catch(e){return null}}
+function quizHTML(g){
+  var bank=(typeof GRAMMAR_QUIZ!=="undefined"&&GRAMMAR_QUIZ[g.id])||[];
+  var min=(typeof KDQuiz!=="undefined")?KDQuiz.MIN_BANK:50;
+  if(bank.length<min)return '<p class="empty gt-quiz">Prova em breve.</p>';
+  var b=loadBest(g.id);
+  return '<div class="gt-quiz"><a class="primary" href="grammar-prova.html#'+esc(g.id)+'">Fazer a prova do '+esc(g.name)+'</a>'
+    +(b!==null?'<span class="gt-s">✓ prova concluída · melhor nota '+b+'%</span>':'')+'</div>';
+}
+function render(){
+  var q=norm(query).trim(),out="",shown=0;
+  GRAMMAR.forEach(function(g){
+    var tops=g.topics.filter(function(t){return !q||norm(plain(t.title)+" "+plain(t.summary)).indexOf(q)>=0});
+    if(q&&!tops.length)return;
+    shown++;
+    var n=g.topics.filter(function(t){return done[t.id]}).length;
+    out+='<details class="grp" open><summary>'+esc(g.name)+' <small>'+esc(g.level)
+      +(g.topics.length?' · '+n+'/'+g.topics.length+' estudados':'')+'</small></summary>';
+    out+=tops.length?tops.map(topicHTML).join(""):'<p class="empty">Em breve.</p>';
+    if(!q&&g.topics.length)out+=quizHTML(g);
+    out+='</details>';
+  });
+  if(!shown)out='<p class="empty">Nenhum tópico encontrado.</p>';
+  document.getElementById("list").innerHTML=out;
+}
+function speak(txt){
+  AyumiTTS.speak(txt);
+}
+function toggleDone(id){
+  if(done[id])delete done[id];else done[id]=true;
+  saveDone(Object.keys(done));
+  render();
+  var el=document.getElementById("t-"+id);
+  if(el){var b=el.querySelector("[data-done]");if(b)b.focus()}
+}
+function openFromHash(){
+  var m=(location.hash||"").match(/^#t-([a-z0-9-]+)$/);
+  if(!m)return;
+  var el=document.getElementById("t-"+m[1]);
+  if(el){el.open=true;openIds[m[1]]=true;if(el.scrollIntoView)el.scrollIntoView()}
+}
+
+var list=document.getElementById("list");
+list.addEventListener("click",function(e){
+  var t=e.target.closest?e.target.closest("button"):null;
+  if(!t)return;
+  if(t.getAttribute("data-say"))speak(t.getAttribute("data-say"));
+  else if(t.getAttribute("data-done"))toggleDone(t.getAttribute("data-done"));
+});
+list.addEventListener("toggle",function(e){
+  var d=e.target;
+  if(d&&d.getAttribute&&d.getAttribute("data-id")){
+    if(d.open)openIds[d.getAttribute("data-id")]=true;else delete openIds[d.getAttribute("data-id")];
+  }
+},true);
+document.getElementById("q").addEventListener("input",function(e){query=e.target.value;render()});
+window.addEventListener("hashchange",openFromHash);
+if(!AyumiTTS.supported())document.documentElement.classList.add("nospeak");
+render();
+openFromHash();
+})();
+</script>
+</body>
+</html>

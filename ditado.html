@@ -1,0 +1,252 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ditado – Ayumi</title>
+<link rel="stylesheet" href="style.css">
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#1d2742">
+<link rel="icon" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<script src="pwa.js" defer></script>
+<script src="tts.js"></script>
+<style>
+.ans{width:100%;font:inherit;font-size:1.4rem;padding:12px 14px;border:1.5px solid var(--line);border-radius:8px;background:var(--card);color:var(--ink);margin-top:14px}
+.prev{min-height:1.6em;margin:6px 2px;color:var(--muted);font-size:1.15rem}
+.listen{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:6px}
+.listen .primary{font-size:1.3rem;padding:14px 26px}
+.opt.long{font-size:1rem;text-align:left}
+select{font:inherit;color:var(--ink);background:var(--card);border:1.5px solid var(--line);border-radius:8px;padding:8px 10px;max-width:100%}
+.setrow{display:flex;flex-wrap:wrap;gap:12px 20px;align-items:center;margin:12px 0}
+.ans-card{text-align:left;margin-top:8px}
+.ans-card .jp{font-size:1.5rem}
+a{color:inherit}
+</style>
+</head>
+<body>
+<header>
+  <h1><span lang="ja">聞き取り道場</span> Ditado</h1>
+  <p>Ouça e responda: escolha a opção certa ou digite o que ouviu. · <a href="index.html">← Ayumi</a></p>
+</header>
+
+<main>
+  <section id="menu">
+    <div class="setrow">
+      <div class="seg" role="group" aria-label="Fonte">
+        <button id="s-w" type="button">Palavras</button>
+        <button id="s-s" type="button">Frases</button>
+      </div>
+      <div class="seg" role="group" aria-label="Modo de resposta">
+        <button id="m-pick" type="button">Escolher</button>
+        <button id="m-type" type="button">Digitar</button>
+      </div>
+    </div>
+    <div class="setrow">
+      <label>Conteúdo: <select id="scope"></select></label>
+      <button id="go" type="button" class="primary">Começar (10 perguntas)</button>
+    </div>
+    <p id="msg" class="feedback" aria-live="polite"></p>
+    <p id="tts-warn" class="hint" hidden>Seu navegador não tem síntese de voz; o ditado precisa dela.</p>
+  </section>
+
+  <section id="game" hidden>
+    <div class="top"><span id="score"></span><span id="stamp" class="stamp">聞</span></div>
+    <div class="card">
+      <div class="listen">
+        <button id="play" type="button" class="primary">🔊 Ouvir</button>
+        <button id="slow" type="button" class="ghost">🐢 Mais devagar</button>
+      </div>
+      <div id="hint" class="hint">O que você ouviu?</div>
+    </div>
+    <div id="typebox">
+      <input id="ans" class="ans" type="text" lang="ja" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" placeholder="digite em romaji ou kana">
+      <div id="prev" class="prev" lang="ja"></div>
+      <button id="check" type="button" class="primary">Conferir</button>
+    </div>
+    <div id="opts" class="opts"></div>
+    <p id="feedback" class="feedback" aria-live="polite"></p>
+    <div id="reveal" class="card ans-card" hidden></div>
+    <div class="row"><button id="next" type="button" class="primary" hidden>Próxima</button></div>
+  </section>
+
+  <section id="result" hidden>
+    <h2 id="final"></h2>
+    <p id="best"></p>
+    <div id="review"></div>
+    <div class="row">
+      <button id="again" type="button" class="primary">Jogar de novo</button>
+      <button id="home" type="button" class="ghost">Voltar ao menu</button>
+    </div>
+  </section>
+</main>
+
+<footer>Dica: "n" sozinho vira ん, "-" vira ー. Atalhos: 1–4 escolhem, Enter confere ou avança, R ouve de novo.</footer>
+
+<script src="data/words.js"></script>
+<script src="data/sentences.js"></script>
+<script src="data/highlight.js"></script>
+<script src="data/conj.js"></script><!-- fornece toKana() e hira() -->
+<script>
+const $ = s => document.querySelector(s);
+const shuffle = a => { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
+const ls = { get(k){ try { return JSON.parse(localStorage.getItem(k)); } catch { return null; } }, set(k, v){ try { localStorage.setItem(k, JSON.stringify(v)); } catch {} } };
+const N = 10;
+const wkey = w => w[0] + "|" + w[1];
+
+// ---------- dados ----------
+const WORD = new Map();                       // chave -> {w, cat, grp}
+for (const c of CATEGORIES) for (const w of c.words) { const k = wkey(w); if (!WORD.has(k)) WORD.set(k, { w, cat: c, grp: c.group }); }
+const SENT = SENTENCES.map(s => ({ s, ref: s[3].map(k => WORD.get(k)).find(Boolean) })).filter(x => x.ref);
+
+const scopes = []; // {value, label, test(ref)}
+scopes.push({ value: "all", label: "Tudo", test: () => true });
+[...new Set(CATEGORIES.map(c => c.group))].forEach(g => scopes.push({ value: "g:" + g, label: g + " (todos)", test: r => r.grp === g }));
+CATEGORIES.forEach(c => scopes.push({ value: "c:" + c.id, label: c.group + " · " + c.name, test: r => r.cat.id === c.id }));
+
+const S = { src: ls.get("kd-ditado-src") || "w", mode: ls.get("kd-ditado-mode") || "pick", q: [], i: 0, score: 0, wrong: [], locked: true };
+const pool = scope => {
+  const sc = scopes.find(x => x.value === scope) || scopes[0];
+  return S.src === "s" ? SENT.filter(x => sc.test(x.ref)) : [...WORD.values()].filter(r => sc.test(r)).map(r => ({ w: r.w, ref: r }));
+};
+function fillScopes(){
+  const cur = $("#scope").value || ls.get("kd-ditado-scope") || "all";
+  $("#scope").replaceChildren(...scopes.map(sc => {
+    const o = document.createElement("option"), n = pool(sc.value).length;
+    o.value = sc.value; o.textContent = `${sc.label} – ${n}`; o.disabled = n < 4; return o;
+  }));
+  const ok = [...$("#scope").options].some(o => o.value === cur && !o.disabled);
+  $("#scope").value = ok ? cur : "all";
+}
+function paint(){
+  $("#s-w").setAttribute("aria-pressed", S.src === "w"); $("#s-s").setAttribute("aria-pressed", S.src === "s");
+  $("#m-pick").setAttribute("aria-pressed", S.mode === "pick"); $("#m-type").setAttribute("aria-pressed", S.mode === "type");
+}
+$("#s-w").onclick = () => { S.src = "w"; ls.set("kd-ditado-src", "w"); paint(); fillScopes(); };
+$("#s-s").onclick = () => { S.src = "s"; ls.set("kd-ditado-src", "s"); paint(); fillScopes(); };
+$("#m-pick").onclick = () => { S.mode = "pick"; ls.set("kd-ditado-mode", "pick"); paint(); };
+$("#m-type").onclick = () => { S.mode = "type"; ls.set("kd-ditado-mode", "type"); paint(); };
+$("#scope").onchange = e => ls.set("kd-ditado-scope", e.target.value);
+paint(); fillScopes();
+const TTS = AyumiTTS.supported();
+if (!TTS) { $("#tts-warn").hidden = false; $("#go").disabled = true; }
+
+// ---------- áudio ----------
+function speak(text, rate){
+  AyumiTTS.speak(text, { rate: rate, onnovoice: () => { $("#feedback").textContent = "Nenhuma voz japonesa encontrada neste navegador/sistema. Instale uma voz em japonês no sistema operacional."; } });
+}
+// fala sempre o kana (evita leitura errada de kanji)
+const audioText = () => { const q = S.q[S.i]; return S.src === "s" ? q.s[1] : q.w[1]; };
+const play = rate => speak(audioText(), rate);
+$("#play").onclick = () => play(0.9);
+$("#slow").onclick = () => play(0.5);
+
+// ---------- normalização / comparação ----------
+const VOW = {}; ["あかさたなはまやらわがざだばぱゃ", "いきしちにひみりぎじぢびぴ", "うくすつぬふむゆるぐずづぶぷゅ", "えけせてねへめれげぜでべぺ", "おこそとのほもよろをごぞどぼぽょ"]
+  .forEach((r, i) => [...r].forEach(c => VOW[c] = "あいうえお"[i]));
+function norm(s){
+  s = hira(s).replace(/[\s。、，．！？!?,.「」『』・]/g, "");
+  let o = ""; for (const c of s) o += c === "ー" ? (VOW[o.slice(-1)] || "") : c;
+  return o.replace(/は/g, "わ").replace(/へ/g, "え").replace(/を/g, "お");
+}
+
+// ---------- perguntas ----------
+function similar(target, cand){ // quanto mais parecido o som, maior
+  const a = target[1], b = cand[1];
+  return (a.length === b.length ? 2 : Math.abs(a.length - b.length) === 1 ? 1 : 0) + (a[0] === b[0] ? 2 : 0) + (a.slice(-1) === b.slice(-1) ? 1 : 0) + Math.random() * 1.5;
+}
+function start(){
+  const items = pool($("#scope").value);
+  if (items.length < 4) { $("#msg").textContent = "Esse conteúdo tem poucos itens. Escolha outro."; return; }
+  $("#msg").textContent = "";
+  const q = shuffle(items).slice(0, N).map(x => ({ ...x, all: items }));
+  Object.assign(S, { q, i: 0, score: 0, wrong: [] });
+  ["menu", "game", "result"].forEach(id => $("#" + id).hidden = id !== "game");
+  render();
+}
+function render(){
+  const q = S.q[S.i]; S.locked = false;
+  $("#score").textContent = `${S.i + 1}/${S.q.length} · acertos: ${S.score}`;
+  $("#feedback").textContent = ""; $("#reveal").hidden = true; $("#next").hidden = true;
+  const pick = S.mode === "pick";
+  $("#typebox").hidden = pick; $("#opts").hidden = !pick; $("#opts").replaceChildren();
+  if (pick) {
+    let right, dist;
+    if (S.src === "s") { right = q.s; dist = shuffle(q.all.filter(x => x.s !== q.s && Math.abs(x.s[1].length - q.s[1].length) < 8).map(x => x.s)).slice(0, 3); }
+    else { right = q.w; dist = q.all.filter(x => x.w[1] !== q.w[1]).map(x => [x.w, similar(q.w, x.w)]).sort((a, b) => b[1] - a[1]).slice(0, 3).map(x => x[0]); }
+    if (dist.length < 3) dist = shuffle(q.all.filter(x => (x.s || x.w) !== right).map(x => x.s || x.w)).slice(0, 3);
+    S.opts = shuffle([right, ...dist]); S.right = right;
+    S.opts.forEach((o, n) => {
+      const b = document.createElement("button"); b.type = "button"; b.className = "opt" + (S.src === "s" ? " long" : ""); b.lang = "ja";
+      b.textContent = S.src === "s" ? o[0] : o[1];
+      b.onclick = () => answer(o === right, b);
+      $("#opts").append(b);
+    });
+  } else { $("#ans").value = ""; $("#prev").textContent = ""; $("#ans").disabled = false; $("#check").disabled = false; $("#ans").focus(); }
+  play(0.9);
+}
+function answer(ok, btn){
+  if (S.locked) return; S.locked = true;
+  const q = S.q[S.i];
+  if (ok) S.score++; else S.wrong.push(q);
+  if (S.mode === "pick") { [...$("#opts").children].forEach((b, n) => { b.disabled = true; if (S.opts[n] === S.right) b.classList.add("ok"); }); if (!ok && btn) btn.classList.add("bad"); }
+  else { $("#ans").disabled = true; $("#check").disabled = true; }
+  $("#feedback").textContent = ok ? "Certo! ✓" : "Não foi dessa vez.";
+  $("#feedback").className = "feedback";
+  const r = $("#reveal"); r.hidden = false;
+  r.innerHTML = `<div class="jp" lang="ja"></div><div></div><div class="hint"></div>`;
+  const [a, b, c] = r.children;
+  if (S.src === "s") { KDHL.fill(a, q.s[0], KDHL.find(q.s[0], wkey(q.ref.w))); b.textContent = q.s[1]; c.textContent = q.s[2]; }
+  else { a.textContent = q.w[0] === q.w[1] ? q.w[0] : `${q.w[0]} (${q.w[1]})`; b.textContent = q.w[2]; c.textContent = q.w[3]; }
+  record(q, ok);
+  $("#next").hidden = false; $("#next").focus();
+}
+function record(q, ok){
+  const d = new Date(), pad = n => String(n).padStart(2, "0");
+  const ref = q.ref, key = S.src === "s" ? q.s[3].find(k => WORD.has(k)) : wkey(q.w);
+  const st = ls.get("stats") || [];
+  st.push({ data: `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`, atividade: "ditado", nivel: ref.grp, categoria: ref.cat.id, chave: key, acertou: ok });
+  ls.set("stats", st.slice(-5000));
+  if (S.src === "w") { // mesma lógica das palavras erradas do quiz
+    const m = ls.get("miss") || {};
+    if (ok) { if (m[key] && --m[key] <= 0) delete m[key]; } else m[key] = Math.min(5, (m[key] || 0) + 2);
+    ls.set("miss", m);
+  }
+}
+function check(){
+  if (S.locked) return;
+  const raw = $("#ans").value.trim(); if (!raw) return;
+  const q = S.q[S.i], got = norm(toKana(raw.replace(/-/g, "ー"), true));
+  const want = S.src === "s" ? [q.s[1], q.s[0]] : [q.w[1], q.w[0]];
+  answer(want.some(x => norm(x) === got) || raw === want[1], null);
+}
+function finish(){
+  ["menu", "game", "result"].forEach(id => $("#" + id).hidden = id !== "result");
+  const bk = "best:ditado" + (S.src === "s" ? "-frases" : ""), prev = ls.get(bk) || 0;
+  $("#final").textContent = `Você acertou ${S.score} de ${S.q.length}`;
+  if (S.score > prev) { ls.set(bk, S.score); $("#best").textContent = prev ? `Novo recorde! (antes: ${prev})` : "Primeiro resultado salvo como recorde."; }
+  else $("#best").textContent = `Recorde: ${prev}`;
+  const rv = $("#review"); rv.replaceChildren();
+  if (S.wrong.length) {
+    const h = document.createElement("h2"); h.textContent = "Para revisar"; rv.append(h);
+    S.wrong.forEach(q => { const p = document.createElement("p"); p.lang = "ja";
+      p.textContent = S.src === "s" ? `${q.s[0]} — ${q.s[2]}` : `${q.w[0]}${q.w[0] === q.w[1] ? "" : " (" + q.w[1] + ")"} — ${q.w[3]}`; rv.append(p); });
+  }
+}
+$("#go").onclick = start;
+$("#again").onclick = start;
+$("#home").onclick = () => { ["menu", "game", "result"].forEach(id => $("#" + id).hidden = id !== "menu"); fillScopes(); };
+$("#check").onclick = check;
+$("#next").onclick = () => { if (++S.i >= S.q.length) finish(); else render(); };
+$("#ans").addEventListener("input", e => { $("#prev").textContent = toKana(e.target.value.replace(/-/g, "ー"), false); });
+document.addEventListener("keydown", e => {
+  if ($("#game").hidden || e.ctrlKey || e.metaKey || e.altKey) return;
+  if (e.key === "Enter") { e.preventDefault(); S.locked ? $("#next").click() : (S.mode === "type" && check()); }
+  else if (S.mode === "pick" && !S.locked && /^[1-4]$/.test(e.key)) $("#opts").children[+e.key - 1]?.click();
+  else if (S.mode === "pick" && (e.key === "r" || e.key === "R")) play(0.9);
+});
+</script>
+</body>
+</html>

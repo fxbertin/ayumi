@@ -1,0 +1,559 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>言の葉 Kotonoha – Ayumi</title>
+<link rel="stylesheet" href="style.css">
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#1d2742">
+<link rel="icon" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<script src="pwa.js" defer></script>
+<script src="tts.js"></script>
+<style>
+.setrow{display:flex;flex-wrap:wrap;gap:12px 20px;align-items:center;margin:12px 0}
+.setrow label{display:flex;align-items:center;gap:8px}
+select{font:inherit;color:var(--ink);background:var(--card);border:1.5px solid var(--line);border-radius:8px;padding:8px 10px;max-width:100%}
+a{color:inherit}
+.recs{display:flex;flex-wrap:wrap;gap:6px 18px;color:var(--muted);margin:14px 0}
+.recs b{color:var(--ink)}
+details.how{background:var(--card);border:1.5px solid var(--line);border-radius:8px;padding:8px 14px;margin:14px 0}
+details.how summary{cursor:pointer;font-weight:700}
+details.how p{margin:.5em 0}
+.hud{display:flex;flex-wrap:wrap;gap:4px 18px;margin:4px 0 10px;color:var(--muted)}
+.hud b{color:var(--ink)}
+#cur{min-height:2.2rem;text-align:center;font-size:1.6rem;font-weight:600;letter-spacing:.06em}
+#msg{min-height:1.6em;text-align:center;margin:2px 0 10px;color:var(--muted)}
+#msg.good{color:var(--ok)}
+#msg.bad{color:var(--bad)}
+#msg.warn{color:var(--stamp);font-weight:600}
+#loose{min-height:1.3em;text-align:center;margin:-6px 0 8px;font-size:.9rem;color:var(--muted)}
+#raininfo{margin:2px 0 8px}
+.rainrow{display:flex;flex-wrap:wrap;align-items:center;gap:4px 16px;color:var(--muted)}
+.rainrow b{color:var(--ink)}
+.rainrow button{padding:4px 12px;font-size:.9rem;margin-left:auto}
+.rbar{height:6px;border-radius:3px;background:var(--line);overflow:hidden;margin:6px 0 4px}
+.rbar i{display:block;height:100%;width:0;background:var(--ink);opacity:.55}
+.rbar.warn i{background:var(--stamp);opacity:1}
+#rwarn{min-height:1.3em;font-size:.9rem;color:var(--stamp);font-weight:600}
+#boardwrap{display:flex;justify-content:center}
+#board{position:relative;--c:48px;--n:5;--g:4px;--pad:8px;
+  width:calc(var(--n)*var(--c) + (var(--n) - 1)*var(--g) + 2*var(--pad));
+  height:calc(var(--n)*var(--c) + (var(--n) - 1)*var(--g) + 2*var(--pad));
+  background:var(--card);border:1.5px solid var(--line);border-radius:10px;
+  touch-action:none;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}
+#board:focus-visible{outline:3px solid var(--stamp);outline-offset:3px}
+#board.paused{pointer-events:none}
+#board.paused .k{color:transparent}
+#board.paused::after{content:"Pausado";position:absolute;inset:0;display:grid;place-items:center;font-size:1.4rem;font-weight:700;color:var(--ink);z-index:4}
+.k.spawn{opacity:0}
+#lines{position:absolute;left:0;top:0;pointer-events:none;z-index:3;opacity:.5}
+#lines polyline{fill:none;stroke:var(--stamp);stroke-linecap:round;stroke-linejoin:round}
+.k{position:absolute;left:var(--pad);top:var(--pad);width:var(--c);height:var(--c);display:grid;place-items:center;
+  border-radius:8px;background:var(--paper);border:1.5px solid var(--line);color:var(--ink);
+  font-weight:600;font-size:calc(var(--c)*.55);line-height:1;
+  transform:translate(calc(var(--x)*(var(--c) + var(--g))),calc(var(--y)*(var(--c) + var(--g))));
+  transition:transform .3s cubic-bezier(.4,.1,.6,1.1),opacity .3s}
+.k.two{font-size:calc(var(--c)*.4)}
+.k.sel{background:var(--stamp);border-color:var(--stamp);color:#fff}
+#board:focus .k.kc{box-shadow:0 0 0 3px var(--ink)}
+.k.pop{animation:kpop .2s ease-out forwards}
+.k.no{animation:kno .3s}
+.k.hint{animation:khint .5s ease-in-out infinite alternate;border-color:var(--stamp)}
+.k.flip{animation:kflip .35s}
+@keyframes kpop{to{scale:1.3;opacity:0}}
+@keyframes kno{25%{translate:5px 0}75%{translate:-5px 0}}
+@keyframes khint{to{scale:1.15}}
+@keyframes kflip{50%{scale:0 1}}
+@media (prefers-reduced-motion:reduce){.k{transition:none}.k.pop,.k.no,.k.hint,.k.flip{animation:none}.k.hint{outline:3px solid var(--stamp)}}
+.btns{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin:14px 0}
+.btns button{padding:8px 12px;font-size:.95rem}
+.btns button.attn{border-color:var(--stamp);box-shadow:0 0 0 2px var(--stamp)}
+#last{display:flex;align-items:center;justify-content:center;gap:10px;min-height:2.4rem;margin:6px 0;text-align:center}
+#last .ja{font-size:1.3rem;font-weight:600}
+#list{list-style:none;margin:10px 0 0;padding:0}
+#list li,.rl li{display:flex;gap:6px 12px;flex-wrap:wrap;align-items:baseline;padding:6px 0;border-bottom:1px solid var(--line)}
+.rl{list-style:none;margin:6px 0;padding:0}
+.rl .ja{font-size:1.15rem;font-weight:600}
+.rl .rd{color:var(--muted)}
+.rl .pt{flex:1 1 140px}
+.rl li.miss{opacity:.7}
+.rl .ghost{padding:3px 8px}
+#rscore{font-size:2.4rem;font-weight:700;margin:.1em 0}
+.stampbox{display:inline-block}
+</style>
+</head>
+<body>
+<header>
+  <h1><span lang="ja">言の葉</span> Kotonoha</h1>
+  <p>Ligue kana vizinhos para formar palavras. As casas somem, as de cima caem, e você aprende palavras no caminho. · <a href="index.html">← Ayumi</a></p>
+</header>
+
+<main>
+  <section id="menu">
+    <div class="setrow">
+      <label>Dificuldade
+        <select id="lv"><option value="facil">Fácil (5×5)</option><option value="medio">Médio (6×6)</option><option value="dificil">Difícil (6×6, sem diagonal)</option></select>
+      </label>
+      <label>Modo
+        <select id="md"><option value="classico">Clássico</option><option value="ochiba">落ち葉 Ochiba (letras novas a cada minuto)</option></select>
+      </label>
+      <label>Tamanho mínimo da palavra
+        <select id="mn"><option value="2">2 kana</option><option value="3">3 kana</option><option value="4">4 kana</option></select>
+      </label>
+    </div>
+    <p class="hint" id="lvinfo"></p>
+    <p><button id="go" type="button" class="primary">Jogar</button></p>
+    <details class="how">
+      <summary>Como jogar</summary>
+      <p><b>Formar uma palavra:</b> arraste o dedo ou o mouse por casas vizinhas e solte. Ou toque nas casas, uma a uma, e toque de novo na última (ou use o botão Enviar) para confirmar. Tocar na penúltima desfaz a última casa.</p>
+      <p><b>Só valem palavras da lista do Ayumi</b>, com a leitura em hiragana (por exemplo, さかな). Ao acertar, aparece a palavra em kanji e o significado.</p>
+      <p><b>Pontos:</b> cada palavra vale o quadrado do número de casas (3 casas = 9, 6 casas = 36). Limpar o quadro todo dá +50. Dica custa 5 pontos; reembaralhar custa 10 (até 3 vezes por partida) e também reagrupa as casas. Quando sobram casas soltas (sem nenhuma vizinha), o jogo avisa e o botão Reagrupar (−3) desliza as casas para junto umas das outras, sem trocar as letras.</p>
+      <p><b>Modo 落ち葉 (Ochiba, “folhas que caem”):</b> o quadro começa só com parte das casas e, a cada minuto, caem kana novos: sempre 1 ou 2 palavras escondidas, mais algumas peças soltas. Limpe palavras para abrir espaço. Se não houver casas livres para a chuva, a partida termina; o jogo avisa quando o quadro está quase cheio. Limpar o quadro dá +50 e a chuva seguinte cai na hora. Se não houver palavras agora, não é o fim: espere a próxima chuva ou reembaralhe. A pausa esconde as letras.</p>
+      <p><b>Teclado:</b> setas movem o cursor, Espaço marca a casa, Enter envia, Esc limpa, Backspace tira a última.</p>
+      <p>Limpar o quadro todo é um bônus, não uma obrigação: dependendo das palavras que você escolher, algumas casas podem ficar sem saída.</p>
+    </details>
+    <div class="recs" id="recs"></div>
+  </section>
+
+  <section id="game" hidden>
+    <div id="raininfo" hidden>
+      <div class="rainrow"><span>Próxima chuva em <b id="rtime">1:00</b></span><span>Tempo <b id="ptime">0:00</b></span><span>Chuvas <b id="rcount">0</b></span><button id="pausebtn" type="button" class="ghost">Pausa</button></div>
+      <div class="rbar" id="rbar" aria-hidden="true"><i id="rfill"></i></div>
+      <div id="rwarn" role="status" aria-live="polite"></div>
+    </div>
+    <div class="hud"><span>Pontos <b id="sc">0</b></span><span>Palavras <b id="nw">0</b></span><span>Casas <b id="left">0</b></span></div>
+    <div id="cur">&nbsp;</div>
+    <div id="msg" role="status" aria-live="polite"></div>
+    <div id="loose" aria-live="polite"></div>
+    <div id="boardwrap"><div id="board" tabindex="0" role="application" aria-label="Tabuleiro de kana. Setas movem o cursor, Espaço marca a casa, Enter envia a palavra, Esc limpa."></div></div>
+    <div class="btns">
+      <button id="send" type="button" class="primary">Enviar</button>
+      <button id="clear" type="button" class="ghost">Limpar</button>
+      <button id="hintb" type="button" class="ghost">Dica (−5)</button>
+      <button id="regr" type="button" class="ghost">Reagrupar (−3)</button>
+      <button id="shuf" type="button" class="ghost">Reembaralhar (−10)</button>
+      <button id="quit" type="button" class="ghost">Terminar</button>
+    </div>
+    <div id="last" aria-live="polite"></div>
+    <ol id="list" aria-label="Palavras encontradas"></ol>
+  </section>
+
+  <section id="result" hidden>
+    <h2 id="rtitle"></h2>
+    <div id="rscore"></div>
+    <p id="rinfo"></p>
+    <div class="btns" style="justify-content:flex-start">
+      <button id="again" type="button" class="primary">Novo tabuleiro</button>
+      <button id="repeat" type="button" class="ghost">Repetir este tabuleiro</button>
+      <button id="tomenu" type="button" class="ghost">Menu</button>
+    </div>
+    <h2 id="rwh">Palavras que você achou</h2>
+    <ul class="rl" id="rwords"></ul>
+    <details class="how"><summary>Palavras escondidas neste tabuleiro</summary>
+      <p>Estas palavras limpavam o quadro todo, nesta ordem. As marcadas com ✓ você também achou.</p>
+      <ul class="rl" id="rplan"></ul>
+    </details>
+  </section>
+</main>
+<footer>Seu recorde fica salvo só neste navegador. <a href="progresso.html">Ver progresso</a></footer>
+
+<script src="data/words.js"></script>
+<script src="data/kotonoha-engine.js"></script>
+<script>
+(function () {
+"use strict";
+const $ = s => document.querySelector(s);
+const ls = { get(k, d) { try { const v = localStorage.getItem(k); return v === null ? d : JSON.parse(v); } catch { return d; } },
+             set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} } };
+const el = (t, c, x) => { const e = document.createElement(t); if (c) e.className = c; if (x != null) e.textContent = x; return e; };
+const eq = (a, b) => a[0] === b[0] && a[1] === b[1];
+const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+const dict = KOTO.buildDict(CATEGORIES);
+const COST = { hint: 5, shuffle: 10, regroup: 3 }, MAX_SHUF = 3, BONUS = 50, GAP = 4, PAD = 8;
+const RAIN_MS = (() => { const q = parseFloat(new URLSearchParams(location.search).get("chuva")); return q > 0 && q <= 3600 ? q * 1000 : 60000; })();   // ?chuva=5 encurta o intervalo (só para testes)
+const fmtUp = ms => { const t = Math.floor(ms / 1000); return Math.floor(t / 60) + ":" + String(t % 60).padStart(2, "0"); };
+const fmt = ms => { const t = Math.max(0, Math.ceil(ms / 1000)); return Math.floor(t / 60) + ":" + String(t % 60).padStart(2, "0"); };
+const NAMES = { facil: "Fácil", medio: "Médio", dificil: "Difícil" };
+const INFO = {
+  facil: "Tabuleiro 5×5. As casas se ligam também na diagonal (8 direções).",
+  medio: "Tabuleiro 6×6. As casas se ligam também na diagonal (8 direções).",
+  dificil: "Tabuleiro 6×6. Só liga para cima, para baixo, para a esquerda e para a direita."
+};
+const board = $("#board");
+const NS = "http://www.w3.org/2000/svg";
+const svg = document.createElementNS(NS, "svg"); svg.id = "lines"; svg.setAttribute("aria-hidden", "true");
+const line = document.createElementNS(NS, "polyline"); svg.appendChild(line);
+
+const S = { level: "facil", mode: "classico", rainMode: false, paused: false, t: 0, until: 0, last: 0, tick: 0, rains: 0, nextId: 0, rrnd: null, min: 2, seed: 1, game: null, grid: null, els: new Map(), path: [], tapMode: false, dragging: false, pid: null, pendingTap: null,
+            score: 0, found: [], shufLeft: MAX_SHUF, locked: false, over: false, pending: null, rnd: null, c: 48, kc: [0, 0], hintTimer: 0, msgTimer: 0 };
+
+/* ---------- preferências e menu ---------- */
+function readPrefs() {
+  const lv = ls.get("kd-kotonoha-level", "facil"), mn = ls.get("kd-kotonoha-min", 2);
+  S.level = KOTO.LEVELS[lv] ? lv : "facil";
+  S.min = [2, 3, 4].includes(mn) ? mn : 2;
+  S.mode = ls.get("kd-kotonoha-modo", "classico") === "ochiba" ? "ochiba" : "classico";
+  $("#lv").value = S.level; $("#mn").value = String(S.min); $("#md").value = S.mode;
+}
+function menuInfo() {
+  const lv = $("#lv").value;
+  $("#lvinfo").textContent = INFO[lv] + ($("#md").value === "ochiba" ? " Modo 落ち葉: começa com cerca de 60% das casas e, a cada minuto, caem " + KOTO.LEVELS[lv].rain + " kana novos." : "");
+}
+function showRecords() {
+  const box = $("#recs"); box.replaceChildren();
+  KOTO.LEVEL_ORDER.forEach(l => {
+    const b = ls.get("best:kotonoha-" + ($("#md").value === "ochiba" ? "ochiba-" : "") + l, 0) || 0;
+    const s = el("span", "", NAMES[l] + ": "); s.append(el("b", "", b > 0 ? String(b) : "–")); box.append(s);
+  });
+  box.prepend(el("span", "", ($("#md").value === "ochiba" ? "Recordes 落ち葉 (pontos) → " : "Recordes (pontos) → ")));
+}
+function show(id) { ["menu", "game", "result"].forEach(x => { $("#" + x).hidden = x !== id; }); }
+$("#lv").onchange = menuInfo;
+$("#md").onchange = () => { menuInfo(); showRecords(); };
+
+/* ---------- tabuleiro (DOM) ---------- */
+function layout() {
+  const n = S.game ? S.game.n : 5;
+  const avail = Math.min($("#boardwrap").clientWidth || 360, 560);
+  S.c = Math.max(34, Math.min(58, Math.floor((avail - 2 * PAD - (n - 1) * GAP - 4) / n)));
+  board.style.setProperty("--c", S.c + "px"); board.style.setProperty("--n", n);
+  board.style.setProperty("--g", GAP + "px"); board.style.setProperty("--pad", PAD + "px");
+  drawLine();
+}
+function place(e, r, c) { e.style.setProperty("--x", c); e.style.setProperty("--y", r); }
+function setLetter(e, u) { e.textContent = u; e.classList.toggle("two", u.length > 1); }
+function build() {
+  board.replaceChildren(svg); S.els.clear();
+  const g = S.grid, n = S.game.n;
+  for (let r = 0; r < n; r++) for (let c = 0; c < n; c++) {
+    const cell = g[r][c]; if (!cell) continue;
+    const e = el("div", "k"); setLetter(e, cell.u); place(e, r, c); e.setAttribute("aria-hidden", "true");
+    board.appendChild(e); S.els.set(cell.id, e);
+  }
+  layout();
+}
+function drawLine() {
+  const n = S.game ? S.game.n : 0, size = n * S.c + (n - 1) * GAP + 2 * PAD, step = S.c + GAP;
+  svg.setAttribute("width", size); svg.setAttribute("height", size); svg.setAttribute("viewBox", "0 0 " + size + " " + size);
+  line.setAttribute("stroke-width", Math.round(S.c * .22));
+  line.setAttribute("points", S.path.length > 1 ? S.path.map(([r, c]) => (PAD + c * step + S.c / 2) + "," + (PAD + r * step + S.c / 2)).join(" ") : "");
+}
+function refresh() {
+  S.els.forEach(e => e.classList.remove("sel", "kc"));
+  S.path.forEach(([r, c]) => { const cell = S.grid[r][c]; if (cell) S.els.get(cell.id).classList.add("sel"); });
+  const kc = S.grid && S.grid[S.kc[0]] && S.grid[S.kc[0]][S.kc[1]];
+  if (kc) S.els.get(kc.id).classList.add("kc");
+  const txt = S.path.map(([r, c]) => S.grid[r][c].u).join("");
+  $("#cur").textContent = txt || "\u00a0";
+  drawLine();
+}
+function hud() {
+  $("#sc").textContent = S.score; $("#nw").textContent = S.found.length; $("#left").textContent = KOTO.count(S.grid);
+  $("#shuf").textContent = "Reembaralhar (−" + COST.shuffle + " · restam " + S.shufLeft + ")";
+  $("#shuf").disabled = S.shufLeft <= 0;
+  const loose = S.over ? [] : KOTO.isolated(S.grid, S.game.mode);
+  $("#loose").textContent = loose.length ? "⚠ " + (loose.length === 1 ? "1 casa solta" : loose.length + " casas soltas") + " (sem vizinhas). Reagrupar custa −" + COST.regroup + "." : "";
+  $("#regr").textContent = "Reagrupar (−" + COST.regroup + ")";
+  $("#regr").disabled = loose.length === 0 || KOTO.count(S.grid) < 2;
+  if (S.rainMode) {
+    const L = KOTO.LEVELS[S.level], free = S.game.n * S.game.n - KOTO.count(S.grid);
+    $("#rwarn").textContent = S.over ? "" : free < L.rain ? "⚠ A próxima chuva não cabe! Limpe casas ou a partida termina." : free === L.rain ? "⚠ Quadro quase cheio: limpe palavras antes da próxima chuva." : "";
+    $("#rbar").classList.toggle("warn", !S.over && free <= L.rain);
+    $("#rcount").textContent = S.rains;
+  }
+}
+function rainUI() {
+  $("#rtime").textContent = fmt(S.until); $("#ptime").textContent = fmtUp(S.t);
+  $("#rfill").style.width = Math.max(0, Math.min(100, (1 - S.until / RAIN_MS) * 100)) + "%";
+}
+function msg(t, kind) {
+  const m = $("#msg"); m.textContent = t || ""; m.className = kind || "";
+  clearTimeout(S.msgTimer);
+  if (t && (kind === "bad" || kind === "good")) S.msgTimer = setTimeout(() => { if (m.textContent === t) { m.textContent = ""; m.className = ""; } }, 3500);
+}
+
+/* ---------- seleção ---------- */
+function clearPath() { S.path = []; S.tapMode = false; S.dragging = false; S.pendingTap = null; refresh(); }
+function hit(e, strict) {
+  const rect = board.getBoundingClientRect(), step = S.c + GAP, n = S.game.n;
+  const x = e.clientX - rect.left - board.clientLeft - PAD, y = e.clientY - rect.top - board.clientTop - PAD;
+  const col = Math.floor(x / step), row = Math.floor(y / step);
+  if (row < 0 || col < 0 || row >= n || col >= n || !S.grid[row][col]) return null;
+  const dx = x - col * step - S.c / 2, dy = y - row * step - S.c / 2;
+  if (strict ? Math.hypot(dx, dy) > S.c * .62 : Math.max(Math.abs(dx), Math.abs(dy)) > S.c / 2 + GAP / 2) return null;
+  return [row, col];
+}
+function extend(p) {
+  const P = S.path, last = P[P.length - 1];
+  if (!last || eq(p, last)) return;
+  if (P.length > 1 && eq(p, P[P.length - 2])) { P.pop(); refresh(); return; }
+  if (P.some(q => eq(q, p))) return;
+  if (KOTO.adjacent(last, p, S.game.mode)) { P.push(p); refresh(); }
+}
+function tapAct(p, kb) {
+  const P = S.path, last = P[P.length - 1];
+  if (!P.length) { S.path = [p]; S.tapMode = true; refresh(); return; }
+  if (eq(p, last)) {
+    if (P.length === 1) { clearPath(); return; }
+    if (kb) { P.pop(); refresh(); return; }
+    submit(); return;
+  }
+  if (P.length > 1 && eq(p, P[P.length - 2])) { P.pop(); refresh(); return; }
+  if (P.some(q => eq(q, p))) return;
+  if (KOTO.adjacent(last, p, S.game.mode)) { P.push(p); refresh(); return; }
+  S.path = [p]; refresh();
+}
+board.addEventListener("pointerdown", e => {
+  if (S.locked || S.over || S.paused || !S.game) return;
+  const p = hit(e, false); if (!p) return;
+  e.preventDefault();
+  try { board.setPointerCapture(e.pointerId); } catch {}
+  S.kc = p; S.dragging = true; S.pid = e.pointerId;
+  if (S.tapMode) { S.pendingTap = p; refresh(); }        // pode ser um toque (soma/desfaz) ou o começo de um arrasto novo
+  else { S.pendingTap = null; S.path = [p]; refresh(); }
+});
+board.addEventListener("pointermove", e => {
+  if (!S.dragging || e.pointerId !== S.pid) return;
+  const p = hit(e, true); if (!p) return;
+  if (S.pendingTap) {
+    if (eq(p, S.pendingTap)) return;
+    S.path = [S.pendingTap]; S.pendingTap = null; S.tapMode = false;   // saiu da casa: é um arrasto novo
+  }
+  extend(p);
+});
+board.addEventListener("pointerup", e => {
+  if (!S.dragging || e.pointerId !== S.pid) return;
+  S.dragging = false;
+  if (S.pendingTap) { const p = S.pendingTap; S.pendingTap = null; tapAct(p, false); return; }
+  if (S.path.length > 1) submit(); else { S.tapMode = true; refresh(); }
+});
+board.addEventListener("pointercancel", () => { if (S.dragging) { S.pendingTap = null; clearPath(); } });
+board.addEventListener("keydown", e => {
+  if (S.locked || S.over || S.paused || !S.game) return;
+  const n = S.game.n, D = { ArrowUp: [-1, 0], ArrowDown: [1, 0], ArrowLeft: [0, -1], ArrowRight: [0, 1] }[e.key];
+  if (D) {
+    e.preventDefault();
+    let [r, c] = S.kc;
+    for (let i = 0; i < n; i++) { r += D[0]; c += D[1]; if (r < 0 || c < 0 || r >= n || c >= n) break; if (S.grid[r][c]) { S.kc = [r, c]; break; } }
+    refresh();
+  } else if (e.key === " ") { e.preventDefault(); if (S.grid[S.kc[0]][S.kc[1]]) tapAct(S.kc.slice(), true); }
+  else if (e.key === "Enter") { e.preventDefault(); if (S.path.length) submit(); }
+  else if (e.key === "Escape") { e.preventDefault(); clearPath(); }
+  else if (e.key === "Backspace") { e.preventDefault(); S.path.pop(); if (!S.path.length) S.tapMode = false; refresh(); }
+});
+$("#send").onclick = () => { if (!S.locked && !S.over && !S.paused && S.path.length) submit(); };
+$("#clear").onclick = () => { if (!S.locked && !S.paused) clearPath(); };
+
+/* ---------- jogada ---------- */
+function submit() {
+  const P = S.path.slice(), units = P.map(([r, c]) => S.grid[r][c].u), L = units.length;
+  S.dragging = false;
+  if (L < S.min) return bad(P, "Use pelo menos " + S.min + " kana.");
+  const e = KOTO.lookup(dict, units);
+  if (!e) return bad(P, "“" + units.join("") + "” não está na lista de palavras.");
+  accept(P, e);
+}
+function bad(P, text) {
+  if (!reduce) P.forEach(([r, c]) => { const x = S.els.get(S.grid[r][c].id); x.classList.add("no"); setTimeout(() => x.classList.remove("no"), 320); });
+  clearPath(); msg(text, "bad");
+}
+function accept(P, e) {
+  S.locked = true; S.dragging = false;
+  const L = P.length, gain = L * L;
+  S.score += gain; S.found.push({ key: e.key, entries: e.entries });
+  const ids = P.map(([r, c]) => S.grid[r][c].id);
+  S.tapMode = false; S.path = []; $("#cur").textContent = e.key; drawLine();
+  showFound(e, gain);
+  ids.forEach(id => { const x = S.els.get(id); x.classList.remove("sel"); if (!reduce) x.classList.add("pop"); });
+  setTimeout(() => {
+    ids.forEach(id => { S.els.get(id).remove(); S.els.delete(id); });
+    S.grid = KOTO.drop(S.grid, P);
+    const n = S.game.n;
+    for (let r = 0; r < n; r++) for (let c = 0; c < n; c++) if (S.grid[r][c]) place(S.els.get(S.grid[r][c].id), r, c);
+    hud();
+    setTimeout(() => { S.locked = false; afterMove(); }, reduce ? 0 : 330);
+  }, reduce ? 0 : 200);
+}
+function showFound(e, gain) {
+  const box = $("#last"); box.replaceChildren();
+  const ja = el("span", "ja", e.entries.map(x => x.jp).join(" · "));
+  const info = el("span", "", e.key + " — " + e.entries.map(x => x.pt).join("; ") + "  (+" + gain + ")");
+  box.append(ja, info);
+  if (AyumiTTS.supported()) {
+    const b = el("button", "ghost", "🔊"); b.type = "button"; b.setAttribute("aria-label", "Ouvir " + e.key);
+    b.onclick = () => AyumiTTS.speak(e.entries[0].kana, { rate: .85 }); box.append(b);
+  }
+  const li = el("li"); li.append(el("span", "ja", e.entries.map(x => x.jp).join(" · ")), el("span", "rd", e.key), el("span", "pt", e.entries.map(x => x.pt).join("; ")));
+  $("#list").prepend(li);
+  msg("+" + gain + " pontos", "good");
+}
+function afterMove() {
+  refresh(); hud();
+  if (S.over) return;
+  if (KOTO.count(S.grid) === 0) {
+    S.score += BONUS; hud();
+    if (!S.rainMode) { finish("clear"); return; }
+    msg("Quadro limpo! +" + BONUS + ". A chuva já vem.", "good");
+    S.until = 0; return;                      // o relógio faz a chuva cair na hora
+  }
+  if (KOTO.findWord(S.grid, dict, S.min, S.game.mode, null)) { S.pending = null; $("#shuf").classList.remove("attn"); return; }
+  if (S.rainMode) {                           // sem palavras agora não é o fim: a chuva traz peças novas
+    const ng = S.shufLeft > 0 ? KOTO.reshuffle(S.grid, dict, S.min, S.game.mode, S.rnd) : null;
+    if (ng) { S.pending = ng; $("#shuf").classList.add("attn"); msg("Não há palavras possíveis agora. Espere a próxima chuva ou reembaralhe (−" + COST.shuffle + ").", "warn"); }
+    else { S.pending = null; msg("Não há palavras possíveis agora. A próxima chuva traz peças novas.", "warn"); }
+    return;
+  }
+  if (S.shufLeft <= 0) { finish("stuck"); return; }
+  const ng = KOTO.reshuffle(S.grid, dict, S.min, S.game.mode, S.rnd);
+  if (!ng) { finish("stuck"); return; }
+  S.pending = ng; $("#shuf").classList.add("attn");
+  msg("Não há mais palavras possíveis. Reembaralhe (−" + COST.shuffle + "; as casas também se reagrupam) ou termine a partida.", "warn");
+}
+
+/* ---------- modo 落ち葉: chuva, relógio e pausa ---------- */
+function dropRain() {
+  const L = KOTO.LEVELS[S.level], n = S.game.n;
+  const r = KOTO.rain(S.grid, dict, S.min, S.game.mode, S.rrnd, S.nextId, L.rain, L.loose);
+  if (!r.fits) { finish("full"); return; }
+  S.locked = true; clearPath();
+  S.grid = r.grid; S.nextId = r.nextId; S.rains++; S.pending = null; $("#shuf").classList.remove("attn");
+  r.added.forEach(a => {
+    const e = el("div", "k spawn"); setLetter(e, a.u); place(e, a.r - n, a.c); e.setAttribute("aria-hidden", "true");
+    board.appendChild(e); S.els.set(a.id, e);
+  });
+  void board.offsetWidth;
+  setTimeout(() => r.added.forEach(a => { const e = S.els.get(a.id); if (!e) return; place(e, a.r, a.c); e.classList.remove("spawn"); }), 30);
+  msg("🍂 Chuva: " + r.added.length + " kana novos.", "good");
+  hud();
+  setTimeout(() => { S.locked = false; afterMove(); }, reduce ? 0 : 420);
+}
+function tick() {
+  const now = performance.now(), dt = Math.min(now - S.last, 1000); S.last = now;
+  if (!S.rainMode || S.over || S.paused) return;
+  S.t += dt; S.until = Math.max(0, S.until - dt);
+  if (S.until <= 0 && !S.locked) { S.until = RAIN_MS; dropRain(); }
+  if (!S.over) rainUI();
+}
+function setPaused(on) {
+  if (!S.rainMode || S.over || on === S.paused) return;
+  S.paused = on; S.last = performance.now();
+  if (on) clearPath();
+  board.classList.toggle("paused", on);
+  $("#pausebtn").textContent = on ? "Continuar" : "Pausa";
+  if (!on) board.focus({ preventScroll: true });
+}
+$("#pausebtn").onclick = () => { if (S.locked && !S.paused) return; setPaused(!S.paused); };
+document.addEventListener("visibilitychange", () => { if (document.hidden) setPaused(true); });
+
+/* ---------- dica e reembaralhar ---------- */
+$("#hintb").onclick = () => {
+  if (S.locked || S.over || S.paused) return;
+  const w = KOTO.findWord(S.grid, dict, S.min, S.game.mode, S.rnd);
+  if (!w) { msg("Não há palavras possíveis agora.", "warn"); return; }
+  S.score = Math.max(0, S.score - COST.hint); hud();
+  const [r, c] = w.path[0], x = S.els.get(S.grid[r][c].id);
+  x.classList.add("hint"); clearTimeout(S.hintTimer); S.hintTimer = setTimeout(() => x.classList.remove("hint"), 2800);
+  msg("Dica: comece por esta casa (−" + COST.hint + ").", "good");
+};
+$("#shuf").onclick = () => {
+  if (S.locked || S.over || S.paused) return;
+  if (S.shufLeft <= 0) { msg("Acabaram os reembaralhamentos desta partida.", "warn"); return; }
+  const ng = S.pending || KOTO.reshuffle(S.grid, dict, S.min, S.game.mode, S.rnd);
+  S.pending = null;
+  if (!ng) { msg("Com as casas que restam não dá para formar nenhuma palavra; reembaralhar não ajudaria.", "warn"); return; }
+  S.shufLeft--; S.score = Math.max(0, S.score - COST.shuffle); S.grid = ng; clearPath();
+  const n = S.game.n;
+  for (let r = 0; r < n; r++) for (let c = 0; c < n; c++) {
+    const cell = ng[r][c]; if (!cell) continue;
+    const x = S.els.get(cell.id); setLetter(x, cell.u); place(x, r, c);
+    if (!reduce) { x.classList.remove("flip"); void x.offsetWidth; x.classList.add("flip"); }
+  }
+  $("#shuf").classList.remove("attn"); hud(); msg("Casas reembaralhadas e reagrupadas (−" + COST.shuffle + ").", "good");
+};
+$("#regr").onclick = () => {
+  if (S.locked || S.over || S.paused) return;
+  if (!KOTO.isolated(S.grid, S.game.mode).length) { msg("Não há casas soltas.", "warn"); return; }
+  const ng = KOTO.regroup(S.grid, dict, S.min, S.game.mode);
+  S.score = Math.max(0, S.score - COST.regroup); S.grid = ng; S.pending = null; clearPath();
+  const n = S.game.n;
+  for (let r = 0; r < n; r++) for (let c = 0; c < n; c++) { const cell = ng[r][c]; if (cell) place(S.els.get(cell.id), r, c); }
+  $("#shuf").classList.remove("attn"); hud(); msg("Casas reagrupadas (−" + COST.regroup + ").", "good");
+  S.locked = true; setTimeout(() => { S.locked = false; afterMove(); }, reduce ? 0 : 330);
+};
+$("#quit").onclick = () => {
+  if (S.over) return;
+  if (S.locked) return;
+  if (KOTO.count(S.grid) > 0 && !confirm("Terminar a partida agora?")) return;
+  finish("quit");
+};
+
+/* ---------- partida ---------- */
+function start(seed) {
+  S.seed = seed; S.rainMode = S.mode === "ochiba";
+  S.game = S.rainMode ? KOTO.generatePartial(dict, S.level, S.min, seed) : KOTO.generate(dict, S.level, S.min, seed);
+  S.grid = S.game.grid.map(r => r.slice());
+  S.rnd = KOTO.mulberry32(seed * 31 + 7); S.rrnd = KOTO.mulberry32(seed * 17 + 3);
+  clearInterval(S.tick); S.paused = false; board.classList.remove("paused"); $("#pausebtn").textContent = "Pausa";
+  S.t = 0; S.until = RAIN_MS; S.rains = 0; S.nextId = S.game.nextId || 0;
+  $("#raininfo").hidden = !S.rainMode;
+  S.score = 0; S.found = []; S.shufLeft = MAX_SHUF; S.locked = false; S.over = false; S.pending = null;
+  S.path = []; S.tapMode = false; S.dragging = false;
+  S.kc = [S.game.n - 1, 0];
+  $("#list").replaceChildren(); $("#last").replaceChildren(); msg(""); $("#shuf").classList.remove("attn");
+  show("game"); build(); refresh(); hud();
+  $("#cur").textContent = "\u00a0";
+  if (S.rainMode) { rainUI(); S.last = performance.now(); S.tick = setInterval(tick, 200); }
+}
+function newSeed() {
+  const cur = ls.get("kd-kotonoha-seed", null);
+  const nx = (Number.isInteger(cur) && cur >= 0 && cur < 1e9 ? cur : Math.floor(Math.random() * 90000)) + 1;
+  ls.set("kd-kotonoha-seed", nx); return nx;
+}
+$("#go").onclick = () => {
+  S.level = $("#lv").value; S.min = parseInt($("#mn").value, 10); S.mode = $("#md").value === "ochiba" ? "ochiba" : "classico";
+  ls.set("kd-kotonoha-level", S.level); ls.set("kd-kotonoha-min", S.min); ls.set("kd-kotonoha-modo", S.mode);
+  start(newSeed());
+};
+function finish(reason) {
+  S.over = true; S.locked = true; clearPath(); clearTimeout(S.hintTimer); clearInterval(S.tick); S.paused = false; board.classList.remove("paused");
+  const key = "best:kotonoha-" + (S.rainMode ? "ochiba-" : "") + S.level, prev = ls.get(key, 0) || 0, rec = S.score > prev;
+  if (rec) ls.set(key, S.score);
+  const left = KOTO.count(S.grid);
+  $("#rtitle").textContent = reason === "clear" ? "Quadro limpo! 🎉" : reason === "full" ? "O quadro encheu" : reason === "stuck" ? "Não há mais palavras possíveis" : "Partida encerrada";
+  $("#rscore").textContent = S.score + " pontos";
+  const lvName = (S.rainMode ? "落ち葉, " : "") + NAMES[S.level] + ", mínimo " + S.min + " kana";
+  const parts = [lvName + "."];
+  if (S.rainMode) parts.push("Você aguentou " + fmtUp(S.t) + " e " + S.rains + (S.rains === 1 ? " chuva." : " chuvas.") + (reason === "full" ? " A chuva seguinte não coube." : "") + " Ficaram " + left + " casas no quadro.");
+  else parts.push(reason === "clear" ? "Você limpou o quadro todo (+" + BONUS + ")." : "Sobraram " + left + " casas.");
+  parts.push(rec && S.score > 0 ? "Novo recorde!" : "Recorde: " + Math.max(prev, S.score) + ".");
+  $("#rinfo").textContent = parts.join(" ");
+  const fill = (ul, items, mark) => {
+    ul.replaceChildren();
+    items.forEach(it => {
+      const li = el("li", mark && !it.got ? "miss" : "");
+      li.append(el("span", "ja", (it.got ? "✓ " : "") + it.entries.map(x => x.jp).join(" · ")), el("span", "rd", it.key), el("span", "pt", it.entries.map(x => x.pt).join("; ")));
+      if (AyumiTTS.supported()) { const b = el("button", "ghost", "🔊"); b.type = "button"; b.setAttribute("aria-label", "Ouvir " + it.key); b.onclick = () => AyumiTTS.speak(it.entries[0].kana, { rate: .85 }); li.append(b); }
+      ul.append(li);
+    });
+  };
+  fill($("#rwords"), S.found.slice().reverse());
+  if (!S.found.length) $("#rwords").append(el("li", "", "Nenhuma palavra desta vez."));
+  const gotKeys = new Set(S.found.map(f => f.key));
+  fill($("#rplan"), S.game.plan.map(p => ({ key: p.key, entries: dict.seen.get(p.key).entries, got: gotKeys.has(p.key) })), true);
+  $("#rplan").parentElement.hidden = S.rainMode;
+  show("result"); $("#rtitle").setAttribute("tabindex", "-1"); $("#rtitle").focus();
+}
+$("#again").onclick = () => start(newSeed());
+$("#repeat").onclick = () => start(S.seed);
+$("#tomenu").onclick = () => { $("#md").value = S.mode; showRecords(); show("menu"); };
+window.addEventListener("resize", () => { if (S.game && !$("#game").hidden) layout(); });
+
+readPrefs(); menuInfo(); showRecords(); show("menu");
+})();
+</script>
+</body>
+</html>
