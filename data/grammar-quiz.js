@@ -76,6 +76,9 @@ basico: [
 {id:"b070",topic:"perguntas",kind:"traducao",q:"O que quer dizer いつ いきますか。",opts:["Onde você vai?","Quando você vai?","Com quem você vai?","Por que você vai?"],ans:1,why:"**いつ** pergunta “quando”. “Onde” é どこ, “quem” é だれ e “por quê” é どうして."},
 {id:"b071",topic:"perguntas",kind:"conceito",q:"Qual palavra pergunta “por quê?” e tem resposta terminada em から?",opts:["どう","いつ","だれ","どうして"],ans:3,why:"**どうして** pede um motivo, e a resposta termina em から: にほんが すきですから。"},
 {id:"b072",topic:"perguntas",kind:"traducao",q:"Como se pergunta “Como é o Japão?”",opts:["にほんは どうですか。","にほんは なにですか。","にほんは いつですか。","にほんは だれですか。"],ans:0,why:"**どう** pergunta como algo é (opinião ou estado). なに é “o quê”, いつ é “quando”, e だれ é “quem”."},
+{id:"b073",topic:"aru-mais",kind:"forma",q:"Complete na forma curta: {お金|かね}が ___。 (Não tenho dinheiro.)",opts:["あらない","ありません","ない","いない"],ans:2,why:"O negativo de ある é uma palavra à parte: **ない**. Não existe あらない. ありません é o negativo educado, e não o curto, e いない é de いる (pessoas e animais)."},
+{id:"b074",topic:"aru-mais",kind:"particula",q:"Complete: {教室|きょうしつ}___ {会議|かいぎ}が あります。 (Vai haver uma reunião na sala.)",opts:["に","で","を","の"],ans:1,why:"Para **eventos** (reunião, prova, festa) o lugar leva **で**. O に é para a existência de coisas, como em へやに ほんが あります."},
+{id:"b075",topic:"aru-mais",kind:"conceito",q:"O que quer dizer ある{日|ひ}、{山|やま}へ {行|い}きました。?",opts:["Um dia, fui à montanha.","Havia um dia na montanha.","Fui à montanha todos os dias.","Fui à montanha porque tinha tempo."],ans:0,why:"Antes de substantivo, ある quer dizer **“um certo”**: ある{日|ひ} é “um dia”, sem dizer qual. Aqui ele não é o verbo (não leva が e não conjuga), então não significa “haver”."},
 // FIM-BASICO
 ],
 intermediario: [
@@ -157,6 +160,9 @@ intermediario: [
 {id:"i076",topic:"setsuzoku",kind:"conceito",q:"Qual conjunção quer dizer “mas”?",opts:["そして","でも","だから","それに"],ans:1,why:"**でも** (e しかし, mais formal) quer dizer “mas”. そして soma, だから dá consequência, e それに quer dizer “além disso”."},
 {id:"i077",topic:"setsuzoku",kind:"conceito",q:"Qual conjunção quer dizer “por isso” (consequência)?",opts:["でも","そして","ところで","だから"],ans:3,why:"**だから** (ou ですから, mais educado) liga uma consequência: “por isso”."},
 {id:"i078",topic:"setsuzoku",kind:"conceito",q:"Qual conjunção se usa para mudar de assunto (“a propósito”)?",opts:["それに","だから","ところで","でも"],ans:2,why:"**ところで** muda de assunto: “a propósito”."},
+{id:"i079",topic:"hesitacoes-expressoes",kind:"conceito",q:"Qual é a diferença entre **ええ** e **うん** ao dizer “sim”?",opts:["Os dois têm a mesma formalidade","**ええ** é educado; **うん** é informal, para amigos e família","**うん** é mais educado que **ええ**","**ええ** só se usa por escrito"],ans:1,why:"**ええ** é o “sim” educado e **うん** é o informal. Com superiores, o mais seguro é **はい**."},
+{id:"i080",topic:"hesitacoes-expressoes",kind:"conceito",q:"Em qual frase o **あの** é hesitação (“ahn…”), e não “aquele”?",opts:["あの{人|ひと}は {先生|せんせい}です。","あの、すみません。","あの {山|やま}は {高|たか}いです。","あの {本|ほん}は わたしのです。"],ans:1,why:"Em **あの、すみません**, o あの vem seguido de vírgula e serve para chamar a atenção. Nas outras, あの + substantivo quer dizer **“aquele”**: あの{人|ひと} (aquela pessoa), あの{山|やま} (aquela montanha)."},
+{id:"i081",topic:"hesitacoes-expressoes",kind:"conceito",q:"Quando se diz **お{疲|つか}れ{様|さま}でした**?",opts:["Ao chegar ao trabalho de manhã","Ao fim do trabalho, aos colegas","Ao pedir desculpas a um cliente","Ao conhecer alguém pela primeira vez"],ans:1,why:"**お{疲|つか}れ{様|さま}でした** é a frase de trabalho para o fim do dia (“obrigado pelo esforço”). Durante o dia se diz お{疲|つか}れ{様|さま}です. Para desculpas, use ごめんなさい ou すみません; para se apresentar, よろしく お{願|ねが}いします."},
 // FIM-INTERMEDIARIO
 ],
 avancado: [

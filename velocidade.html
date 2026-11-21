@@ -112,7 +112,7 @@ function start() {
   S.pool = poolFor($("#scope").value);
   if (S.pool.length < 4) { $("#msg").textContent = "Poucas palavras nessa seleção."; return; }
   $("#msg").textContent = "";
-  ls.set("kd-vel-scope", $("#scope").value); ls.set("kd-vel-read", $("#reading").checked);
+  ls.set("kd-vel-scope2", $("#scope").value); ls.set("kd-vel-read", $("#reading").checked);
   Object.assign(S, { deck: [], score: 0, streak: 0, maxStreak: 0, right: 0, total: 0, wrong: [], end: Date.now() + DUR });
   ["menu", "game", "result"].forEach(id => $("#" + id).hidden = id !== "game");
   hud(); nextQ();
@@ -176,7 +176,7 @@ const groups = [...new Set(CATEGORIES.map(c => c.group))];
 $("#scope").innerHTML = '<option value="all">Todas as palavras</option>' +
   '<optgroup label="Por nível">' + groups.map(g => `<option value="g:${g}">${g}</option>`).join("") + "</optgroup>" +
   groups.map(g => `<optgroup label="${g}">` + CATEGORIES.map((c, i) => c.group === g ? `<option value="c:${i}">${c.name}</option>` : "").join("") + "</optgroup>").join("");
-const ss = ls.get("kd-vel-scope"); if (ss && [...$("#scope").options].some(o => o.value === ss)) $("#scope").value = ss;
+const ss = ls.get("kd-vel-scope2"); if (ss && [...$("#scope").options].some(o => o.value === ss)) $("#scope").value = ss;
 if (ls.get("kd-vel-read") === false) $("#reading").checked = false;
 setDir(S.dir); menu();
 $("#d-jp").onclick = () => setDir("jp");

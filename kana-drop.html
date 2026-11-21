@@ -194,7 +194,7 @@ function start(){
   readConj();
   loadWords($('#cat').value);
   if(WORDS.length<6){$('#msg').textContent='Poucas palavras em kana nessa categoria. Escolha outra.';return;}
-  ls.set('kd-kanadrop-cat',$('#cat').value);
+  ls.set('kd-kanadrop-cat2',$('#cat').value);
   grid=Array.from({length:H},()=>Array(W).fill(null));
   queue=[];recent=[];score=0;total=0;found=new Map();over=false;busy=false;paused=false;$('#pausa').hidden=true;$('#bp').textContent='Pausa';
   $('#list').innerHTML='';$('#count').textContent='0';
@@ -349,7 +349,7 @@ document.addEventListener('visibilitychange',()=>{if(document.hidden)setPause(tr
 $('#hint').onchange=()=>{ls.set('kd-kanadrop-hint',$('#hint').checked);render();};
 if(typeof CATEGORIES!=='undefined'){
   $('#cat').innerHTML='<option value="all">Todas</option>'+CATEGORIES.map((c,i)=>`<option value="${i}">${c.group}: ${c.name}</option>`).join('');
-  const sc=ls.get('kd-kanadrop-cat');if(sc!=null&&[...$('#cat').options].some(o=>o.value===sc))$('#cat').value=sc;
+  const sc=ls.get('kd-kanadrop-cat2');if(sc!=null&&[...$('#cat').options].some(o=>o.value===sc))$('#cat').value=sc;
 }
 // Conjugações: opção e escolha das formas (padrão: as formas de nível N5, como nas páginas de conjugação).
 function readConj(){
