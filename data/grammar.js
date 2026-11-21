@@ -1,7 +1,7 @@
 // Gramática do Ayumi.
 // Estrutura: grupos > tópicos. Texto simples; **x** vira negrito (ou destaque nos exemplos);
 // {漢字|かんじ} vira furigana (ruby) nos exemplos.
-// Tópico: { id, title, summary, use:[], form:[], charts:[{title,script:"hira"|"kata",cols,rows:[["hira|kata|romaji" ou "",...]]}],
+// Tópico: { id, title, summary, use:[], form:[], tables:[{title,head,rows,text?}] (text:true = tabela de texto corrido, com quebra de linha), charts:[{title,script:"hira"|"kata",cols,rows:[["hira|kata|romaji" ou "",...]]}],
 //           ex:[[japonês, kana ("" se já está só em kana), português, nota?]], care:[], practice:[[rótulo, página]] }
 const GRAMMAR = [
 { id: "basico", name: "Básico", level: "~N5", topics: [
@@ -504,6 +504,44 @@ const GRAMMAR = [
   practice: [["Lacuna (modo Partículas)", "lacuna.html"]]
 },
 
+{ id: "aru-mais", title: "ある: ter, haver e muito mais",
+  summary: "Os outros sentidos do ある: ter, haver (um evento), “um certo”, o negativo ない e a origem do ありがとう.",
+  use: [
+    "Você já viu o ある como “existir”. O japonês usa esse mesmo verbo para **ter** e para **haver**, porque pensa assim: se o tempo **existe** para mim, eu **tenho** tempo. Se uma prova **existe** amanhã, **tem** prova amanhã.",
+    "Então o ある cobre quatro situações: **ter** (coisas, tempo, dinheiro, dúvidas), **haver um evento** (prova, reunião, festa), **“um certo”** (ある{日|ひ}, ある{人|ひと}) e o seu **negativo**, que não é “あらない”, e sim **ない**.",
+    "No fim do tópico há uma curiosidade: o **ありがとう** (obrigado/a) vem do ある."
+  ],
+  form: [
+    "**Ter**: **pessoa は coisa が あります**. {時間|じかん}が あります (tenho tempo), お{金|かね}が あります (tenho dinheiro), {質問|しつもん}が あります (tenho uma pergunta). A coisa que você tem leva **が**.",
+    "**Haver um evento**: **lugar で evento が あります**. {教室|きょうしつ}で {会議|かいぎ}が あります (vai haver uma reunião na sala). Para eventos o lugar leva **で**, e não に.",
+    "**Um certo**: **ある + substantivo**, sem が e sem に. ある{日|ひ} (um certo dia, “um dia”), ある{人|ひと} (uma certa pessoa). Aqui o ある é uma palavra fixa que só vem antes de substantivo, e não conjuga.",
+    "**Negativo**: **ありません** (educado) e **ない** (curto). O passado é **ありませんでした** e **なかった**. Não existe “あらない” nem “あらなかった”: o negativo do ある é uma palavra à parte, o **ない**.",
+    "**ある x あります**: **あります** é a forma educada e **ある** é a curta, usada com amigos e dentro de frases maiores (você verá a forma curta no tópico de fala informal).",
+    "**Com pessoas, volte ao います**: “eu tenho um irmão mais velho” é **わたしは あにが います**, e não “あにが あります”. “Ter” coisas, tempo e dinheiro é ある. “Ter” gente (família, amigos) é いる, e o que se tem leva が. (A diferença entre ある e いる está no tópico anterior.)",
+    "**ありがとう**: vem de **{有|あ}り{難|がた}い**, que junta ある com **がたい** (difícil). Quer dizer “difícil de existir”: o que é **raro** é **precioso**, e quem recebe algo precioso fica **grato**. O ありがとう de hoje é essa palavra com o som suavizado, e se escreve em kana."
+  ],
+  ex: [
+    ["{時間|じかん}が あります。", "", "Tenho tempo.", "Literalmente: “existe tempo (para mim)”."],
+    ["わたしは お{金|かね}が ありません。", "", "Não tenho dinheiro.", "ありません: o negativo educado do ある."],
+    ["{質問|しつもん}が あります。", "", "Tenho uma pergunta.", "Dúvida, pergunta, ideia, plano: tudo isso “existe”, então é ある."],
+    ["{明日|あした}、{試験|しけん}が あります。", "", "Amanhã tem prova.", "Evento marcado: ある, e não する."],
+    ["{教室|きょうしつ}で {会議|かいぎ}が あります。", "", "Vai haver uma reunião na sala.", "Evento: lugar + **で**. Para coisas seria に."],
+    ["ある{日|ひ}、{山|やま}へ {行|い}きました。", "", "Um dia, fui à montanha.", "ある{日|ひ} abre uma história sem dizer qual dia."],
+    ["ある{人|ひと}が {来|き}ました。", "", "Veio uma certa pessoa.", "Quem fala sabe quem foi, mas não diz."],
+    ["{今日|きょう}は {宿題|しゅくだい}が ない。", "", "Hoje não tem lição de casa.", "ない = a forma curta de ありません."],
+    ["わたしは あにが います。", "", "Tenho um irmão mais velho.", "A conta que muita gente erra: “ter” irmão é **います**, e não あります."],
+    ["ありがとう。", "", "Obrigado(a).", "有り難い: “difícil de existir”, logo raro e precioso."]
+  ],
+  care: [
+    "**Pessoas e animais**: います, mesmo quando o português diz “tenho”. わたしは あにが います está certo, e あにが あります soa como se seu irmão fosse um objeto.",
+    "O negativo é **ない** (ou ありません). **Nunca** あらない ou あらません.",
+    "**Evento** pede **で** ({教室|きょうしつ}で {会議|かいぎ}が あります). **Existência** pede **に** (へやに ほんが あります).",
+    "O **ある** de “um certo” **não** é o verbo: não leva が, não conjuga e só vem antes de substantivo. ある{日|ひ} é “um dia”, e não “há um dia”.",
+    "Para “já fiz isso na vida” o ある aparece em outra estrutura: veja o tópico **～たことがある**."
+  ],
+  practice: [["Lacuna (modo Partículas)", "lacuna.html"], ["Kotonoha", "kotonoha.html"]]
+},
+
 { id: "ga", title: "が",
   summary: "O が marca quem faz algo e a coisa de que você gosta, em que é bom ou que quer.",
   use: [
@@ -928,6 +966,74 @@ const GRAMMAR = [
     "Dentro de frases longas (como ～と{思|おも}います), a forma curta é usada mesmo em textos educados."
   ],
   practice: [["Treino de conjugação (verbos)", "conjugacao.html"], ["Treino de conjugação (adjetivos)", "conjugacao-adjetivos.html"]]
+},
+
+{ id: "hesitacoes-expressoes", title: "Hesitações e expressões do dia a dia (あの, えっと, ごめん…)",
+  summary: "As palavrinhas que abrem, enchem e suavizam a fala, e as frases feitas do dia a dia, cada uma com o seu nível de formalidade.",
+  use: [
+    "Quem fala japonês de verdade usa muitas palavrinhas sem tradução exata. Elas servem para **começar a falar**, **ganhar tempo para pensar**, **reagir** ao que a outra pessoa disse e **suavizar** o tom.",
+    "Elas quase não mudam o sentido da frase, mas mudam o **clima**. Um あのう educado e um やばい de gíria dizem coisas bem diferentes sobre quem fala. Por isso cada uma vem aqui com o seu **nível de formalidade**.",
+    "Para entender a base de “educado x informal”, veja antes o tópico **Fala informal**."
+  ],
+  form: [
+    "Em geral vêm **no começo da frase**, seguidas de vírgula (、): あの、すみません。 / えっと、{今日|きょう}は…",
+    "**Alongar a vogal** deixa a palavra mais hesitante e cuidadosa: あの → **あのう**, えっと → **ええと**, うん → **うーん**.",
+    "**ええ x うん** (sim): **ええ** é educado e **うん** é informal, para amigos e família. Com superiores, use **はい**.",
+    "**ごめん x ごめんなさい x すみません** (desculpa): **ごめん** só entre íntimos, **ごめんなさい** é mais educado, e **すみません** também serve para chamar a atenção (“com licença”).",
+    "**よろしく** vem de “trate-me bem”: informal. Educado: **よろしく お{願|ねが}いします**. Usa-se ao se apresentar e ao pedir algo.",
+    "**お{疲|つか}れ{様|さま}** é uma frase de trabalho: **お{疲|つか}れ{様|さま}です** entre colegas durante o dia, e **お{疲|つか}れ{様|さま}でした** ao fim do trabalho. Entre colegas próximos encurta para **お{疲|つか}れ**.",
+    "**やばい** começou como “perigoso, ruim”, e hoje também diz “demais, incrível”. Quem decide é o contexto e o tom."
+  ],
+  tables: [
+    { text: true, title: "Hesitar, reagir e guiar a conversa",
+      head: ["Palavra", "Sentido", "Registro"],
+      rows: [
+        ["あの / あのう", "ahn… (começar a falar, chamar a atenção, pedir licença)", "neutro; あのう é mais educado e hesitante"],
+        ["えっと / ええと", "é…, deixa eu ver (ganhar tempo)", "neutro; ええと é um pouco mais cuidadoso"],
+        ["うーん", "hum… (pensando ou em dúvida)", "informal"],
+        ["さあ", "sei lá; ou “vamos!”", "neutro e informal"],
+        ["まあ", "bem, até que… (suaviza)", "neutro"],
+        ["ええ / うん", "sim", "ええ educado, うん informal"],
+        ["へえ", "nossa!, é mesmo?", "informal"],
+        ["ふーん", "hum, ah, é? (sem muito interesse)", "informal"],
+        ["そうか", "ah, é? entendi", "informal (educado: そうですか)"],
+        ["ああ", "ah!, ah, entendi", "neutro"],
+        ["ほら", "olha!, viu?", "informal"],
+        ["さて", "bem, então (mudar de assunto, começar algo)", "neutro"],
+        ["ねえ", "ei! (chamar a atenção)", "informal"],
+        ["よし", "certo!, vamos lá!", "informal"]
+      ] },
+    { text: true, title: "Frases feitas do dia a dia",
+      head: ["Expressão", "Sentido", "Registro"],
+      rows: [
+        ["ごめん", "desculpa", "informal"],
+        ["よろしく", "conto com você; prazer", "informal (educado: よろしく お{願|ねが}いします)"],
+        ["お{疲|つか}れ{様|さま}", "bom trabalho; obrigado pelo esforço", "trabalho; educado com です / でした"],
+        ["どういたしまして", "de nada", "educado"],
+        ["いいね", "legal!, boa!", "informal"],
+        ["やばい", "nossa!; que perigo; que demais", "gíria, informal"]
+      ] }
+  ],
+  ex: [
+    ["あの、すみません。{駅|えき}は どこですか。", "", "Ahn, com licença. Onde fica a estação?", "あの abre a conversa com um desconhecido."],
+    ["えっと、{今日|きょう}は {何曜日|なんようび}ですか。", "", "Hmm, que dia da semana é hoje?", "えっと dá tempo para pensar."],
+    ["さあ、どうでしょう。", "", "Hmm, quem sabe?", "さあ = “não sei”. Em “さあ、{行|い}きましょう” quer dizer “vamos lá!”."],
+    ["まあ、{悪|わる}くないですね。", "", "Bem, até que não está mal.", "まあ tira a força da frase: “nem tanto, mas…”."],
+    ["ええ、そうです。", "", "Sim, é isso mesmo.", "ええ é educado. Entre amigos: うん、そう。"],
+    ["ふーん、そうなんですか。", "", "Hum, é mesmo?", "Com tom baixo, pode soar sem interesse."],
+    ["ごめん、{忘|わす}れちゃった。", "", "Desculpa, esqueci.", "ごめん só com íntimos. Educado: ごめんなさい."],
+    ["{今日|きょう}も お{疲|つか}れ{様|さま}でした。", "", "Obrigado(a) pelo trabalho de hoje também.", "Fala-se ao fim do dia de trabalho."],
+    ["やばい、もう {八時|はちじ}だ。", "", "Nossa, já são oito horas!", "やばい aqui é “que apuro”. Gíria."],
+    ["「ありがとう。」「どういたしまして。」", "", "“Obrigado(a).” “De nada.”", "どういたしまして é a resposta educada ao ありがとう."]
+  ],
+  care: [
+    "**ふーん** e **そうか** soam bem entre amigos, mas com **superiores, clientes e desconhecidos** podem parecer frios ou até arrogantes. Use **そうですか** ou **なるほど**.",
+    "**うん, ごめん, いいね, やばい, よし** são **informais**. Com quem merece respeito, troque por **はい, ごめんなさい / すみません, いいですね** e uma palavra mais neutra no lugar de やばい.",
+    "**やばい** muda de sentido com o tom: pode ser um problema (やばい、{遅刻|ちこく}だ) ou um elogio. Na dúvida, não use no trabalho nem com quem você acabou de conhecer.",
+    "Hesitar é natural na **fala**, mas em e-mails, cartas e textos formais evite あの, えっと e うーん.",
+    "Não confunda o **あの** de hesitação com o **あの** de “aquele”: あの{人|ひと} é “aquela pessoa”, e あの、すみません é “ahn, com licença”."
+  ],
+  practice: [["Kotonoha (palavras novas)", "kotonoha.html"], ["Vocabulário (hesitações e expressões)", "vocabulario.html"]]
 },
 
 { id: "naide-kudasai", title: "～ないでください",

@@ -51,6 +51,9 @@ button.kc:hover{border-color:var(--ink)}
 .gtbl th,.gtbl td{border:1px solid var(--line);padding:4px 8px;text-align:center;white-space:nowrap;line-height:2}
 .gtbl thead th,.gtbl tbody th{background:var(--paper);font-weight:700}
 .gtbl thead th{font-size:.85rem}
+.gtbl-text{min-width:0}
+.gtbl-text th,.gtbl-text td{white-space:normal;word-break:keep-all;overflow-wrap:anywhere;text-align:left;line-height:1.7}
+.gtbl-text tbody th{white-space:normal;min-width:5.5em}
 a.primary{display:inline-block;text-decoration:none}
 .gt-quiz{margin:14px 0 6px;display:flex;flex-wrap:wrap;align-items:center;gap:8px 14px}
 .empty{color:var(--muted)}
@@ -100,7 +103,7 @@ function chartHTML(c){
   return h+'</div>';
 }
 function tableHTML(tb){
-  var h='<div class="kc-t">'+esc(tb.title)+'</div><div class="tbl-wrap"><table class="gtbl" aria-label="'+esc(tb.title)+'"><thead><tr>'
+  var h='<div class="kc-t">'+esc(tb.title)+'</div><div class="tbl-wrap"><table class="gtbl'+(tb.text?' gtbl-text':'')+'" aria-label="'+esc(tb.title)+'"><thead><tr>'
     +tb.head.map(function(c){return '<th scope="col">'+fmt(c)+'</th>'}).join("")+'</tr></thead><tbody>';
   tb.rows.forEach(function(r){
     h+='<tr>'+r.map(function(c,i){return i===0?'<th scope="row" lang="ja">'+fmt(c)+'</th>':'<td lang="ja">'+fmt(c)+'</td>'}).join("")+'</tr>';
