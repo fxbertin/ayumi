@@ -21,8 +21,11 @@ const GODAN_RU = new Set(["帰る|かえる","走る|はしる","切る|きる",
 const IE = /[いきしちにひみりぎじぢびぴえけせてねへめれげぜでべぺ]る$/;
 
 // w = [japonês, kana, romaji, português]; devolve null se não for um verbo conjugável.
+// Verbos que ficam fora da prática de conjugação (ある: o negativo é ない; くれる: sem potencial nem passiva naturais).
+const NO_CONJ = new Set(["ある|ある", "くれる|くれる"]);
 function makeVerb(w) {
   const [j, k] = w; let cls;
+  if (NO_CONJ.has(j + "|" + k)) return null;
   if (/来る$/.test(j) && /くる$/.test(k)) cls = "kuru";   // inclui compostos: 連れて来る
   else if (/する$/.test(k) && /する$/.test(j)) cls = "suru";
   else if (!ROWS.u.includes(k.slice(-1))) return null;

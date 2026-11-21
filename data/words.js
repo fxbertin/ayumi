@@ -787,7 +787,15 @@ const CATEGORIES = [
  ["きゅうり", "きゅうり", "kyuuri", "pepino"],["茄子", "なす", "nasu", "berinjela"],["大根", "だいこん", "daikon", "nabo japonês (daikon)"],
  ["白菜", "はくさい", "hakusai", "acelga chinesa"],["かぼちゃ", "かぼちゃ", "kabocha", "abóbora"],["芋", "いも", "imo", "batata / tubérculo"],
  ["豆", "まめ", "mame", "feijão / grão"],["キャベツ", "きゃべつ", "kyabetsu", "repolho"],["トマト", "とまと", "tomato", "tomate"],
- ["レモン", "れもん", "remon", "limão siciliano"]
+ ["レモン", "れもん", "remon", "limão siciliano"],
+ ["梅", "うめ", "ume", "ameixa-japonesa (ume)"],
+ ["栗", "くり", "kuri", "castanha"],
+ ["杏", "あんず", "anzu", "damasco"],
+ ["柚子", "ゆず", "yuzu", "yuzu (cítrico japonês)"],
+ ["無花果", "いちじく", "ichijiku", "figo"],
+ ["胡桃", "くるみ", "kurumi", "noz"],
+ ["柘榴", "ざくろ", "zakuro", "romã"],
+ ["枇杷", "びわ", "biwa", "nêspera"]
 ]},
 { id:"utensilios", group:"Vocabul\u00e1rio", name:"Utensílios de cozinha", words:[
  ["鍋", "なべ", "nabe", "panela"],["包丁", "ほうちょう", "houchou", "faca de cozinha"],["茶碗", "ちゃわん", "chawan", "tigela (de arroz)"],
@@ -890,7 +898,13 @@ const CATEGORIES = [
  ["どこか", "どこか", "dokoka", "algum lugar"],
  ["誰か", "だれか", "dareka", "alguém"],
  ["何か", "なにか", "nanika", "alguma coisa"],
- ["うん", "うん", "un", "sim; ahã (informal)"]
+ ["うん", "うん", "un", "sim; ahã (informal)"],
+ ["ごめん", "ごめん", "gomen", "desculpa (informal)"],
+ ["よろしく", "よろしく", "yoroshiku", "conto com você; prazer (ao se apresentar)"],
+ ["お疲れ様", "おつかれさま", "otsukaresama", "bom trabalho; obrigado pelo esforço"],
+ ["どういたしまして", "どういたしまして", "douitashimashite", "de nada"],
+ ["いいね", "いいね", "iine", "legal!; boa!"],
+ ["やばい", "やばい", "yabai", "nossa!; que perigo; que demais (gíria)"]
 ]},
 { id:"midia", group:"Vocabulário", name:"Mídia e entretenimento", words:[
  ["雑誌", "ざっし", "zasshi", "revista"],
@@ -1214,7 +1228,13 @@ const CATEGORIES = [
  ["語る", "かたる", "kataru", "contar; narrar"],
  ["争う", "あらそう", "arasou", "disputar; competir"],
  ["備える", "そなえる", "sonaeru", "preparar-se; equipar"],
- ["耐える", "たえる", "taeru", "suportar"]
+ ["耐える", "たえる", "taeru", "suportar"],
+ ["ある", "ある", "aru", "existir; ter (coisas)"],
+ ["居る", "いる", "iru", "estar; existir (pessoas e animais)"],
+ ["なる", "なる", "naru", "tornar-se; ficar"],
+ ["くれる", "くれる", "kureru", "dar (a mim ou a nós)"],
+ ["やる", "やる", "yaru", "fazer; dar (a animais e plantas)"],
+ ["しまう", "しまう", "shimau", "guardar; acabar fazendo"]
 ]},
 { id:"adverbios-curtos", group:"Vocabulário", name:"Advérbios e palavrinhas de medida", words:[
  ["まるで", "まるで", "marude", "como se; igualzinho a"],
@@ -1300,5 +1320,50 @@ const CATEGORIES = [
  ["障子", "しょうじ", "shouji", "porta de correr de papel translúcido (shoji)"],
  ["ちゃぶ台", "ちゃぶだい", "chabudai", "mesa baixa japonesa"],
  ["こたつ", "こたつ", "kotatsu", "kotatsu (mesa baixa aquecida)"]
+]},
+{ id:"corpo-extra", group:"Vocabulário", name:"Corpo: pele, músculos e mais", words:[
+ ["肌", "はだ", "hada", "pele"],
+ ["皮膚", "ひふ", "hifu", "pele (do corpo)"],
+ ["脇", "わき", "waki", "axila; lado"],
+ ["お尻", "おしり", "oshiri", "bumbum"],
+ ["手のひら", "てのひら", "tenohira", "palma da mão"],
+ ["拳", "こぶし", "kobushi", "punho"],
+ ["筋肉", "きんにく", "kinniku", "músculo"],
+ ["息", "いき", "iki", "respiração; fôlego"]
+]},
+{ id:"flores-arvores", group:"Vocabulário", name:"Flores e árvores", words:[
+ ["薔薇", "ばら", "bara", "rosa (flor)"],
+ ["椿", "つばき", "tsubaki", "camélia"],
+ ["向日葵", "ひまわり", "himawari", "girassol"],
+ ["朝顔", "あさがお", "asagao", "ipomeia (flor-da-manhã)"],
+ ["菊", "きく", "kiku", "crisântemo"],
+ ["蓮", "はす", "hasu", "lótus"],
+ ["藤", "ふじ", "fuji", "glicínia"],
+ ["紅葉", "もみじ", "momiji", "bordo; folhas vermelhas do outono"],
+ ["百合", "ゆり", "yuri", "lírio"],
+ ["蒲公英", "たんぽぽ", "tanpopo", "dente-de-leão"],
+ ["松", "まつ", "matsu", "pinheiro"],
+ ["杉", "すぎ", "sugi", "cedro japonês"],
+ ["柳", "やなぎ", "yanagi", "salgueiro"],
+ ["稲", "いね", "ine", "arroz (planta)"],
+ ["麦", "むぎ", "mugi", "trigo; cevada"]
+]},
+{ id:"interjeicoes", group:"Vocabulário", name:"Hesitações e interjeições", words:[
+ ["あの", "あの", "ano", "aquele (ali); ahn… (para começar a falar)"],
+ ["あのう", "あのう", "anoo", "ahn… (hesitação educada)"],
+ ["えっと", "えっと", "etto", "é…; deixa eu ver"],
+ ["ええと", "ええと", "eeto", "é…; deixa eu pensar"],
+ ["さあ", "さあ", "saa", "hum…, quem sabe?; vamos!"],
+ ["まあ", "まあ", "maa", "bem; até que; mais ou menos"],
+ ["ええ", "ええ", "ee", "sim; é (educado)"],
+ ["ああ", "ああ", "aa", "ah!; ah, entendi"],
+ ["へえ", "へえ", "hee", "nossa!; é mesmo?"],
+ ["ふーん", "ふーん", "fuun", "hum; ah, é? (sem muito interesse)"],
+ ["うーん", "うーん", "uun", "hum… (pensando)"],
+ ["ほら", "ほら", "hora", "olha!; viu?"],
+ ["さて", "さて", "sate", "bem, então (para mudar de assunto)"],
+ ["そうか", "そうか", "souka", "ah, é?; entendi"],
+ ["ねえ", "ねえ", "nee", "ei; ó (para chamar a atenção)"],
+ ["よし", "よし", "yoshi", "certo!; vamos lá!"]
 ]}
 ];

@@ -15,8 +15,22 @@
 <script src="tts.js"></script>
 <style>
 .setrow{display:flex;flex-wrap:wrap;gap:12px 20px;align-items:center;margin:12px 0}
-.setrow label{display:flex;align-items:center;gap:8px}
-select{font:inherit;color:var(--ink);background:var(--card);border:1.5px solid var(--line);border-radius:8px;padding:8px 10px;max-width:100%}
+.setrow label{display:flex;flex-wrap:wrap;align-items:center;gap:6px 8px;min-width:0;max-width:100%}
+select{font:inherit;color:var(--ink);background:var(--card);border:1.5px solid var(--line);border-radius:8px;padding:8px 10px;max-width:100%;min-width:0}
+dialog.dlg{box-sizing:border-box;width:min(92vw,420px);max-height:90vh;overflow:auto;padding:20px 22px;border:1.5px solid var(--line);border-radius:14px;background:var(--card);color:var(--ink);box-shadow:0 10px 40px rgba(0,0,0,.35)}
+dialog.dlg::backdrop{background:rgba(0,0,0,.5)}
+dialog.dlg h2{margin:0 0 .3em;font-size:1.35rem}
+dialog.dlg p{margin:.5em 0}
+dialog.dlg .btns{justify-content:flex-start;margin:16px 0 0}
+#lista{width:1.15em;height:1.15em;margin:0}
+.chk{display:flex;flex-wrap:nowrap;align-items:center;gap:8px}
+.chk[aria-disabled=true]{opacity:.55}
+#huntbox{margin:10px 0}
+#huntbox .hint{margin:.4em 0;font-size:.9rem}
+.rl li.gone{opacity:.55}
+#dscore{font-size:2.2rem;font-weight:700;margin:.1em 0}
+#drec{font-weight:700}
+#drec.new{color:var(--stamp)}
 a{color:inherit}
 .recs{display:flex;flex-wrap:wrap;gap:6px 18px;color:var(--muted);margin:14px 0}
 .recs b{color:var(--ink)}
@@ -101,6 +115,7 @@ details.how p{margin:.5em 0}
       <label>Modo
         <select id="md"><option value="classico">Clássico</option><option value="ochiba">落ち葉 Ochiba (letras novas a cada minuto)</option></select>
       </label>
+      <label class="chk" id="listalbl"><input type="checkbox" id="lista"> Mostrar as palavras para caçar (recorde à parte)</label>
       <label>Tamanho mínimo da palavra
         <select id="mn"><option value="2">2 kana</option><option value="3">3 kana</option><option value="4">4 kana</option></select>
       </label>
@@ -138,6 +153,11 @@ details.how p{margin:.5em 0}
       <button id="shuf" type="button" class="ghost">Reembaralhar (−10)</button>
       <button id="quit" type="button" class="ghost">Terminar</button>
     </div>
+    <details id="huntbox" class="how" hidden open>
+      <summary id="huntsum">Palavras para caçar</summary>
+      <p class="hint" id="huntnote"></p>
+      <ul class="rl" id="hunt"></ul>
+    </details>
     <div id="last" aria-live="polite"></div>
     <ol id="list" aria-label="Palavras encontradas"></ol>
   </section>
@@ -154,11 +174,30 @@ details.how p{margin:.5em 0}
     <h2 id="rwh">Palavras que você achou</h2>
     <ul class="rl" id="rwords"></ul>
     <details class="how"><summary>Palavras escondidas neste tabuleiro</summary>
-      <p>Estas palavras limpavam o quadro todo, nesta ordem. As marcadas com ✓ você também achou.</p>
+      <p id="rplanp">Estas palavras limpavam o quadro todo, nesta ordem. As marcadas com ✓ você também achou.</p>
       <ul class="rl" id="rplan"></ul>
     </details>
   </section>
 </main>
+<dialog id="enddlg" class="dlg" aria-labelledby="dtitle" aria-describedby="dinfo">
+  <h2 id="dtitle"></h2>
+  <div id="dscore"></div>
+  <p id="drec"></p>
+  <p id="dinfo"></p>
+  <div class="btns">
+    <button id="dagain" type="button" class="primary">Novo tabuleiro</button>
+    <button id="drepeat" type="button" class="ghost">Repetir este tabuleiro</button>
+    <button id="dmenu" type="button" class="ghost">Menu</button>
+  </div>
+</dialog>
+<dialog id="quitdlg" class="dlg" aria-labelledby="qtitle" aria-describedby="qinfo">
+  <h2 id="qtitle">Terminar a partida agora?</h2>
+  <p id="qinfo">Os pontos desta partida contam para o recorde, e você verá as palavras que achou e as escondidas.</p>
+  <div class="btns">
+    <button id="qgo" type="button" class="primary">Continuar</button>
+    <button id="qend" type="button" class="ghost">Terminar</button>
+  </div>
+</dialog>
 <footer>Seu recorde fica salvo só neste navegador. <a href="progresso.html">Ver progresso</a></footer>
 
 <script src="data/words.js"></script>
@@ -189,7 +228,7 @@ const svg = document.createElementNS(NS, "svg"); svg.id = "lines"; svg.setAttrib
 const line = document.createElementNS(NS, "polyline"); svg.appendChild(line);
 
 const S = { level: "facil", mode: "classico", rainMode: false, paused: false, t: 0, until: 0, last: 0, tick: 0, rains: 0, nextId: 0, rrnd: null, min: 2, seed: 1, game: null, grid: null, els: new Map(), path: [], tapMode: false, dragging: false, pid: null, pendingTap: null,
-            score: 0, found: [], shufLeft: MAX_SHUF, locked: false, over: false, pending: null, rnd: null, c: 48, kc: [0, 0], hintTimer: 0, msgTimer: 0 };
+            score: 0, found: [], shufLeft: MAX_SHUF, locked: false, over: false, pending: null, rnd: null, c: 48, kc: [0, 0], hintTimer: 0, msgTimer: 0, wantList: false, listOn: false, hunt: { keys: [], ids: [], exact: true } };
 
 /* ---------- preferências e menu ---------- */
 function readPrefs() {
@@ -198,22 +237,30 @@ function readPrefs() {
   S.min = [2, 3, 4].includes(mn) ? mn : 2;
   S.mode = ls.get("kd-kotonoha-modo", "classico") === "ochiba" ? "ochiba" : "classico";
   $("#lv").value = S.level; $("#mn").value = String(S.min); $("#md").value = S.mode;
+  S.wantList = ls.get("kd-kotonoha-lista", false) === true; $("#lista").checked = S.wantList;
+  listaUI();
+}
+function listaUI() {
+  const rain = $("#md").value === "ochiba";
+  $("#lista").disabled = rain; $("#listalbl").setAttribute("aria-disabled", rain ? "true" : "false");
 }
 function menuInfo() {
   const lv = $("#lv").value;
-  $("#lvinfo").textContent = INFO[lv] + ($("#md").value === "ochiba" ? " Modo 落ち葉: começa com cerca de 60% das casas e, a cada minuto, caem " + KOTO.LEVELS[lv].rain + " kana novos." : "");
+  $("#lvinfo").textContent = INFO[lv] + ($("#md").value === "ochiba" ? " Modo 落ち葉: começa com cerca de 60% das casas e, a cada minuto, caem " + KOTO.LEVELS[lv].rain + " kana novos. A lista de palavras só existe no Clássico." : "");
 }
 function showRecords() {
   const box = $("#recs"); box.replaceChildren();
+  const rainM = $("#md").value === "ochiba", listM = !rainM && $("#lista").checked;
   KOTO.LEVEL_ORDER.forEach(l => {
-    const b = ls.get("best:kotonoha-" + ($("#md").value === "ochiba" ? "ochiba-" : "") + l, 0) || 0;
+    const b = ls.get("best:kotonoha-" + (rainM ? "ochiba-" : listM ? "lista-" : "") + l, 0) || 0;
     const s = el("span", "", NAMES[l] + ": "); s.append(el("b", "", b > 0 ? String(b) : "–")); box.append(s);
   });
-  box.prepend(el("span", "", ($("#md").value === "ochiba" ? "Recordes 落ち葉 (pontos) → " : "Recordes (pontos) → ")));
+  box.prepend(el("span", "", (rainM ? "Recordes 落ち葉 (pontos) → " : listM ? "Recordes com a lista de palavras (pontos) → " : "Recordes (pontos) → ")));
 }
 function show(id) { ["menu", "game", "result"].forEach(x => { $("#" + x).hidden = x !== id; }); }
 $("#lv").onchange = menuInfo;
-$("#md").onchange = () => { menuInfo(); showRecords(); };
+$("#md").onchange = () => { listaUI(); menuInfo(); showRecords(); };
+$("#lista").onchange = showRecords;
 
 /* ---------- tabuleiro (DOM) ---------- */
 function layout() {
@@ -392,7 +439,7 @@ function showFound(e, gain) {
   msg("+" + gain + " pontos", "good");
 }
 function afterMove() {
-  refresh(); hud();
+  refresh(); hud(); huntRefresh();
   if (S.over) return;
   if (KOTO.count(S.grid) === 0) {
     S.score += BONUS; hud();
@@ -466,6 +513,7 @@ $("#shuf").onclick = () => {
   S.pending = null;
   if (!ng) { msg("Com as casas que restam não dá para formar nenhuma palavra; reembaralhar não ajudaria.", "warn"); return; }
   S.shufLeft--; S.score = Math.max(0, S.score - COST.shuffle); S.grid = ng; clearPath();
+  if (!S.rainMode) { huntAfterShuffle(ng); huntRefresh(); }
   const n = S.game.n;
   for (let r = 0; r < n; r++) for (let c = 0; c < n; c++) {
     const cell = ng[r][c]; if (!cell) continue;
@@ -481,20 +529,83 @@ $("#regr").onclick = () => {
   S.score = Math.max(0, S.score - COST.regroup); S.grid = ng; S.pending = null; clearPath();
   const n = S.game.n;
   for (let r = 0; r < n; r++) for (let c = 0; c < n; c++) { const cell = ng[r][c]; if (cell) place(S.els.get(cell.id), r, c); }
-  $("#shuf").classList.remove("attn"); hud(); msg("Casas reagrupadas (−" + COST.regroup + ").", "good");
+  $("#shuf").classList.remove("attn"); hud(); if (!S.rainMode) huntFallback(S.grid); huntRefresh(); msg("Casas reagrupadas (−" + COST.regroup + ").", "good");
   S.locked = true; setTimeout(() => { S.locked = false; afterMove(); }, reduce ? 0 : 330);
 };
 $("#quit").onclick = () => {
   if (S.over) return;
   if (S.locked) return;
-  if (KOTO.count(S.grid) > 0 && !confirm("Terminar a partida agora?")) return;
+  if (KOTO.count(S.grid) > 0) {
+    const dlg = $("#quitdlg");
+    if (typeof dlg.showModal !== "function") { if (!confirm("Terminar a partida agora?")) return; finish("quit"); return; }
+    S.quitPaused = S.rainMode && !S.paused;
+    if (S.quitPaused) setPaused(true);
+    dlg.returnValue = ""; dlg.showModal(); $("#qgo").focus();
+    return;
+  }
   finish("quit");
 };
+$("#qgo").onclick = () => $("#quitdlg").close("go");
+$("#qend").onclick = () => $("#quitdlg").close("end");
+$("#quitdlg").addEventListener("close", () => {
+  const end = $("#quitdlg").returnValue === "end";
+  if (end) { if (!S.over) finish("quit"); return; }
+  if (S.quitPaused && !S.over) setPaused(false);
+  S.quitPaused = false;
+});
 
 /* ---------- partida ---------- */
+/* ---------- lista das palavras para caçar ---------- */
+function fillWords(ul, items, mark) {
+  ul.replaceChildren();
+  items.forEach(it => {
+    const li = el("li", (mark && !it.got ? "miss" : "") + (it.gone ? " gone" : ""));
+    li.append(el("span", "ja", (it.got ? "✓ " : "") + it.entries.map(x => x.jp).join(" · ")), el("span", "rd", it.key), el("span", "pt", it.entries.map(x => x.pt).join("; ") + (it.gone ? " (não dá mais)" : "")));
+    if (AyumiTTS.supported()) { const b = el("button", "ghost", "🔊"); b.type = "button"; b.setAttribute("aria-label", "Ouvir " + it.key); b.onclick = () => AyumiTTS.speak(it.entries[0].kana, { rate: .85 }); li.append(b); }
+    ul.append(li);
+  });
+}
+const HUNT_NOTE = "Nesta ordem, estas palavras limpam o quadro todo (+" + BONUS + "). Se você jogar outras, algumas deixam de caber e ficam esmaecidas. A Dica continua custando −" + COST.hint + ".";
+const HUNT_NOTE2 = "Depois de reembaralhar ou reagrupar não existe mais um plano que limpe o quadro todo. Estas são algumas palavras possíveis agora (as mais longas primeiro).";
+// casas (ids) de cada palavra do plano, simulando as quedas em ordem; a palavra "não dá mais" quando uma dessas casas já foi usada
+function huntIds(grid, plan) {
+  let g = grid.map(r => r.slice()); const out = [];
+  for (const p of plan) { out.push(p.path.map(([r, c]) => g[r][c].id)); g = KOTO.drop(g, p.path); }
+  return out;
+}
+function huntRefresh() {
+  const box = $("#huntbox"); box.hidden = !S.listOn;
+  if (!S.listOn) return;
+  const got = new Set(S.found.map(f => f.key));
+  const can = S.hunt.exact || S.over ? null : new Set(KOTO.findWord(S.grid, dict, S.min, S.game.mode, null, true).map(x => x.entry.key));
+  const items = S.hunt.keys.map((k, i) => {
+    const ids = S.hunt.ids[i], g = got.has(k);
+    return { key: k, entries: dict.seen.get(k).entries, got: g, gone: !g && !S.over && (ids ? ids.some(id => !S.els.has(id)) : !!can && !can.has(k)) };
+  });
+  fillWords($("#hunt"), items, false);
+  $("#huntsum").textContent = "Palavras para caçar (" + items.filter(i => i.got).length + " de " + items.length + ")";
+  $("#huntnote").textContent = S.hunt.exact ? HUNT_NOTE : HUNT_NOTE2;
+}
+// sem plano completo (reagrupar ou reembaralhar sem divisão exata): as achadas ficam com ✓ e entram até 6 palavras possíveis agora
+function huntFallback(grid) {
+  const got = new Set(S.found.map(f => f.key)), kept = S.hunt.keys.filter(k => got.has(k)), seen = new Set();
+  const add = KOTO.findWord(grid, dict, S.min, S.game.mode, null, true).map(x => x.entry)
+    .filter(e => !seen.has(e.key) && !kept.includes(e.key) && seen.add(e.key)).sort((a, b) => b.units.length - a.units.length).slice(0, 6).map(e => e.key);
+  const keys = kept.concat(add);
+  S.hunt = { keys, ids: keys.map(() => null), exact: false };
+}
+// depois de reembaralhar: refaz a lista (as palavras já achadas ficam, com ✓)
+function huntAfterShuffle(ng) {
+  if (!(ng.exact && ng.plan)) { huntFallback(ng); return; }
+  const got = new Set(S.found.map(f => f.key)), kept = S.hunt.keys.filter(k => got.has(k)), ids = huntIds(ng, ng.plan);
+  const keys = kept.slice(), idl = kept.map(() => null);
+  ng.plan.forEach((p, i) => { if (!kept.includes(p.key)) { keys.push(p.key); idl.push(ids[i]); } });
+  S.hunt = { keys, ids: idl, exact: true };
+}
 function start(seed) {
   S.seed = seed; S.rainMode = S.mode === "ochiba";
   S.game = S.rainMode ? KOTO.generatePartial(dict, S.level, S.min, seed) : KOTO.generate(dict, S.level, S.min, seed);
+  S.listOn = S.wantList && !S.rainMode; S.hunt = { keys: S.game.plan.map(p => p.key), ids: huntIds(S.game.grid, S.game.plan), exact: true };
   S.grid = S.game.grid.map(r => r.slice());
   S.rnd = KOTO.mulberry32(seed * 31 + 7); S.rrnd = KOTO.mulberry32(seed * 17 + 3);
   clearInterval(S.tick); S.paused = false; board.classList.remove("paused"); $("#pausebtn").textContent = "Pausa";
@@ -504,7 +615,7 @@ function start(seed) {
   S.path = []; S.tapMode = false; S.dragging = false;
   S.kc = [S.game.n - 1, 0];
   $("#list").replaceChildren(); $("#last").replaceChildren(); msg(""); $("#shuf").classList.remove("attn");
-  show("game"); build(); refresh(); hud();
+  show("game"); build(); refresh(); hud(); huntRefresh();
   $("#cur").textContent = "\u00a0";
   if (S.rainMode) { rainUI(); S.last = performance.now(); S.tick = setInterval(tick, 200); }
 }
@@ -516,40 +627,45 @@ function newSeed() {
 $("#go").onclick = () => {
   S.level = $("#lv").value; S.min = parseInt($("#mn").value, 10); S.mode = $("#md").value === "ochiba" ? "ochiba" : "classico";
   ls.set("kd-kotonoha-level", S.level); ls.set("kd-kotonoha-min", S.min); ls.set("kd-kotonoha-modo", S.mode);
+  S.wantList = $("#lista").checked && !$("#lista").disabled; ls.set("kd-kotonoha-lista", $("#lista").checked);
   start(newSeed());
 };
 function finish(reason) {
   S.over = true; S.locked = true; clearPath(); clearTimeout(S.hintTimer); clearInterval(S.tick); S.paused = false; board.classList.remove("paused");
-  const key = "best:kotonoha-" + (S.rainMode ? "ochiba-" : "") + S.level, prev = ls.get(key, 0) || 0, rec = S.score > prev;
+  const key = "best:kotonoha-" + (S.rainMode ? "ochiba-" : S.listOn ? "lista-" : "") + S.level, prev = ls.get(key, 0) || 0, rec = S.score > prev;
   if (rec) ls.set(key, S.score);
   const left = KOTO.count(S.grid);
   $("#rtitle").textContent = reason === "clear" ? "Quadro limpo! 🎉" : reason === "full" ? "O quadro encheu" : reason === "stuck" ? "Não há mais palavras possíveis" : "Partida encerrada";
   $("#rscore").textContent = S.score + " pontos";
-  const lvName = (S.rainMode ? "落ち葉, " : "") + NAMES[S.level] + ", mínimo " + S.min + " kana";
+  const lvName = (S.rainMode ? "落ち葉, " : "") + NAMES[S.level] + ", mínimo " + S.min + " kana" + (S.listOn ? ", com a lista de palavras" : "");
   const parts = [lvName + "."];
   if (S.rainMode) parts.push("Você aguentou " + fmtUp(S.t) + " e " + S.rains + (S.rains === 1 ? " chuva." : " chuvas.") + (reason === "full" ? " A chuva seguinte não coube." : "") + " Ficaram " + left + " casas no quadro.");
   else parts.push(reason === "clear" ? "Você limpou o quadro todo (+" + BONUS + ")." : "Sobraram " + left + " casas.");
-  parts.push(rec && S.score > 0 ? "Novo recorde!" : "Recorde: " + Math.max(prev, S.score) + ".");
-  $("#rinfo").textContent = parts.join(" ");
-  const fill = (ul, items, mark) => {
-    ul.replaceChildren();
-    items.forEach(it => {
-      const li = el("li", mark && !it.got ? "miss" : "");
-      li.append(el("span", "ja", (it.got ? "✓ " : "") + it.entries.map(x => x.jp).join(" · ")), el("span", "rd", it.key), el("span", "pt", it.entries.map(x => x.pt).join("; ")));
-      if (AyumiTTS.supported()) { const b = el("button", "ghost", "🔊"); b.type = "button"; b.setAttribute("aria-label", "Ouvir " + it.key); b.onclick = () => AyumiTTS.speak(it.entries[0].kana, { rate: .85 }); li.append(b); }
-      ul.append(li);
-    });
-  };
-  fill($("#rwords"), S.found.slice().reverse());
+  const isNew = rec && S.score > 0, recTxt = isNew ? "Novo recorde!" : "Recorde: " + Math.max(prev, S.score) + ".";
+  $("#rinfo").textContent = parts.join(" ") + " " + recTxt;
+  fillWords($("#rwords"), S.found.slice().reverse());
   if (!S.found.length) $("#rwords").append(el("li", "", "Nenhuma palavra desta vez."));
   const gotKeys = new Set(S.found.map(f => f.key));
-  fill($("#rplan"), S.game.plan.map(p => ({ key: p.key, entries: dict.seen.get(p.key).entries, got: gotKeys.has(p.key) })), true);
+  fillWords($("#rplan"), S.hunt.keys.map(k => ({ key: k, entries: dict.seen.get(k).entries, got: gotKeys.has(k) })), true);
+  $("#rplanp").textContent = S.hunt.exact ? "Estas palavras limpavam o quadro todo, nesta ordem. As marcadas com ✓ você também achou." : "Depois de reembaralhar ou reagrupar não havia mais um plano que limpasse o quadro todo. Estas são palavras que cabiam; as marcadas com ✓ você achou.";
   $("#rplan").parentElement.hidden = S.rainMode;
   show("result"); $("#rtitle").setAttribute("tabindex", "-1"); $("#rtitle").focus();
+  const dlg = $("#enddlg");
+  if (typeof dlg.showModal === "function") {
+    $("#dtitle").textContent = $("#rtitle").textContent;
+    $("#dscore").textContent = $("#rscore").textContent;
+    const dr = $("#drec"); dr.textContent = recTxt; dr.className = isNew ? "new" : "";
+    $("#dinfo").textContent = parts.join(" ");
+    dlg.returnValue = ""; dlg.showModal(); $("#dagain").focus();
+  }
 }
+$("#enddlg").addEventListener("close", () => { if (!$("#result").hidden) $("#rtitle").focus(); });
+$("#dagain").onclick = () => { $("#enddlg").close("again"); start(newSeed()); };
+$("#drepeat").onclick = () => { $("#enddlg").close("repeat"); start(S.seed); };
+$("#dmenu").onclick = () => { $("#enddlg").close("menu"); $("#tomenu").click(); };
 $("#again").onclick = () => start(newSeed());
 $("#repeat").onclick = () => start(S.seed);
-$("#tomenu").onclick = () => { $("#md").value = S.mode; showRecords(); show("menu"); };
+$("#tomenu").onclick = () => { $("#md").value = S.mode; listaUI(); menuInfo(); showRecords(); show("menu"); };
 window.addEventListener("resize", () => { if (S.game && !$("#game").hidden) layout(); });
 
 readPrefs(); menuInfo(); showRecords(); show("menu");
