@@ -16,7 +16,7 @@ if (typeof SENTENCES !== "undefined") for (const s of SENTENCES) for (const k of
 const shuffle = a => { a = [...a]; for (let i = a.length-1; i > 0; i--) { const j = Math.floor(Math.random()*(i+1)); [a[i],a[j]] = [a[j],a[i]]; } return a; };
 const show = id => ["menu","game","study","feed","result"].forEach(s => $("#"+s).hidden = s !== id);
 
-const S = { mode: store.get("mode") === "study" ? "study" : "play", cat:null, dir: store.get("dir") || "jp2pt", reading: store.get("reading") !== false, auto: store.get("auto") === true,
+const S = { mode: store.get("mode") === "play" ? "play" : "study", cat:null, dir: store.get("dir") || "jp2pt", reading: store.get("reading") !== false, auto: store.get("auto") === true,
             q:[], i:0, score:0, wrong:[], locked:false, correct:0 };
 
 function setDir(d){
@@ -348,6 +348,7 @@ $("#study-feed").onclick = () => { $("#feed-scope").value = S.cat.all ? "g:" + S
 $("#m-play").onclick = () => setMode("play");
 $("#m-study").onclick = () => setMode("study");
 $("#study-back").onclick = renderMenu;
+$("#study-menu").onclick = renderMenu;
 $("#study-play").onclick = () => start(S.cat);
 $("#d-jp2pt").onclick = () => setDir("jp2pt");
 $("#d-pt2jp").onclick = () => setDir("pt2jp");
