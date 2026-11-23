@@ -1,0 +1,182 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Densetsu Meguri – Ayumi</title>
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="data/zonas.css">
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#1d2742">
+<link rel="icon" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<script src="pwa.js" defer></script>
+<style>
+/* cores do desenho */
+.c-mt{fill:#8c9bb0}
+.c-cave{fill:#3b3340}
+.c-vol{fill:#7a5f55}
+.c-stone{fill:#cfc7b8}
+.c-ttw{fill:#d9d2e6}
+.c-for{fill:#4f8f4a}
+.c-wtr{fill:#8fd0ee}
+.c-sand{fill:#ecd9a0}
+.c-wood{fill:#c99a68}
+.c-wall{fill:#f1e2c4}
+.c-flag{fill:#c63a3a}
+.c-door{fill:#8a5a3b}
+.c-cell{fill:#3c3640}
+.c-so{fill:#7d8f58}
+.c-kr{fill:#b8323a}
+.c-kn{fill:#a9b0bb}
+.c-pr{fill:#3f6fb5}
+.c-qr{fill:#8a5fb8}
+.c-pk{fill:#f2a6c6}
+.c-bird{fill:#4f8fd8}
+.c-rock{fill:#a7a29a}
+.c-wolf{fill:#8e98a6}
+.c-bear{fill:#8a5a3a}
+.c-horse{fill:#a8703f}
+.c-hole{fill:#2b2620}
+.c-snake{fill:#6fa84e}
+.c-chest{fill:#9a6b3c}
+.c-gold{fill:#e6b93c}
+.c-gem{fill:#4fb3d9}
+.c-parch{fill:#eedaa8}
+.c-trk{fill:#7a5a3c}
+.c-rack{fill:#a9784f}
+.c-steel{fill:#dfe5ec}
+.c-shield{fill:#3b6fb0}
+.c-herot{fill:#4f9a5a}
+.c-robeW{fill:#3f5fb0}
+.c-hatK{fill:#2d2438}
+.c-magic{fill:#c58bff}
+.c-bkc{fill:#8a3b3b}
+.c-glassw{fill:#dfeef8}
+.c-bot{fill:#6fae5a}
+.c-kaiju{fill:#4c6f78}
+.c-drag{fill:#c24a3a}
+.c-maou{fill:#4a2d6e}
+.c-oni{fill:#4a7fc7}
+.c-ghost{fill:#f4f7fc}
+.c-gob{fill:#7fb35a}
+.c-bone{fill:#ece4cd}
+.c-zsk{fill:#9fb59a}
+.c-blob{fill:#b05ad0}
+.c-sky{fill:#cfe6f5}
+.c-sun{fill:#ffd45a}
+.c-cloud{fill:#ffffff}
+.c-far{fill:#b9d3c0}
+.c-gr{fill:#9ccf8a}
+.c-mtd{fill:#7a889c}
+.c-snow{fill:#f4f7fa}
+.c-lavad{fill:#b23a1e}
+.c-lava{fill:#ff7a2f}
+.c-smoke{fill:#b8bcc4}
+.c-hill{fill:#86bb74}
+.c-rfr{fill:#b5533c}
+.c-dk{fill:#3a3340}
+.c-rfp{fill:#7b5aa6}
+.c-winl{fill:#ffd86b}
+.c-path{fill:#e6d9bf}
+.c-for2{fill:#67a85f}
+.c-wtrn{fill:#8fd0ee;stroke:none}
+.c-lnw{fill:none;stroke:#ffffff;stroke-width:2;stroke-linecap:round;vector-effect:non-scaling-stroke}
+.c-gr2{fill:#7fbf6f}
+.c-leaf{fill:#5fa55a}
+.c-lnd{fill:none;stroke:#5a3a22;stroke-width:2.5;vector-effect:non-scaling-stroke}
+.c-rfo{fill:#c9693f}
+.c-stone2{fill:#bfb6a6}
+.c-lnb{fill:none;stroke:rgba(110,95,80,.35);stroke-width:1.5;vector-effect:non-scaling-stroke}
+.c-white{fill:#ffffff}
+.c-iron{fill:#6f7480}
+.c-bars{fill:none;stroke:#aab0b8;stroke-width:3.5;vector-effect:non-scaling-stroke}
+.c-cob{fill:#bda98a}
+.c-carp{fill:#2e6f78}
+.c-lnc{fill:none;stroke:rgba(110,95,80,.30);stroke-width:1.5;vector-effect:non-scaling-stroke}
+.c-skin{fill:#f4cfa6}
+.c-ink{fill:#3a2f2a}
+.c-hel{fill:#8e949c}
+.c-boots{fill:#6b4a2f}
+.c-beard{fill:#f2f2f2}
+.c-plume{fill:#d33a3a}
+.c-cape{fill:#c0392b}
+.c-hair{fill:#7a5230}
+.c-blond{fill:#e8c870}
+.c-forD{fill:#3f7a3d}
+.c-cliff{fill:#9a8f84}
+.c-bell{fill:#f4efe0}
+.c-birdd{fill:#3f78b8}
+.c-beak{fill:#f2a03a}
+.c-rockl{fill:#c7c2ba}
+.c-wolfl{fill:#d3d8de}
+.c-bearl{fill:#c9a27a}
+.c-mane{fill:#4a3022}
+.c-dirt{fill:#a58257}
+.c-snd{fill:#4d7f38}
+.c-tongue{fill:#d9323a}
+.c-flame{fill:#f2662a}
+.c-flame2{fill:#ffd24a}
+.c-velv{fill:#2f3f66}
+.c-gold2{fill:#d1a024}
+.c-gem2{fill:#8fdcf0}
+.c-ruby{fill:#d9323a}
+.c-parch2{fill:#d8e2b0}
+.c-lnx{fill:none;stroke:#b5533c;stroke-width:2.5;stroke-dasharray:6 5;stroke-linecap:round;vector-effect:non-scaling-stroke}
+.c-lnr{fill:none;stroke:#c63a3a;stroke-width:5;stroke-linecap:round;vector-effect:non-scaling-stroke}
+.c-wallD{fill:#8a8170}
+.c-floor2{fill:#a88860}
+.c-night{fill:#3b3568}
+.c-star{fill:#fff3b0}
+.c-hatW{fill:#2f4a9a}
+.c-crys{fill:#7fd6f0}
+.c-hairD{fill:#2e2232}
+.c-dressP{fill:#5a3a7a}
+.c-magic2{fill:#f0d9ff}
+.c-tbl{fill:#8a5a3b}
+.c-pgs{fill:#f6edd4}
+.c-liqP{fill:#e46fa8}
+.c-skull{fill:#f4f1e6}
+.c-nightM{fill:#2a2540}
+.c-moon{fill:#f3efd8}
+.c-grnd{fill:#4a4458}
+.c-kaijd{fill:#33505a}
+.c-kaijl{fill:#a8c4b8}
+.c-yel{fill:#ffd45a}
+.c-dragw{fill:#f2a03a}
+.c-maoskin{fill:#cdbfe0}
+.c-glow{fill:#ff4a4a}
+.c-woodc{fill:#8a5a3b}
+.c-hairK{fill:#2b2b36}
+.c-tiger{fill:#f2a03a}
+.c-gobd{fill:#5f8f3c}
+.c-zshirt{fill:#6d7aa0}
+.c-zpants{fill:#7a6a50}
+.c-zhair{fill:#4a3c30}
+.c-blobd{fill:#8a3fa8}
+</style>
+</head>
+<body>
+<header>
+  <h1><span lang="ja">伝説めぐり</span> Densetsu Meguri</h1>
+  <p>Um passeio por um mundo de lendas: descubra o nome de cada herói, arma, mago, monstro e criatura em japonês. · <a href="index.html">← Ayumi</a></p>
+</header>
+
+<main id="app"></main>
+
+<footer>Cada rodada tem até 10 itens. No modo “Tocar”, o desenho se aproxima do castelo ou da floresta sozinho. As posições são esquemáticas, só para estudar os nomes. Ao digitar, o mesmo nome com outra palavra (ドラゴン, お化け, 薬, 宝, 英雄) também vale. Atalhos: 1–4 respondem, Enter avança.</footer>
+
+<script src="data/words.js"></script>
+<script src="data/zonas.js"></script>
+<script src="data/densetsu.js"></script>
+<script src="tts.js"></script>
+<script>
+window.DENSETSU_GAME = Zonas.mount(document.getElementById("app"), {
+  prefix: "densetsu", data: DENSETSU, aria: "Desenho esquemático de um mundo de fantasia: mapa, castelo, floresta, heróis, magos e monstros",
+  text: { unit: "item", tocarBtn: "Tocar no desenho", ask1: "Que lugar, criatura ou objeto está piscando?", ask2: "Como se diz isto? Digite em hiragana ou romaji (kanji também vale).", ask3: "Toque no lugar ou objeto que esta palavra nomeia." }
+});
+</script>
+</body>
+</html>

@@ -35,3 +35,5 @@ a{color:inherit}
 .rec{color:var(--muted)}
 /* a media query vem DEPOIS das regras base de #stage (senão elas a sobrescrevem) */
 @media (max-width:620px){.kgrid{grid-template-columns:1fr}#stage{max-height:40vh}#game[data-modo=tocar] #stage{max-height:56vh}#opts.opts{grid-template-columns:1fr 1fr;margin:8px 0}.tapword{font-size:2rem}}
+/* as vistas passam para a linha de baixo quando não cabem (6 botões não cabiam em 390px e ficavam cortados) */
+#vistas{flex-wrap:wrap;max-width:100%}

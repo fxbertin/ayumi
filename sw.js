@@ -2,12 +2,13 @@
 // Estratégia: responde na hora com a cópia guardada e atualiza essa cópia em segundo plano
 // (stale-while-revalidate); assim, uma atualização do site aparece na visita seguinte, sem precisar trocar nada aqui.
 // Quando ADICIONAR ou REMOVER arquivos do site, atualize CORE e aumente VERSION (kd-v2, kd-v3...).
-const VERSION = "kd-v10";
+const VERSION = "kd-v11";
 const CORE = [
   "./",
   "conjugacao-adjetivos.html",
   "conjugacao.html",
   "contadores.html",
+  "densetsu.html",
   "ditado.html",
   "grammar-prova.html",
   "grammar.html",
@@ -37,6 +38,7 @@ const CORE = [
   "data/accent.js",
   "data/body.js",
   "data/casa.js",
+  "data/densetsu.js",
   "data/zonas.css",
   "data/zonas.js",
   "data/conj-adj.js",
@@ -59,6 +61,7 @@ const CORE = [
   "icons/icon-192.png",
   "icons/icon-512.png",
   "icons/icon-maskable-512.png",
+  "img/prev-densetsu.webp",
   "img/prev-kana-blaster.webp",
   "img/prev-kana-drop.webp",
   "img/prev-karada.webp",

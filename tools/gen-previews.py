@@ -58,6 +58,12 @@ with sync_playwright() as p:
         q.evaluate("(()=>{const K=KURASHI;K.S.qs=[{z:K.ZONES.find(z=>z.k==='台所|だいどころ')}];K.S.qi=0;return K.showQ()})()"); q.wait_for_timeout(500)
         g = q.locator(".kgrid").bounding_box()
         out["kurashi"] = crop16x10(q.screenshot(clip={"x": g["x"], "y": g["y"], "width": g["width"], "height": g["width"] * 10 / 16}), "center")
+    if want("densetsu"):
+        q = b.new_context(viewport={"width": 760, "height": 800}, color_scheme="light", device_scale_factor=2).new_page()
+        q.goto(base + "densetsu.html"); q.click("[data-vista=natureza]"); q.click("#go")
+        q.evaluate("(()=>{const K=DENSETSU_GAME;K.S.qs=[{z:K.ZONES.find(z=>z.k==='火山|かざん')}];K.S.qi=0;return K.showQ()})()"); q.wait_for_timeout(500)
+        g = q.locator(".kgrid").bounding_box()
+        out["densetsu"] = crop16x10(q.screenshot(clip={"x": g["x"], "y": g["y"], "width": g["width"], "height": g["width"] * 10 / 16}), "top")
     if want("numeros"):
         q = page(); q.goto(base + "numeros.html"); q.click("[data-lv='5']"); q.click("#go")
         q.evaluate("(()=>{S.q=[35640];S.i=0;render()})()"); q.fill("#ja", "sanmango"); q.wait_for_timeout(300)

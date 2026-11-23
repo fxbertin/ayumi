@@ -43,6 +43,9 @@ Depois de cada resposta, o jogo mostra uma frase de `data/sentences.js` (japonê
 ## Reorganização das categorias de vocabulário (2026-11-21)
 Totais: 95 categorias, 2323 palavras, 2030 frases. Mudanças: `numeros` virou "Números" (JLPT N5, 25 palavras: 一 a 十, 零, 百, 千, 万, 半分 e a contagem nativa 一つ a 十 (とお), com 六つ a 十 novas) e `n5-contadores` virou "Contadores" (46); 円 foi para `dinheiro`. Fusões: `n4-restaurante` e `comidas-japonesas` em `comida`; `casa-partes` e `casa-japonesa` em `casa-moveis`; `escola-provas` em `escola`; `trabalho-carreira` em `escritorio`; `relacoes-sentimentos` em `emocoes`; `viagem-passeio` em `viagem` (grupo Cotidiano). `verbos-curtos` foi distribuída: ある, 居る, なる em `n5-verbos`; くれる, やる, しまう em `n4-verbos`; os outros 8 em `n3-verbos`. `corpo` não mudou. O progresso e os recordes antigos que usam ids removidos não foram migrados (a aplicação está em teste); `kana-drop.html` e `velocidade.html` guardam a categoria escolhida em chaves novas (`kd-kanadrop-cat2`, `kd-vel-scope2`), porque as antigas eram índices.
 
+## Lote 9 de vocabulário (2026-11-21)
++42 palavras e +42 frases para o jogo de heróis e lendas (伝説めぐり). As categorias `heroi-guerra` e `fantasia` viraram uma só, `heroi-fantasia` ("Heróis, lendas e aventura", grupo Vocabulário, 72 palavras), e as palavras novas entraram nela: equipamento (剣 弓 杖 鎧 兜 旗 宝箱 松明 毒 ポーション 宝石 金貨), seres e criaturas (王子 女王 魔王 魔女 妖精 天使 悪魔 巨人 ゴブリン ゾンビ お化け 骸骨 人魚), lugares e elementos (村 塔 王国 神殿 砂漠 墓 牢屋 穴 火 炎 焚き火 動物), magia (呪文 呪い 魔力 闇) e ドラゴン (ALIAS de 竜 no jogo). 村 ("vila") e 墓 ("túmulo") têm o mesmo português do kanji-ex, que o `valkex.js` exige. Totais: 94 categorias, 2365 palavras, 2072 frases. O progresso antigo que usa os ids `heroi-guerra` e `fantasia` não foi migrado.
+
 ## Treino de conjugação
 `conjugacao.html` pede uma forma de um verbo (ます, ません, ました, て, た, ない, たい, potencial, volitiva, ば, passiva). O motor em `data/conj.js` gera as respostas a partir do grupo do verbo (ichidan, godan, する, 来る), detectado pelo kana; os godan que parecem ichidan (帰る, 入る, 切る, 知る, 走る, 要る, 減る) ficam na lista `GODAN_RU`. Os verbos vêm das categorias cujo id contém `verbos`, mais algumas palavras listadas em `EXTRA` dentro da página. Dois modos: digitar (romaji vira kana ao vivo; também aceita kana e kanji) e escolher (as alternativas erradas são erros típicos de conjugação).
 
@@ -84,6 +87,19 @@ Jogo da casa e dos objetos do dia a dia em `kurashi.html`: desenhos esquemático
 - Validador: `node valcasa.js` (zonas × `words.js` e `sentences.js`, leituras e significados sem repetição por grupo, alternativas suficientes, cadeia `up`, tamanho mínimo e quadro, árvore de cenas e `box`, vistas e cotas, aliases).
 - localStorage: recordes `best:kurashi-casa|moveis|cozinha|banheiro|objetos|tudo` (acertos na rodada) e preferências `kd-kurashi-vista`, `kd-kurashi-modo` (`escolher`|`digitar`|`tocar`) e `kd-kurashi-furi`. Não grava em `stats` nem `miss`.
 - A prévia do card é gerada por `tools/gen-previews.py ... kurashi`.
+
+## Densetsu Meguri (伝説めぐり)
+Jogo de heróis, lendas e natureza em `densetsu.html`, no mesmo motor `data/zonas.js` do Kurashi: desenhos esquemáticos (SVG) com 59 zonas ligadas a palavras de `data/words.js` (a maioria da categoria `heroi-fantasia`), em 7 cenas.
+- Cenas: **Mapa da aventura** (城 山 火山 森 洞窟 川 湖 橋 島 村 塔), **Castelo** (pátio com 門 旗 牢屋 e seis personagens; abre com zoom a partir do 城 do mapa), **Floresta e bichos** (zoom a partir da 森), **Herói e equipamento**, **Mago e magia**, **Monstros** e **Tesouro** (mesa vista de cima). Só o mapa tem cenas filhas; Herói, Mago, Monstros e Tesouro abrem só pelo menu.
+- Vistas: **Natureza** (21: mapa e floresta), **Castelo** (9), **Heróis** (8), **Magia e tesouro** (12), **Monstros** (9) e **Tudo** (10: 2 do mapa, 1 do castelo, 2 da floresta, 1 de heróis, 1 de mago, 1 do tesouro e 2 de monstros). Modos, furigana, "Ver o significado (sem ponto)" e teclado iguais aos do Kurashi.
+- Em Herói e equipamento, 武器 é a estante da parede e 剣, 弓 e 盾 são partes dela (`up`): se perguntarem 武器, tocar numa das três também vale.
+- Ao **digitar**, o mesmo item com outro nome também vale (`ALIAS` em `data/densetsu.js`): 英雄 (勇者), お化け (幽霊), 薬 (ポーション), 宝 (宝箱) e ドラゴン (竜).
+- Ficam só no vocabulário, por serem abstratos ou difíceis de reconhecer num desenho simples: 悪魔, 妖精, 天使, 人魚, 巨人, 砂漠, 神殿, 墓, 王国, 火, 炎, 動物, 呪文, 呪い, 魔力 e 闇.
+- Desenho: as cores são classes `c-<nome>` no `<style>` do `densetsu.html`. Criaturas e objetos com contorno complexo (lobo, cavalo, urso, kaiju, dragão, fantasma, espada, arco) são **um único caminho `P`**: formas sobrepostas na mesma zona mostram o contorno de cada uma por dentro, e duas formas com o sentido do traçado contrário (por exemplo uma elipse e um polígono) fazem a sobreposição virar um buraco (foi o peito do oni). Detalhes de outra cor são enfeites (`dec`) desenhados depois, por cima da zona.
+- Validador: `node valdensetsu.js` (mesmas conferências do `valcasa.js`). Os testes no Chromium (390x780 e 1280x900) tocaram nas 59 zonas, uma a uma, e rodaram uma rodada digitada em cada vista.
+- localStorage: recordes `best:densetsu-natureza|castelo|herois|magia|monstros|tudo` (acertos na rodada; 8 em Heróis, 9 em Castelo e Monstros) e preferências `kd-densetsu-vista`, `kd-densetsu-modo` (`escolher`|`digitar`|`tocar`) e `kd-densetsu-furi`. Não grava em `stats` nem `miss`. Entram no backup do `progresso.html`.
+- A prévia do card é gerada por `tools/gen-previews.py ... densetsu`.
+- `data/zonas.css` ganhou `#vistas{flex-wrap:wrap;max-width:100%}`: com 6 botões a fileira das vistas não cabia em 390px e os últimos ficavam cortados (valia também para o Kurashi); agora quebra de linha.
 
 ## 数を書こう (Kazu o kakou, jogo dos números)
 `numeros.html` + `data/numeros-ja.js` (módulo compartilhado, global `NumerosJa` e `module.exports`) + `valnumeros.js`. Números de 0 a 99.999.
