@@ -49,7 +49,7 @@ with sync_playwright() as p:
     if want("karada"):
         q = b.new_context(viewport={"width": 760, "height": 800}, color_scheme="light", device_scale_factor=2).new_page()
         q.goto(base + "karada.html"); q.click("[data-vista=orgaos]"); q.click("#go")
-        q.evaluate("(()=>{S.qs=[{z:BYKEY.get('肺|はい')}];S.qi=0;return showQ()})()"); q.wait_for_timeout(500)
+        q.evaluate("(()=>{const K=KARADA;K.S.qs=[{z:K.ZONES.find(z=>z.k==='肺|はい')}];K.S.qi=0;return K.showQ()})()"); q.wait_for_timeout(500)
         g = q.locator(".kgrid").bounding_box()
         out["karada"] = crop16x10(q.screenshot(clip={"x": g["x"], "y": g["y"], "width": g["width"], "height": g["width"] * 10 / 16}), "top")
     if want("kurashi"):
