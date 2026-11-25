@@ -46,7 +46,14 @@ const CATEGORIES = [
  ["渡す","わたす","watasu","entregar / passar às mãos"],["起こる","おこる","okoru","acontecer / ocorrer"],["空く","あく","aku","ficar vazio / vago"],["混む","こむ","komu","ficar lotado"],["乾く","かわく","kawaku","secar"],
  ["止める","とめる","tomeru","parar (algo) / desligar"],["喜ぶ","よろこぶ","yorokobu","alegrar-se"],["遅れる","おくれる","okureru","atrasar-se"],["連れて行く","つれていく","tsureteiku","levar alguém"],["連れて来る","つれてくる","tsuretekuru","trazer alguém"],
  ["参加する","さんかする","sanka suru","participar"],["相談する","そうだんする","soudan suru","consultar / pedir conselho"],["注意する","ちゅういする","chuui suru","prestar atenção / advertir"],["くれる","くれる","kureru","dar (a mim ou a nós)"],["やる","やる","yaru","fazer; dar (a animais e plantas)"],
- ["しまう","しまう","shimau","guardar; acabar fazendo"]
+ ["しまう","しまう","shimau","guardar; acabar fazendo"],
+ ["治す","なおす","naosu","curar (tratar)"],["壊れる","こわれる","kowareru","quebrar-se / estragar"],["汚れる","よごれる","yogoreru","sujar-se"],
+ ["割れる","われる","wareru","rachar / partir-se"],["折れる","おれる","oreru","quebrar-se (algo comprido)"],["破れる","やぶれる","yabureru","rasgar-se"],
+ ["沸く","わく","waku","ferver (a água ferve)"],["沸かす","わかす","wakasu","ferver (algo)"],["冷える","ひえる","hieru","esfriar"],
+ ["冷やす","ひやす","hiyasu","esfriar (algo) / refrigerar"],["並べる","ならべる","naraberu","enfileirar / dispor"],["建てる","たてる","tateru","construir"],
+ ["植える","うえる","ueru","plantar"],["集まる","あつまる","atsumaru","reunir-se"],["決まる","きまる","kimaru","ficar decidido"],
+ ["動かす","うごかす","ugokasu","mover (algo)"],["出来る","できる","dekiru","poder / ficar pronto"],["無くなる","なくなる","nakunaru","acabar / sumir"],
+ ["掛かる","かかる","kakaru","levar (tempo) / custar"]
 ]},
 { id:"cores", group:"Vocabulário", name:"Cores", words:[
  ["赤","あか","aka","vermelho"],["青","あお","ao","azul"],["黄色","きいろ","kiiro","amarelo"],["緑","みどり","midori","verde"],
@@ -132,7 +139,7 @@ const CATEGORIES = [
  ["崇める","あがめる","agameru","venerar"],["蔑む","さげすむ","sagesumu","desprezar"],["覆す","くつがえす","kutsugaesu","derrubar / reverter"],
  ["培う","つちかう","tsuchikau","cultivar (habilidade)"],["阻む","はばむ","habamu","impedir"],["貶す","けなす","kenasu","depreciar"],
  ["弄ぶ","もてあそぶ","moteasobu","brincar com / manipular"],["懐く","なつく","natsuku","afeiçoar-se"]]},
-{ id:"casa", group:"Cotidiano", name:"Casa", words:[
+{ id:"casa", group:"Cotidiano", name:"Casa: cômodos, móveis e objetos", words:[
  ["家","いえ","ie","casa"],["部屋","へや","heya","quarto / cômodo"],["台所","だいどころ","daidokoro","cozinha"],
  ["風呂","ふろ","furo","banho / banheira"],["トイレ","といれ","toire","banheiro"],["玄関","げんかん","genkan","entrada"],
  ["窓","まど","mado","janela"],["扉","とびら","tobira","porta"],["机","つくえ","tsukue","mesa de estudo"],
@@ -159,7 +166,21 @@ const CATEGORIES = [
  ["電気スタンド", "でんきすたんど", "denkisutando", "luminária de mesa"],
  ["延長コード", "えんちょうこーど", "enchoukoodo", "extensão elétrica"],
  ["空気清浄機", "くうきせいじょうき", "kuukiseijouki", "purificador de ar"],
- ["テーブル", "てーぶる", "teeburu", "mesa"]
+ ["テーブル", "てーぶる", "teeburu", "mesa"],
+ ["クローゼット","くろーぜっと","kuroozetto","closet (armário de roupas)"],["箪笥","たんす","tansu","cômoda"],["ハンガー","はんがー","hangaa","cabide"],
+ ["カーペット","かーぺっと","kaapetto","carpete"],["花瓶","かびん","kabin","vaso de flores"],["植木鉢","うえきばち","uekibachi","vaso de planta"],
+ ["照明","しょうめい","shoumei","iluminação"],["カレンダー","かれんだー","karendaa","calendário"],["シーツ","しーつ","shiitsu","lençol"],
+ ["ストーブ","すとーぶ","sutoobu","estufa; aquecedor a querosene"],["ケトル","けとる","ketoru","chaleira elétrica"],["洗濯ばさみ","せんたくばさみ","sentakubasami","pregador de roupa"],
+ ["食卓","しょくたく","shokutaku","mesa de refeições"],["食器","しょっき","shokki","louça"],["お椀","おわん","owan","tigela (de sopa)"],
+ ["ろうそく","ろうそく","rousoku","vela"],["携帯","けいたい","keitai","celular (forma curta)"],["ドア","どあ","doa","porta"],
+ ["門","もん","mon","portão"],["二階","にかい","nikai","2º andar"],["ベランダ","べらんだ","beranda","varanda"],
+ ["屋上","おくじょう","okujou","terraço"],["物置","ものおき","monooki","depósito; quarto de despejo"],["ガレージ","がれーじ","gareeji","garagem"],
+ ["郵便受け","ゆうびんうけ","yuubinuke","caixa de correspondência (da casa)"],["表札","ひょうさつ","hyousatsu","plaqueta com o nome (na entrada)"],["靴箱","くつばこ","kutsubako","sapateira"],
+ ["傘立て","かさたて","kasatate","porta-guarda-chuvas"],["キッチン","きっちん","kicchin","cozinha (estilo ocidental)"],["リビング","りびんぐ","ribingu","sala (living)"],
+ ["お風呂","おふろ","ofuro","banho (forma polida)"],["襖","ふすま","fusuma","porta de correr de papel opaco (fusuma)"],["障子","しょうじ","shouji","porta de correr de papel translúcido (shoji)"],
+ ["ちゃぶ台","ちゃぶだい","chabudai","mesa baixa japonesa"],["こたつ","こたつ","kotatsu","kotatsu (mesa baixa aquecida)"],["スイッチ","すいっち","suicchi","interruptor"],
+ ["洗濯機","せんたくき","sentakuki","máquina de lavar roupa"],["床","ゆか","yuka","piso / chão"],["棚","たな","tana","prateleira"],
+ ["布団","ふとん","futon","futon / roupa de cama"],["壁","かべ","kabe","parede"],["電灯","でんとう","dentou","lâmpada elétrica"]
 ]},
 { id:"escola", group:"Cotidiano", name:"Escola e estudos", words:[
  ["学校","がっこう","gakkou","escola"],["先生","せんせい","sensei","professor"],["学生","がくせい","gakusei","estudante"],["教室","きょうしつ","kyoushitsu","sala de aula"],["宿題","しゅくだい","shukudai","lição de casa"],
@@ -169,7 +190,12 @@ const CATEGORIES = [
  ["休み時間","やすみじかん","yasumijikan","recreio; intervalo"],["給食","きゅうしょく","kyuushoku","merenda escolar"],["絵の具","えのぐ","enogu","tinta (de pintar)"],["色鉛筆","いろえんぴつ","iroenpitsu","lápis de cor"],["筆","ふで","fude","pincel (de caligrafia)"],
  ["チョーク","ちょーく","chooku","giz"],["ランドセル","らんどせる","randoseru","randoseru (mochila escolar japonesa)"],["画用紙","がようし","gayoushi","papel de desenho"],["予習","よしゅう","yoshuu","estudar antes da aula"],["復習","ふくしゅう","fukushuu","revisão; revisar a matéria"],
  ["暗記","あんき","anki","decorar; memorizar"],["提出","ていしゅつ","teishutsu","entregar; submeter"],["欠席","けっせき","kesseki","ausência; faltar"],["遅刻","ちこく","chikoku","atraso; chegar atrasado"],["受験","じゅけん","juken","prestar exame de admissão"],
- ["合格","ごうかく","goukaku","ser aprovado; aprovação"],["部活","ぶかつ","bukatsu","atividade de clube escolar"],["同級生","どうきゅうせい","doukyuusei","colega de classe"],["徹夜","てつや","tetsuya","virar a noite"],["居眠り","いねむり","inemuri","cochilo (sentado)"]
+ ["合格","ごうかく","goukaku","ser aprovado; aprovação"],["部活","ぶかつ","bukatsu","atividade de clube escolar"],["同級生","どうきゅうせい","doukyuusei","colega de classe"],["徹夜","てつや","tetsuya","virar a noite"],["居眠り","いねむり","inemuri","cochilo (sentado)"],
+ ["大学","だいがく","daigaku","universidade"],["研究","けんきゅう","kenkyuu","pesquisa"],["専門","せんもん","senmon","especialidade"],
+ ["留学","りゅうがく","ryuugaku","estudar no exterior"],["入学","にゅうがく","nyuugaku","ingresso (na escola)"],["成績","せいせき","seiseki","notas"],
+ ["説明","せつめい","setsumei","explicação"],["質問","しつもん","shitsumon","pergunta"],["答え","こたえ","kotae","resposta"],
+ ["意味","いみ","imi","significado"],["文法","ぶんぽう","bunpou","gramática"],["発音","はつおん","hatsuon","pronúncia"],
+ ["漢字","かんじ","kanji","kanji"],["会話","かいわ","kaiwa","conversa"],["作文","さくぶん","sakubun","redação"]
 ]},
 { id:"escritorio", group:"Cotidiano", name:"Trabalho e escritório", words:[
  ["会社","かいしゃ","kaisha","empresa"],["社長","しゃちょう","shachou","presidente da empresa"],["会議","かいぎ","kaigi","reunião"],["仕事","しごと","shigoto","trabalho"],["給料","きゅうりょう","kyuuryou","salário"],
@@ -179,7 +205,8 @@ const CATEGORIES = [
  ["ファイル","ふぁいる","fairu","pasta (de documentos); arquivo"],["修正液","しゅうせいえき","shuuseieki","corretivo líquido"],["部下","ぶか","buka","subordinado"],["同期","どうき","douki","colega que entrou na mesma época"],["取引先","とりひきさき","torihikisaki","cliente; parceiro comercial"],
  ["見積もり","みつもり","mitsumori","orçamento; estimativa"],["報告","ほうこく","houkoku","relatório; informar"],["打ち合わせ","うちあわせ","uchiawase","reunião de alinhamento"],["昇進","しょうしん","shoushin","promoção de cargo"],["異動","いどう","idou","transferência de setor"],
  ["転職","てんしょく","tenshoku","mudança de emprego"],["面接","めんせつ","mensetsu","entrevista"],["履歴書","りれきしょ","rirekisho","currículo"],["有給","ゆうきゅう","yuukyuu","folga remunerada"],["退職","たいしょく","taishoku","deixar a empresa"],
- ["担当","たんとう","tantou","responsável; encarregado"],["納期","のうき","nouki","prazo de entrega"],["段取り","だんどり","dandori","organização das etapas"],["確認","かくにん","kakunin","confirmação; conferir"]
+ ["担当","たんとう","tantou","responsável; encarregado"],["納期","のうき","nouki","prazo de entrega"],["段取り","だんどり","dandori","organização das etapas"],["確認","かくにん","kakunin","confirmação; conferir"],
+ ["社員","しゃいん","shain","funcionário da empresa"],["就職","しゅうしょく","shuushoku","conseguir emprego"]
 ]},
 { id:"comida", group:"Vocabulário", name:"Comida e bebida", words:[
  ["ご飯","ごはん","gohan","arroz cozido / refeição"],["パン","ぱん","pan","pão"],["肉","にく","niku","carne"],["野菜","やさい","yasai","verdura"],["果物","くだもの","kudamono","fruta"],
@@ -329,7 +356,13 @@ const CATEGORIES = [
  ["体育館", "たいいくかん", "taiikukan", "ginásio"],
  ["広場", "ひろば", "hiroba", "praça"],
  ["坂", "さか", "saka", "ladeira"],
- ["噴水", "ふんすい", "funsui", "fonte (de água)"]
+ ["噴水", "ふんすい", "funsui", "fonte (de água)"],
+ ["工場","こうじょう","koujou","fábrica"],["事務所","じむしょ","jimusho","escritório (sede)"],["市場","いちば","ichiba","mercado (feira)"],
+ ["美術館","びじゅつかん","bijutsukan","museu de arte"],["博物館","はくぶつかん","hakubutsukan","museu"],["動物園","どうぶつえん","doubutsuen","zoológico"],
+ ["神社","じんじゃ","jinja","santuário xintoísta"],["お寺","おてら","otera","templo budista"],["城","しろ","shiro","castelo"],
+ ["港","みなと","minato","porto"],["駐車場","ちゅうしゃじょう","chuushajou","estacionamento"],["交差点","こうさてん","kousaten","cruzamento"],
+ ["本屋","ほんや","hon'ya","livraria"],["花屋","はなや","hanaya","floricultura"],["交通","こうつう","koutsuu","trânsito / transporte"],
+ ["建物","たてもの","tatemono","edifício / construção"]
 ]},
 { id:"profissoes", group:"Cotidiano", name:"Profissões", words:[
  ["医者","いしゃ","isha","médico"],["看護師","かんごし","kangoshi","enfermeiro"],["警察官","けいさつかん","keisatsukan","policial"],
@@ -369,7 +402,11 @@ const CATEGORIES = [
  ["日差し", "ひざし", "hizashi", "luz do sol"],
  ["夕焼け", "ゆうやけ", "yuuyake", "céu avermelhado do pôr do sol"],
  ["満月", "まんげつ", "mangetsu", "lua cheia"],
- ["花粉", "かふん", "kafun", "pólen"]
+ ["花粉", "かふん", "kafun", "pólen"],
+ ["台風","たいふう","taifuu","tufão"],["天気予報","てんきよほう","tenkiyohou","previsão do tempo"],["晴れ","はれ","hare","tempo limpo"],
+ ["曇り","くもり","kumori","nublado"],["島","しま","shima","ilha"],["空気","くうき","kuuki","ar"],
+ ["温度","おんど","ondo","temperatura"],["湖","みずうみ","mizuumi","lago"],["虫","むし","mushi","inseto"],
+ ["林","はやし","hayashi","bosque"]
 ]},
 { id:"n5-subst", group:"JLPT N5", name:"Substantivos e objetos", words:[
  ["友達", "ともだち", "tomodachi", "amigo"],["人", "ひと", "hito", "pessoa"],["男", "おとこ", "otoko", "homem"],
@@ -417,7 +454,9 @@ const CATEGORIES = [
  ["胸", "むね", "mune", "peito"],["背", "せ", "se", "costas / estatura"],["法律", "ほうりつ", "houritsu", "lei"],
  ["値段", "ねだん", "nedan", "preço"],["お釣り", "おつり", "otsuri", "troco"],["売り場", "うりば", "uriba", "seção (de loja)"],
  ["品物", "しなもの", "shinamono", "mercadoria"],["事件", "じけん", "jiken", "incidente / caso"],["男性", "だんせい", "dansei", "homem / sexo masculino"],
- ["女性", "じょせい", "josei", "mulher / sexo feminino"],["戦争", "せんそう", "sensou", "guerra"]
+ ["女性", "じょせい", "josei", "mulher / sexo feminino"],["戦争", "せんそう", "sensou", "guerra"],
+ ["連絡","れんらく","renraku","contato / aviso"],["紹介","しょうかい","shoukai","apresentação / indicação"],["用事","ようじ","youji","assunto a resolver"],
+ ["出席","しゅっせき","shusseki","presença / comparecer"],["計画","けいかく","keikaku","plano"]
 ]},
 { id:"n4-adv", group:"JLPT N4", name:"Advérbios e expressões", words:[
  ["特に", "とくに", "tokuni", "especialmente"],["必ず", "かならず", "kanarazu", "sem falta"],["きっと", "きっと", "kitto", "com certeza"],
@@ -447,7 +486,11 @@ const CATEGORIES = [
  ["頭痛","ずつう","zutsuu","dor de cabeça"],["怪我","けが","kega","ferimento"],["注射","ちゅうしゃ","chuusha","injeção"],["手術","しゅじゅつ","shujutsu","cirurgia"],
  ["入院","にゅういん","nyuuin","internação"],["予防","よぼう","yobou","prevenção"],["体温","たいおん","taion","temperatura corporal"],["血","ち","chi","sangue"],
  ["歯医者","はいしゃ","haisha","dentista"],["健康","けんこう","kenkou","saúde"],["症状","しょうじょう","shoujou","sintoma"],
- ["保険証", "ほけんしょう", "hokenshou", "cartão do seguro de saúde"],["歯科", "しか", "shika", "odontologia / clínica dentária"],["睡眠", "すいみん", "suimin", "sono"]]},
+ ["保険証", "ほけんしょう", "hokenshou", "cartão do seguro de saúde"],["歯科", "しか", "shika", "odontologia / clínica dentária"],["睡眠", "すいみん", "suimin", "sono"],
+ ["具合","ぐあい","guai","estado (de saúde)"],["気分","きぶん","kibun","disposição / humor"],["気持ち","きもち","kimochi","sentimento / sensação"],
+ ["注意","ちゅうい","chuui","atenção / cuidado"],["治る","なおる","naoru","curar-se"],["声","こえ","koe","voz"],
+ ["髪","かみ","kami","cabelo"]
+]},
 { id:"tecnologia", group:"Vocabulário", name:"Tecnologia", words:[
  ["携帯電話","けいたいでんわ","keitai denwa","celular"],["スマホ","すまほ","sumaho","smartphone"],["インターネット","いんたーねっと","intaanetto","internet"],
  ["メール","めーる","meeru","e-mail"],["画面","がめん","gamen","tela"],["充電","じゅうでん","juuden","carregar (bateria)"],["電池","でんち","denchi","pilha / bateria"],
@@ -459,7 +502,9 @@ const CATEGORIES = [
  ["懐中電灯", "かいちゅうでんとう", "kaichuudentou", "lanterna"],
  ["目覚まし時計", "めざましどけい", "mezamashidokei", "despertador"],
  ["電球", "でんきゅう", "denkyuu", "lâmpada"],
- ["ケーブル", "けーぶる", "keeburu", "cabo"]
+ ["ケーブル", "けーぶる", "keeburu", "cabo"],
+ ["コピー","こぴー","kopii","cópia / fotocópia"],["ボタン","ぼたん","botan","botão"],["ビデオ","びでお","bideo","vídeo"],
+ ["ゲーム","げーむ","geemu","jogo (eletrônico)"],["番号","ばんごう","bangou","número (de série, telefone)"],["電話番号","でんわばんごう","denwabangou","número de telefone"]
 ]},
 { id:"emocoes", group:"Vocabulário", name:"Emoções e sentimentos", words:[
  ["嬉しい","うれしい","ureshii","feliz / contente"],["悲しい","かなしい","kanashii","triste"],["寂しい","さびしい","sabishii","solitário"],["怖い","こわい","kowai","assustador / com medo"],["驚く","おどろく","odoroku","surpreender-se"],
@@ -556,7 +601,11 @@ const CATEGORIES = [
  ["スプーン","すぷーん","supuun","colher"],["ノート","のーと","nooto","caderno"],["ペン","ぺん","pen","caneta"],["シャワー","しゃわー","shawaa","chuveiro"],
  ["エアコン","えあこん","eakon","ar-condicionado"],["ギター","ぎたー","gitaa","violão / guitarra"],["ピアノ","ぴあの","piano","piano"],["ラーメン","らーめん","raamen","lámen"],
  ["サラダ","さらだ","sarada","salada"],["ジュース","じゅーす","juusu","suco"],["アイスクリーム","あいすくりーむ","aisukuriimu","sorvete"],
- ["プレゼント","ぷれぜんと","purezento","presente"],["パーティー","ぱーてぃー","paatii","festa"]]},
+ ["プレゼント","ぷれぜんと","purezento","presente"],["パーティー","ぱーてぃー","paatii","festa"],
+ ["エスカレーター","えすかれーたー","esukareetaa","escada rolante"],["ソファー","そふぁー","sofaa","sofá"],["カーテン","かーてん","kaaten","cortina"],
+ ["タオル","たおる","taoru","toalha"],["ネクタイ","ねくたい","nekutai","gravata"],["セーター","せーたー","seetaa","suéter"],
+ ["ワイン","わいん","wain","vinho"],["コンビニ","こんびに","konbini","loja de conveniência"]
+]},
 { id:"n5-posicao", group:"JLPT N5", name:"Direções e posições", words:[
  ["上","うえ","ue","em cima"],["下","した","shita","embaixo"],["中","なか","naka","dentro"],["外","そと","soto","fora"],["前","まえ","mae","frente / antes"],
  ["後ろ","うしろ","ushiro","atrás"],["右","みぎ","migi","direita"],["左","ひだり","hidari","esquerda"],["隣","となり","tonari","ao lado"],["横","よこ","yoko","lateral"],
@@ -570,7 +619,7 @@ const CATEGORIES = [
  ["毎月", "まいつき", "maitsuki", "todo mês"],["毎年", "まいとし", "maitoshi", "todo ano"],["一昨日", "おととい", "ototoi", "anteontem"],
  ["明後日", "あさって", "asatte", "depois de amanhã"],["今夜", "こんや", "konya", "esta noite (hoje à noite)"]
 ]},
-{ id:"n5-cumprimentos", group:"JLPT N5", name:"Cumprimentos e frases feitas", words:[
+{ id:"n5-cumprimentos", group:"JLPT N5", name:"Cumprimentos e conversa do dia a dia", words:[
  ["おはようございます","おはようございます","ohayou gozaimasu","bom dia"],["こんにちは","こんにちは","konnichiwa","olá / boa tarde"],["こんばんは","こんばんは","konbanwa","boa noite"],
  ["おやすみなさい","おやすみなさい","oyasuminasai","boa noite (ao dormir)"],["ありがとうございます","ありがとうございます","arigatou gozaimasu","muito obrigado"],
  ["すみません","すみません","sumimasen","com licença / desculpe"],["ごめんなさい","ごめんなさい","gomennasai","desculpe"],["さようなら","さようなら","sayounara","adeus"],
@@ -585,19 +634,12 @@ const CATEGORIES = [
  ["ただいま", "ただいま", "tadaima", "cheguei (ao voltar para casa)"],
  ["おかえり", "おかえり", "okaeri", "bem-vindo de volta"],
  ["いってきます", "いってきます", "ittekimasu", "já vou e volto (ao sair de casa)"],
- ["おやすみ", "おやすみ", "oyasumi", "boa noite (ao ir dormir)"]
+ ["おやすみ", "おやすみ", "oyasumi", "boa noite (ao ir dormir)"],
+ ["僕","ぼく","boku","eu (masculino, informal)"],["君","きみ","kimi","você (informal, íntimo)"],["どこか","どこか","dokoka","algum lugar"],
+ ["誰か","だれか","dareka","alguém"],["何か","なにか","nanika","alguma coisa"],["うん","うん","un","sim; ahã (informal)"],
+ ["ごめん","ごめん","gomen","desculpa (informal)"],["よろしく","よろしく","yoroshiku","conto com você; prazer (ao se apresentar)"],["お疲れ様","おつかれさま","otsukaresama","bom trabalho; obrigado pelo esforço"],
+ ["どういたしまして","どういたしまして","douitashimashite","de nada"],["いいね","いいね","iine","legal!; boa!"],["やばい","やばい","yabai","nossa!; que perigo; que demais (gíria)"]
 ]},
-{ id:"n4-estudo", group:"JLPT N4", name:"Estudo e idioma", words:[
- ["大学","だいがく","daigaku","universidade"],["研究","けんきゅう","kenkyuu","pesquisa"],["専門","せんもん","senmon","especialidade"],["留学","りゅうがく","ryuugaku","estudar no exterior"],
- ["入学","にゅうがく","nyuugaku","ingresso (na escola)"],["成績","せいせき","seiseki","notas"],["説明","せつめい","setsumei","explicação"],["質問","しつもん","shitsumon","pergunta"],
- ["答え","こたえ","kotae","resposta"],["意味","いみ","imi","significado"],["文法","ぶんぽう","bunpou","gramática"],["発音","はつおん","hatsuon","pronúncia"],
- ["漢字","かんじ","kanji","kanji"],["会話","かいわ","kaiwa","conversa"],["作文","さくぶん","sakubun","redação"]]},
-{ id:"n4-lugares", group:"JLPT N4", name:"Lugares e estabelecimentos", words:[
- ["工場","こうじょう","koujou","fábrica"],["事務所","じむしょ","jimusho","escritório (sede)"],["市場","いちば","ichiba","mercado (feira)"],["美術館","びじゅつかん","bijutsukan","museu de arte"],
- ["博物館","はくぶつかん","hakubutsukan","museu"],["動物園","どうぶつえん","doubutsuen","zoológico"],["神社","じんじゃ","jinja","santuário xintoísta"],["お寺","おてら","otera","templo budista"],
- ["城","しろ","shiro","castelo"],["港","みなと","minato","porto"],["駐車場","ちゅうしゃじょう","chuushajou","estacionamento"],["交差点","こうさてん","kousaten","cruzamento"],
- ["本屋","ほんや","hon'ya","livraria"],["花屋","はなや","hanaya","floricultura"],
- ["交通", "こうつう", "koutsuu", "trânsito / transporte"],["建物", "たてもの", "tatemono", "edifício / construção"]]},
 { id:"n5-datas", group:"JLPT N5", name:"Dias do mês, horas e minutos", words:[
  ["一日","ついたち","tsuitachi","dia 1 do mês"],["二日","ふつか","futsuka","dia 2 do mês"],["三日","みっか","mikka","dia 3 do mês"],["四日","よっか","yokka","dia 4 do mês"],
  ["五日","いつか","itsuka","dia 5 do mês"],["六日","むいか","muika","dia 6 do mês"],["七日","なのか","nanoka","dia 7 do mês"],["八日","ようか","youka","dia 8 do mês"],
@@ -629,17 +671,6 @@ const CATEGORIES = [
  ["では", "では", "dewa", "então (formal)"],
  ["とか", "とか", "toka", "tipo; ou (exemplos)"]
 ]},
-{ id:"n4-trabalho", group:"JLPT N4", name:"Trabalho e empresa", words:[
- ["社員","しゃいん","shain","funcionário da empresa"],["就職","しゅうしょく","shuushoku","conseguir emprego"],["連絡","れんらく","renraku","contato / aviso"],["紹介","しょうかい","shoukai","apresentação / indicação"],["用事","ようじ","youji","assunto a resolver"],["出席","しゅっせき","shusseki","presença / comparecer"],["計画", "けいかく", "keikaku", "plano"]]},
-{ id:"n4-saude", group:"JLPT N4", name:"Saúde e bem-estar", words:[
- ["具合","ぐあい","guai","estado (de saúde)"],["気分","きぶん","kibun","disposição / humor"],["気持ち","きもち","kimochi","sentimento / sensação"],["注意","ちゅうい","chuui","atenção / cuidado"],["治る","なおる","naoru","curar-se"],["声","こえ","koe","voz"],["髪","かみ","kami","cabelo"]]},
-{ id:"n4-casa", group:"JLPT N4", name:"Casa, móveis e aparelhos", words:[
- ["コピー", "こぴー", "kopii", "cópia / fotocópia"],["ボタン", "ぼたん", "botan", "botão"],["スイッチ", "すいっち", "suicchi", "interruptor"],
- ["ビデオ", "びでお", "bideo", "vídeo"],["ゲーム", "げーむ", "geemu", "jogo (eletrônico)"],["番号", "ばんごう", "bangou", "número (de série, telefone)"],
- ["電話番号", "でんわばんごう", "denwabangou", "número de telefone"],["洗濯機", "せんたくき", "sentakuki", "máquina de lavar roupa"],["床", "ゆか", "yuka", "piso / chão"],
- ["棚", "たな", "tana", "prateleira"],["布団", "ふとん", "futon", "futon / roupa de cama"],["壁", "かべ", "kabe", "parede"],
- ["電灯", "でんとう", "dentou", "lâmpada elétrica"]
-]},
 { id:"n4-tempo-limites", group:"JLPT N4", name:"Tempo e períodos", words:[
  ["以上", "いじょう", "ijou", "mais de / acima de"],["以下", "いか", "ika", "menos de / abaixo de"],["以内", "いない", "inai", "dentro de (limite)"],
  ["以外", "いがい", "igai", "exceto / fora disso"],["途中", "とちゅう", "tochuu", "no meio do caminho"],["最初", "さいしょ", "saisho", "início / primeiro"],
@@ -656,22 +687,12 @@ const CATEGORIES = [
  ["赤ちゃん", "あかちゃん", "akachan", "bebê"],["大人", "おとな", "otona", "adulto"],["主人", "しゅじん", "shujin", "marido (meu) / dono"],
  ["奥さん", "おくさん", "okusan", "esposa (de outra pessoa)"],["相談", "そうだん", "soudan", "consulta / conversa para pedir conselho"],["結婚", "けっこん", "kekkon", "casamento"]
 ]},
-{ id:"n4-verbos2", group:"JLPT N4", name:"Verbos transitivos e intransitivos", words:[
- ["治す","なおす","naosu","curar (tratar)"],["壊れる","こわれる","kowareru","quebrar-se / estragar"],["汚れる","よごれる","yogoreru","sujar-se"],["割れる","われる","wareru","rachar / partir-se"],["折れる","おれる","oreru","quebrar-se (algo comprido)"],["破れる","やぶれる","yabureru","rasgar-se"],["沸く","わく","waku","ferver (a água ferve)"],["沸かす","わかす","wakasu","ferver (algo)"],["冷える","ひえる","hieru","esfriar"],["冷やす","ひやす","hiyasu","esfriar (algo) / refrigerar"],["並べる","ならべる","naraberu","enfileirar / dispor"],["建てる","たてる","tateru","construir"],["植える","うえる","ueru","plantar"],["集まる","あつまる","atsumaru","reunir-se"],["決まる","きまる","kimaru","ficar decidido"],["動かす","うごかす","ugokasu","mover (algo)"],["出来る","できる","dekiru","poder / ficar pronto"],["無くなる","なくなる","nakunaru","acabar / sumir"],["掛かる","かかる","kakaru","levar (tempo) / custar"]]},
 { id:"n4-direcao", group:"JLPT N4", name:"Direção e trânsito", words:[
  ["反対","はんたい","hantai","oposto / contrário"],["真ん中","まんなか","mannaka","meio / centro"],["隅","すみ","sumi","canto"],["端","はし","hashi","ponta / beira"],["周り","まわり","mawari","em volta / arredores"],["通り","とおり","toori","rua / avenida"],["道路","どうろ","douro","estrada / via"],["歩道","ほどう","hodou","calçada"],["横断歩道","おうだんほどう","oudanhodou","faixa de pedestres"],["出口","でぐち","deguchi","saída"],["入口","いりぐち","iriguchi","entrada"],["乗り場","のりば","noriba","ponto de embarque"],["改札","かいさつ","kaisatsu","catraca (de estação)"],["地下","ちか","chika","subsolo"],["方向","ほうこう","houkou","direção"]]},
 { id:"direcoes-caminho", group:"Cotidiano", name:"Pedir e dar direções", words:[
  ["まっすぐ","まっすぐ","massugu","reto / em frente"],["角","かど","kado","esquina"],["突き当たり","つきあたり","tsukiatari","fim da rua"],["行き止まり","いきどまり","ikidomari","beco sem saída"],["次","つぎ","tsugi","próximo; seguinte"],["手前","てまえ","temae","antes (do ponto) / este lado"],["先","さき","saki","adiante / mais à frente"],["近道","ちかみち","chikamichi","atalho"],["遠回り","とおまわり","toomawari","desvio / caminho mais longo"],["道順","みちじゅん","michijun","trajeto / indicações do caminho"],["目的地","もくてきち","mokutekichi","destino"],["通行止め","つうこうどめ","tsuukoudome","via interditada"]]},
 { id:"onomatopeias", group:"Vocabul\u00e1rio", name:"Onomatopeias", words:[
  ["わくわく","わくわく","wakuwaku","empolgado"],["どきどき","どきどき","dokidoki","coração batendo forte"],["にこにこ","にこにこ","nikoniko","sorridente"],["いらいら","いらいら","iraira","irritado"],["ふわふわ","ふわふわ","fuwafuwa","macio e leve"],["ぴかぴか","ぴかぴか","pikapika","brilhando / reluzente"],["ぺらぺら","ぺらぺら","perapera","fluente (em idioma)"],["ざあざあ","ざあざあ","zaazaa","chuva forte"],["ぐるぐる","ぐるぐる","guruguru","girando em círculos"],["ごろごろ","ごろごろ","gorogoro","rolando / à toa"],["きらきら","きらきら","kirakira","cintilando"],["ぺこぺこ","ぺこぺこ","pekopeko","morrendo de fome"]]},
-{ id:"n4-katakana2", group:"JLPT N4", name:"Katakana: casa e roupas", words:[
- ["エスカレーター","えすかれーたー","esukareetaa","escada rolante"],["ソファー","そふぁー","sofaa","sofá"],["カーテン","かーてん","kaaten","cortina"],["タオル","たおる","taoru","toalha"],["ネクタイ","ねくたい","nekutai","gravata"],["セーター","せーたー","seetaa","suéter"],["ワイン","わいん","wain","vinho"],["コンビニ","こんびに","konbini","loja de conveniência"]]},
-{ id:"n4-natureza", group:"JLPT N4", name:"Natureza e clima", words:[
- ["台風", "たいふう", "taifuu", "tufão"],["天気予報", "てんきよほう", "tenkiyohou", "previsão do tempo"],["晴れ", "はれ", "hare", "tempo limpo"],
- ["曇り", "くもり", "kumori", "nublado"],["島", "しま", "shima", "ilha"],["空気", "くうき", "kuuki", "ar"],
- ["温度", "おんど", "ondo", "temperatura"],["湖", "みずうみ", "mizuumi", "lago"],["虫", "むし", "mushi", "inseto"],
- ["林", "はやし", "hayashi", "bosque"]
-]},
 { id:"n3-adjna", group:"JLPT N3", name:"Adjetivos な (N3)", words:[
  ["正直", "しょうじき", "shoujiki", "honesto"],["素直", "すなお", "sunao", "dócil / sincero"],["豊か", "ゆたか", "yutaka", "rico / abundante"],
  ["完全", "かんぜん", "kanzen", "completo / perfeito"],["平気", "へいき", "heiki", "tranquilo / indiferente"],["公平", "こうへい", "kouhei", "justo / imparcial"],
@@ -759,12 +780,17 @@ const CATEGORIES = [
  ["口座","こうざ","kouza","conta bancária"],["借金","しゃっきん","shakkin","dívida"],["割引","わりびき","waribiki","desconto"],["領収書","りょうしゅうしょ","ryoushuusho","recibo"],["生活費","せいかつひ","seikatsuhi","custo de vida"],
  ["円","えん","en","iene"]
 ]},
-{ id:"musica", group:"Vocabul\u00e1rio", name:"Música e instrumentos", words:[
+{ id:"musica", group:"Vocabul\u00e1rio", name:"Música e mídia", words:[
  ["楽器", "がっき", "gakki", "instrumento musical"],
  ["バイオリン", "ばいおりん", "baiorin", "violino"],["太鼓", "たいこ", "taiko", "tambor"],["笛", "ふえ", "fue", "flauta"],
  ["曲", "きょく", "kyoku", "música / peça musical"],["歌詞", "かし", "kashi", "letra de música"],["演奏", "えんそう", "ensou", "apresentação musical"],
  ["合唱", "がっしょう", "gasshou", "coro"],["作曲", "さっきょく", "sakkyoku", "composição musical"],["楽譜", "がくふ", "gakufu", "partitura"],
- ["カラオケ", "からおけ", "karaoke", "karaokê"]
+ ["カラオケ", "からおけ", "karaoke", "karaokê"],
+ ["雑誌","ざっし","zasshi","revista"],["漫画","まんが","manga","mangá; história em quadrinhos"],["小説","しょうせつ","shousetsu","romance; novela"],
+ ["アニメ","あにめ","anime","anime; desenho animado"],["ニュース","にゅーす","nyuusu","notícia; noticiário"],["番組","ばんぐみ","bangumi","programa (de TV ou rádio)"],
+ ["絵本","えほん","ehon","livro ilustrado"],["物語","ものがたり","monogatari","história; conto"],["テレビゲーム","てれびげーむ","terebigeemu","videogame"],
+ ["ゲーム機","げーむき","geemuki","console de videogame"],["コントローラー","こんとろーらー","kontorooraa","controle (de videogame)"],["パズル","ぱずる","pazuru","quebra-cabeça"],
+ ["カード","かーど","kaado","cartão; carta (de jogo)"]
 ]},
 { id:"higiene", group:"Vocabul\u00e1rio", name:"Higiene e banheiro", words:[
  ["歯ブラシ", "はぶらし", "haburashi", "escova de dentes"],["歯磨き粉", "はみがきこ", "hamigakiko", "pasta de dente"],["石鹸", "せっけん", "sekken", "sabonete"],
@@ -819,35 +845,6 @@ const CATEGORIES = [
  ["糊", "のり", "nori", "cola"],
  ["テープ", "てーぷ", "teepu", "fita adesiva; fita"],
  ["梯子", "はしご", "hashigo", "escada de mão"]
-]},
-{ id:"expressoes", group:"Vocabulário", name:"Conversa do dia a dia", words:[
- ["僕", "ぼく", "boku", "eu (masculino, informal)"],
- ["君", "きみ", "kimi", "você (informal, íntimo)"],
- ["どこか", "どこか", "dokoka", "algum lugar"],
- ["誰か", "だれか", "dareka", "alguém"],
- ["何か", "なにか", "nanika", "alguma coisa"],
- ["うん", "うん", "un", "sim; ahã (informal)"],
- ["ごめん", "ごめん", "gomen", "desculpa (informal)"],
- ["よろしく", "よろしく", "yoroshiku", "conto com você; prazer (ao se apresentar)"],
- ["お疲れ様", "おつかれさま", "otsukaresama", "bom trabalho; obrigado pelo esforço"],
- ["どういたしまして", "どういたしまして", "douitashimashite", "de nada"],
- ["いいね", "いいね", "iine", "legal!; boa!"],
- ["やばい", "やばい", "yabai", "nossa!; que perigo; que demais (gíria)"]
-]},
-{ id:"midia", group:"Vocabulário", name:"Mídia e entretenimento", words:[
- ["雑誌", "ざっし", "zasshi", "revista"],
- ["漫画", "まんが", "manga", "mangá; história em quadrinhos"],
- ["小説", "しょうせつ", "shousetsu", "romance; novela"],
- ["アニメ", "あにめ", "anime", "anime; desenho animado"],
- ["ニュース", "にゅーす", "nyuusu", "notícia; noticiário"],
- ["番組", "ばんぐみ", "bangumi", "programa (de TV ou rádio)"],
- ["絵本", "えほん", "ehon", "livro ilustrado"],
- ["物語", "ものがたり", "monogatari", "história; conto"],
- ["テレビゲーム", "てれびげーむ", "terebigeemu", "videogame"],
- ["ゲーム機", "げーむき", "geemuki", "console de videogame"],
- ["コントローラー", "こんとろーらー", "kontorooraa", "controle (de videogame)"],
- ["パズル", "ぱずる", "pazuru", "quebra-cabeça"],
- ["カード", "かーど", "kaado", "cartão; carta (de jogo)"]
 ]},
 { id:"espaco", group:"Vocabulário", name:"Espaço e universo", words:[
  ["宇宙", "うちゅう", "uchuu", "espaço; universo"],
@@ -1127,15 +1124,6 @@ const CATEGORIES = [
  ["しばしば", "しばしば", "shibashiba", "com frequência"],
  ["ぐらい", "ぐらい", "gurai", "cerca de; mais ou menos"],
  ["ごろ", "ごろ", "goro", "por volta de (hora, época)"]
-]},
-{ id:"casa-moveis", group:"Vocabulário", name:"Casa: cômodos, móveis e objetos", words:[
- ["クローゼット","くろーぜっと","kuroozetto","closet (armário de roupas)"],["箪笥","たんす","tansu","cômoda"],["ハンガー","はんがー","hangaa","cabide"],["カーペット","かーぺっと","kaapetto","carpete"],["花瓶","かびん","kabin","vaso de flores"],
- ["植木鉢","うえきばち","uekibachi","vaso de planta"],["照明","しょうめい","shoumei","iluminação"],["カレンダー","かれんだー","karendaa","calendário"],["シーツ","しーつ","shiitsu","lençol"],["ストーブ","すとーぶ","sutoobu","estufa; aquecedor a querosene"],
- ["ケトル","けとる","ketoru","chaleira elétrica"],["洗濯ばさみ","せんたくばさみ","sentakubasami","pregador de roupa"],["食卓","しょくたく","shokutaku","mesa de refeições"],["食器","しょっき","shokki","louça"],["お椀","おわん","owan","tigela (de sopa)"],
- ["ろうそく","ろうそく","rousoku","vela"],["携帯","けいたい","keitai","celular (forma curta)"],["ドア","どあ","doa","porta"],["門","もん","mon","portão"],["二階","にかい","nikai","2º andar"],
- ["ベランダ","べらんだ","beranda","varanda"],["屋上","おくじょう","okujou","terraço"],["物置","ものおき","monooki","depósito; quarto de despejo"],["ガレージ","がれーじ","gareeji","garagem"],["郵便受け","ゆうびんうけ","yuubinuke","caixa de correspondência (da casa)"],
- ["表札","ひょうさつ","hyousatsu","plaqueta com o nome (na entrada)"],["靴箱","くつばこ","kutsubako","sapateira"],["傘立て","かさたて","kasatate","porta-guarda-chuvas"],["キッチン","きっちん","kicchin","cozinha (estilo ocidental)"],["リビング","りびんぐ","ribingu","sala (living)"],
- ["お風呂","おふろ","ofuro","banho (forma polida)"],["襖","ふすま","fusuma","porta de correr de papel opaco (fusuma)"],["障子","しょうじ","shouji","porta de correr de papel translúcido (shoji)"],["ちゃぶ台","ちゃぶだい","chabudai","mesa baixa japonesa"],["こたつ","こたつ","kotatsu","kotatsu (mesa baixa aquecida)"]
 ]},
 { id:"flores-arvores", group:"Vocabulário", name:"Flores e árvores", words:[
  ["薔薇", "ばら", "bara", "rosa (flor)"],
