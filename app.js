@@ -67,7 +67,7 @@ function wordRow(w, tag, noEx, onStar){
 function study(cat){
   S.cat = cat;
   $("#study-title").textContent = `${cat.group}: ${cat.name}`;
-  $("#study-feed").hidden = false;
+  $("#study-feed").hidden = !!cat.srs;
   const list = $("#study-list"); list.replaceChildren();
   const refresh = () => {
     const n = cat.words.length;
@@ -183,7 +183,7 @@ function search(q){
 const openGroups = () => store.get("open") || ["JLPT N5"];
 
 function renderMenu(){
-  updateErr(); updateDeck();
+  updateErr(); updateDeck(); updateSrs();
   const box = $("#groups"); box.replaceChildren();
   const groups = [...new Set(CATEGORIES.map(c => c.group))];
   const jl = g => g.startsWith("JLPT");
@@ -265,6 +265,45 @@ function starBtn(w, cb){
   b.onclick = () => { const on = deckToggle(w); set(on); if (cb) cb(on); };
   return b;
 }
+// Repetição espaçada: "kd-srs" -> { "japonês|kana": { b: caixa 1–5, d: vencimento "AAAA-MM-DD", h: últimos 8 { d: data, a: acertou, r: "j" (japonês→português) ou "p" (português→japonês) } } }.
+// A palavra entra ao ser ERRADA no quiz; acerto só sobe a caixa se a palavra estava vencida; erro cai duas caixas (mín. 1) e vence amanhã.
+// Reconhecimento (japonês→português) sobe só até a caixa 3; as caixas 4 e 5 exigem acerto em português→japonês. Datas locais, como o "stats".
+const SRS_KEY = "kd-srs", SRS_DAYS = [0, 1, 3, 7, 14, 30], SRS_HIST = 8, SRS_SEED_DIA = 15;
+function dayStr(off){
+  const d = new Date(); d.setDate(d.getDate() + (off || 0));
+  const pad = n => String(n).padStart(2, "0");
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+}
+function srsLoad(){   // na primeira vez (sem "kd-srs"), semeia a partir de "miss": caixa 1, no máximo 15 por dia, as mais erradas primeiro
+  let sr = store.get(SRS_KEY);
+  if (sr && typeof sr === "object" && !Array.isArray(sr)) return sr;
+  sr = {};
+  const m = missMap(), have = new Set();
+  for (const c of CATEGORIES) for (const w of c.words) have.add(wkey(w));
+  Object.keys(m).filter(k => have.has(k)).sort((a, b) => m[b] - m[a]).forEach((k, i) => { sr[k] = { b: 1, d: dayStr(Math.floor(i / SRS_SEED_DIA)), h: [] }; });
+  store.set(SRS_KEY, sr);
+  return sr;
+}
+function srsRecord(w, ok, sr){
+  const k = wkey(w), today = dayStr(), dir = S.dir === "pt2jp" ? "p" : "j";
+  let e = sr[k];
+  if (!e) { if (ok) return; e = sr[k] = { b: 1, d: today, h: [] }; }
+  e.h = [...(e.h || []), { d: today, a: ok, r: dir }].slice(-SRS_HIST);
+  if (!ok) { e.b = Math.max(1, e.b - 2); e.d = dayStr(1); }
+  else if (e.d <= today) { if (e.b < (dir === "p" ? 5 : 3)) e.b++; e.d = dayStr(SRS_DAYS[e.b]); }
+  store.set(SRS_KEY, sr);
+}
+function srsDue(){   // palavras vencidas (hoje ou antes), as mais atrasadas primeiro; ignora palavras que não existem mais
+  const sr = srsLoad(), today = dayStr(), by = new Map();
+  for (const c of CATEGORIES) for (const w of c.words) by.set(wkey(w), w);
+  return Object.keys(sr).filter(k => by.has(k) && sr[k].d <= today).sort((a, b) => sr[a].d < sr[b].d ? -1 : sr[a].d > sr[b].d ? 1 : sr[a].b - sr[b].b).map(k => by.get(k));
+}
+function srsCat(){ return { id: "srs", group: "Revisão", name: "Revisar hoje", words: srsDue(), pool: CATEGORIES.flatMap(c => c.words), errors: true, srs: true }; }   // errors: sem recorde
+function updateSrs(){
+  const n = srsDue().length;
+  $("#srs-open").hidden = !n;
+  $("#srs-open").textContent = `Revisar hoje (${n})`;
+}
 function startErrors(){
   const words = missWords();
   if (words.length) start({ id: "erros", group: "Revisão", name: "Meus erros", words, pool: CATEGORIES.flatMap(c => c.words), errors: true });
@@ -272,8 +311,9 @@ function startErrors(){
 
 function start(cat){
   if (cat.deck) { cat = deckCat(); if (!cat.words.length) return renderMenu(); }   // o deck pode ter mudado desde a última vez
+  if (cat.srs) { cat = srsCat(); if (!cat.words.length) return renderMenu(); }   // as vencidas mudam com os dias
   S.cat = cat; S.n = ROUNDS;
-  const words = shuffle(pick(cat.words, ROUNDS));
+  const words = shuffle(cat.srs ? cat.words.slice(0, ROUNDS) : pick(cat.words, ROUNDS));
   S.q = words.map(w => {
     const others = shuffle((cat.pool || cat.words).filter(x => x !== w && x[3] !== w[3])).slice(0, 3);
     return { w, opts: shuffle([w, ...others]) };
@@ -317,11 +357,12 @@ function answer(n){
   const { w } = S.q[S.i];
   const btns = [...$("#opts").children];
   btns[S.correct].classList.add("ok");
-  const m = missMap(), k = wkey(w);
+  const sr = srsLoad(), m = missMap(), k = wkey(w);   // srsLoad antes de mexer em "miss": a primeira semeadura usa a lista de erros de antes desta resposta
   if (n === S.correct) { S.score++; if (m[k] && --m[k] <= 0) delete m[k]; }
   else { btns[n].classList.add("bad"); S.wrong.push(w); m[k] = Math.min(5, (m[k] || 0) + 2); }
   store.set("miss", m);
   recordStat(w, n === S.correct);
+  srsRecord(w, n === S.correct, sr);
   $("#score").textContent = `Acertos: ${S.score}`;
   $("#feedback").textContent = `${w[0]} (${pitch(w)}, ${w[2]}) = ${w[3]}`;
   $("#feedback").append(starBtn(w));
@@ -353,7 +394,8 @@ function finish(){
   const total = S.q.length;
   $("#final").textContent = `${S.score} de ${total} acertos em ${S.cat.group}: ${S.cat.name}`;
   const key = bestKey(S.cat.id, S.n), prev = store.get(key);
-  if (S.cat.errors) $("#best").textContent = "";
+  if (S.cat.srs) { const rest = srsDue().length; $("#best").textContent = rest ? `Ainda ${rest === 1 ? "resta 1 palavra" : "restam " + rest + " palavras"} para revisar hoje.` : "Nada mais para revisar hoje."; }
+  else if (S.cat.errors) $("#best").textContent = "";
   else if (prev == null || S.score > prev) { store.set(key, S.score); $("#best").textContent = prev == null ? "Primeira pontuação salva." : "Novo recorde!"; }
   else $("#best").textContent = `Seu recorde: ${prev}/${total}`;
   const rv = $("#review"); rv.replaceChildren();
@@ -383,6 +425,7 @@ $("#auto").onchange = e => { S.auto = e.target.checked; store.set("auto", S.auto
 for (const b of $("#rounds").children) b.onclick = () => { setRounds(+b.dataset.n); renderMenu(); };
 $("#q").oninput = e => search(e.target.value);
 $("#feed-open").onclick = feedStart;
+$("#srs-open").onclick = () => S.mode === "study" ? study(srsCat()) : start(srsCat());
 $("#err-open").onclick = startErrors;
 $("#deck-open").onclick = () => S.mode === "study" ? study(deckCat()) : start(deckCat());
 $("#deck-clear").onclick = () => { if (confirm("Esvaziar o deck? As palavras continuam no vocabulário, só saem do seu deck.")) { store.set(DECK_KEY, []); updateDeck(); } };
