@@ -19,15 +19,15 @@ with sync_playwright() as p:
     b = p.chromium.launch(); out = {}
     def page():
         return b.new_context(viewport={"width": 520, "height": 700}, color_scheme="light", device_scale_factor=2).new_page()
-    if want("kana-drop"):
-        q = page(); q.goto(base + "kana-drop.html"); q.click("#go"); q.wait_for_timeout(300)
+    if want("kana-no-ame"):
+        q = page(); q.goto(base + "kana-no-ame.html"); q.click("#go"); q.wait_for_timeout(300)
         for _ in range(16):
             for _ in range(random.randint(0, 4)): q.keyboard.press(random.choice(["ArrowLeft", "ArrowRight"]))
             q.keyboard.press(" "); q.wait_for_timeout(200)
-        q.wait_for_timeout(500); out["kana-drop"] = crop16x10(q.locator("#board").screenshot(), "bottom")
-    if want("kana-blaster"):
-        q = page(); q.goto(base + "kana-blaster.html"); q.click("#go"); q.wait_for_timeout(3500)
-        out["kana-blaster"] = crop16x10(q.locator("#cv").screenshot(), "top")
+        q.wait_for_timeout(500); out["kana-no-ame"] = crop16x10(q.locator("#board").screenshot(), "bottom")
+    if want("space-kana"):
+        q = page(); q.goto(base + "space-kana.html"); q.click("#go"); q.wait_for_timeout(3500)
+        out["space-kana"] = crop16x10(q.locator("#cv").screenshot(), "top")
     if want("velocidade"):
         q = page(); q.goto(base + "velocidade.html"); q.click("#go"); q.wait_for_timeout(900)
         out["velocidade"] = crop16x10(q.screenshot(clip={"x": 0, "y": 125, "width": 520, "height": 340}), "top")
@@ -49,7 +49,7 @@ with sync_playwright() as p:
     if want("karada"):
         q = b.new_context(viewport={"width": 760, "height": 800}, color_scheme="light", device_scale_factor=2).new_page()
         q.goto(base + "karada.html"); q.click("[data-vista=orgaos]"); q.click("#go")
-        q.evaluate("(()=>{S.qs=[{z:BYKEY.get('肺|はい')}];S.qi=0;return showQ()})()"); q.wait_for_timeout(500)
+        q.evaluate("(()=>{const K=KARADA;K.S.qs=[{z:K.ZONES.find(z=>z.k==='肺|はい')}];K.S.qi=0;return K.showQ()})()"); q.wait_for_timeout(500)
         g = q.locator(".kgrid").bounding_box()
         out["karada"] = crop16x10(q.screenshot(clip={"x": g["x"], "y": g["y"], "width": g["width"], "height": g["width"] * 10 / 16}), "top")
     if want("kurashi"):

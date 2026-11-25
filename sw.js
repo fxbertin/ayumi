@@ -2,7 +2,7 @@
 // Estratégia: responde na hora com a cópia guardada e atualiza essa cópia em segundo plano
 // (stale-while-revalidate); assim, uma atualização do site aparece na visita seguinte, sem precisar trocar nada aqui.
 // Quando ADICIONAR ou REMOVER arquivos do site, atualize CORE e aumente VERSION (kd-v2, kd-v3...).
-const VERSION = "kd-v11";
+const VERSION = "kd-v14";
 const CORE = [
   "./",
   "conjugacao-adjetivos.html",
@@ -13,8 +13,8 @@ const CORE = [
   "grammar-prova.html",
   "grammar.html",
   "index.html",
-  "kana-blaster.html",
-  "kana-drop.html",
+  "space-kana.html",
+  "kana-no-ame.html",
   "kanji.html",
   "karada.html",
   "kotonoha.html",
@@ -62,8 +62,8 @@ const CORE = [
   "icons/icon-512.png",
   "icons/icon-maskable-512.png",
   "img/prev-densetsu.webp",
-  "img/prev-kana-blaster.webp",
-  "img/prev-kana-drop.webp",
+  "img/prev-space-kana.webp",
+  "img/prev-kana-no-ame.webp",
   "img/prev-karada.webp",
   "img/prev-kotonoha.webp",
   "img/prev-kurashi.webp",

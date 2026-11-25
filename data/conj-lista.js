@@ -1,5 +1,5 @@
 // Listas de verbos e adjetivos conjugáveis do Ayumi. Compartilhadas por conjugacao.html,
-// conjugacao-adjetivos.html e kana-drop.html, para as três usarem exatamente a mesma seleção.
+// conjugacao-adjetivos.html e kana-no-ame.html, para as três usarem exatamente a mesma seleção.
 // Carregue depois de data/words.js e de data/conj.js (buildVerbs) ou data/conj-adj.js (buildAdjs).
 
 // Verbos que vivem em categorias sem "verbos" no id, e o nível de cada um.

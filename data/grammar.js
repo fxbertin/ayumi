@@ -45,12 +45,12 @@ const GRAMMAR = [
     ["さくら", "", "flor de cerejeira", "Três sílabas: さ (sa) + く (ku) + ら (ra)."]
   ],
   care: [
-    "Algumas letras se parecem muito: **ぬ/め**, **ね/れ/わ**, **さ/ち** e **は/ほ**. O Kana Blaster treina justamente essas confusões.",
+    "Algumas letras se parecem muito: **ぬ/め**, **ね/れ/わ**, **さ/ち** e **は/ほ**. O Space Kana treina justamente essas confusões.",
     "**は**, **へ** e **を** mudam de som quando são partículas: は → wa, へ → e, を → o. Isso aparece nos tópicos de partículas.",
     "O romaji escreve alguns sons de um jeito diferente da posição na tabela: し = shi, ち = chi, つ = tsu, ふ = fu.",
     "Aprenda uma linha por vez (あ行, depois か行…) e revise antes de seguir. Não precisa decorar tudo de uma vez."
   ],
-  practice: [["Kana Drop", "kana-drop.html"], ["Kana Blaster", "kana-blaster.html"]]
+  practice: [["Kana no Ame", "kana-no-ame.html"], ["Space Kana", "space-kana.html"]]
 },
 
 { id: "katakana", title: "Katakana (カタカナ)",
@@ -92,7 +92,7 @@ const GRAMMAR = [
     "Ler katakana costuma ser mais lento no começo, e isso é normal. Treinar com palavras que você já conhece (ホテル, タクシー) ajuda.",
     "Muitas palavras em katakana são adaptações de inglês, então o som muda: “beer” vira ビール (biiru)."
   ],
-  practice: [["Kana Drop", "kana-drop.html"], ["Kana Blaster", "kana-blaster.html"]]
+  practice: [["Kana no Ame", "kana-no-ame.html"], ["Space Kana", "space-kana.html"]]
 },
 
 { id: "dakuten", title: "Dakuten e handakuten (゛ ゜)",
@@ -137,7 +137,7 @@ const GRAMMAR = [
     "Os dois tracinhos do dakuten ficam no canto superior direito da letra. Se você não vê os tracinhos, é a letra sem dakuten.",
     "**は** como partícula continua soando “wa”. O ば e o ぱ são letras à parte."
   ],
-  practice: [["Kana Drop", "kana-drop.html"], ["Kana Blaster", "kana-blaster.html"]]
+  practice: [["Kana no Ame", "kana-no-ame.html"], ["Space Kana", "space-kana.html"]]
 },
 
 { id: "sons-especiais", title: "Sons combinados, っ e vogal longa",
@@ -180,7 +180,7 @@ const GRAMMAR = [
     "A vogal longa é a maior fonte de confusão para quem fala português: おばさん e おばあさん, ゆき (neve) e ゆうき (coragem). Ouvir bastante ajuda.",
     "O ん ocupa uma batida inteira, então ほん soa “ho-n”, e não só “ho”."
   ],
-  practice: [["Kana Drop", "kana-drop.html"], ["Kana Blaster", "kana-blaster.html"]]
+  practice: [["Kana no Ame", "kana-no-ame.html"], ["Space Kana", "space-kana.html"]]
 },
 
 { id: "escrita", title: "Como o japonês é escrito",

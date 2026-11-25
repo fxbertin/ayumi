@@ -13,6 +13,9 @@
 //   VISTAS  {id:{name, scenes:[...], quota:{cena:n}}}  VORDER: ordem dos botões
 //   GROUP   {cena: grupo}            alternativas de resposta vêm do mesmo grupo
 //   ALIAS   {"chave":["chave2",...]} outras palavras aceitas no modo Digitar
+//   SCENES.<id>.flip = "outraCena": a cena é o VERSO da outra (giro scaleX em vez de crossfade; as filhas da outra se alcançam passando por ela)
+//   VISTAS.<id>.label: texto em "Recorde (…)" e no resultado (padrão: name em minúsculas); quota aceita chave de cena OU de grupo
+//   PREFER [grupos]: ao completar alternativas com outros grupos, estes vêm primeiro
 //   FALLBACK, FRAME [W,H] (400x600), MAX (10 por rodada), MIN (zonas mínimas por vista), EXCLUIDAS, NEED
 const Zonas = (() => {
   const KANJI = /[\u4e00-\u9faf]/;
@@ -135,14 +138,21 @@ const Zonas = (() => {
       }
     }
     D.ORDER.forEach(id => { if (!D.SCENES[id]) err("ORDER com cena inexistente", id); });
+    for (const [id, sc] of Object.entries(D.SCENES)) if (sc.flip) {   // flip: a cena é o verso de outra cena raiz, sem pai nem box
+      const p = D.SCENES[sc.flip];
+      if (!p) err("flip com cena inexistente", id, sc.flip); else if (p.parent || p.flip) err("flip deve apontar para uma cena raiz sem flip", id, sc.flip);
+      if (sc.parent) err("cena com flip não tem pai", id);
+    }
+    (D.PREFER || []).forEach(g => { if (!D.ZONES.some(z => (D.GROUP[z.s] || z.s) === g)) err("PREFER com grupo inexistente", g); });
     // vistas
     for (const [v, vs] of Object.entries(D.VISTAS)) {
       const sc = vs.quota ? Object.keys(vs.quota) : vs.scenes;
-      sc.forEach(x => { if (!D.SCENES[x]) err("vista com cena inexistente", v, x); });
-      const cnt = D.ZONES.filter(z => (vs.scenes || sc).includes(z.s)).length;
+      const isGroup = x => !D.SCENES[x] && D.ZONES.some(z => (D.GROUP[z.s] || z.s) === x);   // chave de cota que é um grupo
+      sc.forEach(x => { if (!D.SCENES[x] && !(vs.quota && isGroup(x))) err("vista com cena inexistente", v, x); });
+      const cnt = vs.scenes ? D.ZONES.filter(z => vs.scenes.includes(z.s)).length : D.ZONES.filter(z => sc.includes(z.s) || sc.includes(D.GROUP[z.s] || z.s)).length;
       if (cnt < (D.MIN || 8)) err("poucas zonas na vista", v, cnt);
       if (vs.quota) { const tot = Object.values(vs.quota).reduce((a, b) => a + b, 0); if (tot > MAX) err("cota da vista passa do máximo da rodada", v, tot);
-        Object.entries(vs.quota).forEach(([s, q]) => { if (D.ZONES.filter(z => z.s === s).length < q) err("cota maior que as zonas da cena", v, s); }); }
+        Object.entries(vs.quota).forEach(([s, q]) => { if (D.ZONES.filter(z => D.SCENES[s] ? z.s === s : (D.GROUP[z.s] || z.s) === s).length < q) err("cota maior que as zonas da cena ou do grupo", v, s); }); }
     }
     D.VORDER.forEach(v => { if (!D.VISTAS[v]) err("VORDER com vista inexistente", v); });
     // grupos: leituras e significados sem repetição, alternativas suficientes
@@ -255,6 +265,7 @@ const Zonas = (() => {
     const ALIAS = new Map(Object.entries(D.ALIAS || {}).map(([k, l]) => [k, l.map(a => WORDS.get(a)).filter(Boolean)]));
     const ancestors = z => { const o = []; let p = z.up; while (p) { o.push(p); p = BYKEY.get(p).up; } return o; };
     const related = (a, b) => a === b || ancestors(a).includes(b.k) || ancestors(b).includes(a.k);
+    const vlabel = v => D.VISTAS[v].label || D.VISTAS[v].name.toLowerCase();
     const qCount = v => { const vs = D.VISTAS[v]; return vs.quota ? Math.min(MAX, Object.values(vs.quota).reduce((a, b) => a + b, 0)) : Math.min(MAX, ZONES.filter(z => vs.scenes.includes(z.s)).length); };
 
     // botões das vistas
@@ -306,12 +317,19 @@ const Zonas = (() => {
       D.ORDER.forEach(x => { SC[x].g.style.display = x === s ? "" : "none"; SC[x].g.style.opacity = ""; SC[x].g.removeAttribute("transform"); });
       S.scene = s; setTag(s);
     }
+    async function flipTo(s) {                                 // giro (scaleX) entre uma cena e seu verso
+      box.style.transform = "scaleX(0)"; await sleep(RM() ? 0 : 120);
+      showOnly(s); box.style.transform = ""; await sleep(RM() ? 0 : 120);
+    }
     const chain = s => { const a = [s]; while (D.SCENES[a[a.length - 1]].parent) a.push(D.SCENES[a[a.length - 1]].parent); return a; };
     async function goScene(t) {
       const cur = S.scene;
       if (cur === t) return;
       if (!cur) return showOnly(t);
       setTapMode(false);
+      const fl = id => D.SCENES[id].flip;                       // cena "verso" de outra: só se chega a ela girando a parceira
+      if (fl(cur)) { await flipTo(fl(cur)); if (fl(cur) === t) return; return goScene(t); }
+      if (fl(t)) { if (cur !== fl(t)) await goScene(fl(t)); await flipTo(t); return; }
       const ca = chain(cur), ct = chain(t), lca = ca.find(x => ct.includes(x));
       if (!lca) { await swap(cur, t); S.scene = t; setTag(t); return; }
       while (S.scene !== lca) {                               // sai de um cômodo: volta ao pai (afasta o zoom)
@@ -332,7 +350,7 @@ const Zonas = (() => {
     const S = { vista: D.VORDER[0], modo: "escolher", furi: true, scene: null, qs: [], qi: 0, right: 0, wrong: [], locked: true, answered: false, hinted: false };
     function makeRound() {
       const vs = D.VISTAS[S.vista]; let pick;
-      if (vs.quota) pick = Object.keys(vs.quota).flatMap(sc => shuffle(ZONES.filter(z => z.s === sc)).slice(0, vs.quota[sc]));
+      if (vs.quota) pick = Object.keys(vs.quota).flatMap(sc => shuffle(ZONES.filter(z => D.SCENES[sc] ? z.s === sc : z.g === sc)).slice(0, vs.quota[sc]));   // a chave da cota é uma cena ou, se não for cena, um grupo
       else pick = shuffle(ZONES.filter(z => vs.scenes.includes(z.s))).slice(0, qCount(S.vista));
       return pick.slice(0, MAX).sort((a, b) => D.ORDER.indexOf(a.s) - D.ORDER.indexOf(b.s)).map(z => ({ z }));
     }
@@ -341,7 +359,8 @@ const Zonas = (() => {
       const ok = x => !related(x, z) && !al(z, x) && !al(x, z) && x.w.kana !== z.w.kana && x.w.pt !== z.w.pt;
       const same = shuffle(ZONES.filter(x => x.g === z.g && ok(x)));
       if (same.length >= 3) return same.slice(0, 3);
-      return same.concat(shuffle(ZONES.filter(x => x.g !== z.g && ok(x)))).slice(0, 3);
+      const pf = D.PREFER || [];       // PREFER: grupos usados primeiro ao completar (ordem estável)
+      return same.concat(shuffle(ZONES.filter(x => x.g !== z.g && ok(x))).sort((a, b) => (pf.includes(a.g) ? 0 : 1) - (pf.includes(b.g) ? 0 : 1))).slice(0, 3);
     }
     const setPanel = m => { $("#opts").hidden = m !== "escolher"; $("#typed").hidden = m !== "digitar"; $("#tapbox").hidden = m !== "tocar"; };
     function hud() { $("#prog").textContent = `${T.unit[0].toUpperCase() + T.unit.slice(1)} ${S.qi + 1} de ${S.qs.length}`; $("#score").textContent = `${S.right} acerto${S.right === 1 ? "" : "s"}`; }
@@ -416,7 +435,7 @@ const Zonas = (() => {
     }
     function finish() {
       clearOv(); setTapMode(false); show("result");
-      const n = S.qs.length, key = `best:${PX}-${S.vista}`, prev = ls.get(key) || 0, vn = D.VISTAS[S.vista].name.toLowerCase();
+      const n = S.qs.length, key = `best:${PX}-${S.vista}`, prev = ls.get(key) || 0, vn = vlabel(S.vista);
       $("#final").textContent = `${S.right} acerto${S.right === 1 ? "" : "s"} em ${n} (${vn})`;
       if (S.right > prev) { ls.set(key, S.right); $("#best").textContent = prev ? `Novo recorde! (antes: ${prev})` : "Primeiro resultado salvo como recorde."; }
       else $("#best").textContent = `Recorde: ${prev} de ${n}`;
@@ -434,7 +453,7 @@ const Zonas = (() => {
     function menu() { show("menu"); recLine(); }
     function recLine() {
       const b = ls.get(`best:${PX}-${S.vista}`);
-      $("#rec").textContent = b ? `Recorde (${D.VISTAS[S.vista].name.toLowerCase()}): ${b} de ${qCount(S.vista)}` : "";
+      $("#rec").textContent = b ? `Recorde (${vlabel(S.vista)}): ${b} de ${qCount(S.vista)}` : "";
     }
     const setSeg = (attr, val) => root.querySelectorAll(`[data-${attr}]`).forEach(b => b.setAttribute("aria-pressed", b.dataset[attr] === val));
 
