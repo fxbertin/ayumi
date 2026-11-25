@@ -54,7 +54,7 @@ footer{margin-top:30px;color:var(--muted);font-size:.85rem}
 
 #speak{margin-top:14px}
 
-.sw{display:grid;grid-template-columns:auto 1fr auto;gap:4px 14px;align-items:center;padding:10px 0;border-bottom:1px solid var(--line)}
+.sw{display:grid;grid-template-columns:auto 1fr auto auto;gap:4px 14px;align-items:center;padding:10px 0;border-bottom:1px solid var(--line)}
 .sw-ja{font-size:1.6rem;font-weight:600}
 .sw-rd{color:var(--muted)}
 .sw-pt{grid-column:2}
@@ -73,6 +73,10 @@ mark.hl{background:rgba(47,125,91,.22);background:color-mix(in srgb,var(--ok) 22
 .ex-pt{margin-top:4px}
 
 #q{width:100%;padding:10px 12px;border:1.5px solid var(--line);border-radius:8px;font:inherit;background:var(--card);color:var(--ink);margin:12px 0}
+.sw > .ghost.sw-star{grid-column:4;grid-row:1 / span 2;padding:6px 10px;font-size:1.15rem;line-height:1}
+.sw-star{color:var(--muted)}
+.sw-star.on{color:#d99a00;border-color:#d99a00}
+.feedback .sw-star,.rev .sw-star{margin-left:8px;padding:2px 10px;font-size:1.05rem;line-height:1.2}
 .sw-cat{grid-column:2;font-size:.8rem;color:var(--muted)}
 .sw-info{color:var(--muted);margin:4px 0}
 

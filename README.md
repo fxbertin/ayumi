@@ -137,6 +137,9 @@ Usa a Web Speech API (`speechSynthesis`, `lang = ja-JP`). A voz vem do navegador
 ### Vozes japonesas (`vozes.html`)
 Página com o passo a passo para instalar uma voz japonesa no Android, iPhone/iPad, Windows e Mac, mais o botão "Testar a voz" (`AyumiTTS.hasJa()` e `AyumiTTS.speak`). Os passos foram conferidos nas páginas de ajuda do Google, da Apple e da Microsoft em 2026-11-20; o Linux ficou de fora por não ter sido confirmado. O texto e o link ficam em um só lugar, `tts.js`: `AyumiTTS.voiceHelp(el)` escreve "Nenhuma voz japonesa neste aparelho. Como instalar uma voz japonesa" (com o link `AyumiTTS.voiceHelpUrl`, relativo) e é usado pelo aviso único (`noVoiceNotice`, chave `kd-voice-note`, fora do backup) e pelo `onnovoice` de app.js, ditado, numeros, relogio, taxi e taxi-a. Há um link discreto no rodapé de `index.html` e de `progresso.html`.
 
+## Meu deck (vocabulário)
+Em `vocabulario.html`, o botão ☆/★ aparece em cada palavra (lista de estudo, resultados da busca, rolagem infinita), no feedback do quiz depois de responder e na lista "Para revisar". O mesmo botão guarda e remove; no próprio deck, tocar em ★ tira a palavra da lista na hora. As palavras ficam em `kd-deck` (lista de `"japonês|kana"`). O botão "Meu deck (N)" abre o estudo ou o quiz (conforme o modo escolhido), sem recorde, como "Revisar meus erros"; "Esvaziar deck" limpa tudo; a rolagem infinita tem a opção "Meu deck". O deck entra no exportar/importar (`bkCheck` valida `kd-deck`) e **não** é apagado pelo "Zerar progresso". Palavras que saírem de `data/words.js` são ignoradas. `sw.js` não mudou (sem arquivos novos).
+
 ## Backup do progresso
 
 Em `progresso.html`, “Exportar progresso” baixa um `.json` (app, version, exportedAt, data) com `stats`, `miss`, `best:*` e todas as chaves `kd-*` (menos `kd-voice-note`). “Importar progresso” valida o arquivo, mostra um resumo e, ao confirmar, SUBSTITUI tudo o que está salvo no aparelho (não há mesclagem).

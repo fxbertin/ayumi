@@ -58,6 +58,7 @@ a{color:inherit}
     <h2>Recordes</h2>
     <div id="recs" class="recs"></div>
   </section>
+  <p id="deckline" class="hint"></p>
   <h2>Backup do progresso</h2>
   <p class="hint">Baixe um arquivo com todo o seu progresso e preferências para guardar ou levar a outro aparelho (por exemplo, do navegador para o app instalado). Importar <b>substitui</b> o progresso deste aparelho pelo do arquivo.</p>
   <div class="row">
@@ -161,8 +162,15 @@ function render() {
   shown.forEach(k => { const d = el("div", "rec"); d.append(el("b", "", String(ls.get(k, 0))), el("small", "", bestName(k))); rc.append(d); });
 }
 
+(function deckLine() {
+  const d = ls.get("kd-deck", []), have = new Set();
+  for (const c of CATEGORIES) for (const w of c.words) have.add(w[0] + "|" + w[1]);
+  const n = Array.isArray(d) ? d.filter(k => have.has(k)).length : 0;
+  $("#deckline").textContent = n ? `Meu deck: ${n} palavra${n === 1 ? "" : "s"} guardada${n === 1 ? "" : "s"} (para revisar, abra o Vocabulário).` : "Meu deck: vazio. No Vocabulário, toque em ☆ ao lado de uma palavra para guardá-la.";
+})();
+
 $("#reset").onclick = () => {
-  if (!confirm("Zerar TUDO: o histórico, a lista de palavras erradas, os recordes, as notas das provas de gramática, os tópicos de gramática marcados como estudados e os textos de leitura lidos? Suas preferências ficam. Isso não pode ser desfeito. Se quiser guardar uma cópia, cancele e use “Exportar progresso” antes.")) return;
+  if (!confirm("Zerar TUDO: o histórico, a lista de palavras erradas, os recordes, as notas das provas de gramática, os tópicos de gramática marcados como estudados e os textos de leitura lidos? Suas preferências e o seu deck de palavras ficam. Isso não pode ser desfeito. Se quiser guardar uma cópia, cancele e use “Exportar progresso” antes.")) return;
   try { ["stats", "miss", "kd-gram-done", "kd-leitura-done", ...lsKeys().filter(k => k.startsWith("best:") || k.startsWith("kd-gram-quiz-"))].forEach(k => localStorage.removeItem(k)); } catch {}
   $("#msg").textContent = "Progresso zerado."; render();
 };
@@ -226,6 +234,8 @@ function bkCheck(k, raw) {
     if (![2, 3, 4].includes(v)) return "tamanho mínimo do Kotonoha inválido";
   } else if (k === "kd-kotonoha-seed") {
     if (!Number.isInteger(v) || v < 0 || v > 1e9) return "semente do Kotonoha inválida";
+  } else if (k === "kd-deck") {
+    if (!Array.isArray(v) || v.length > 5000 || v.some(x => typeof x !== "string" || x.length > 80 || !x.includes("|"))) return "deck inválido";
   } else if (k === "kd-leitura-done") {
     if (!isObj(v) || Object.values(v).some(d => !isObj(d) || typeof d.best !== "number")) return "leituras inválidas";
   }
@@ -270,10 +280,11 @@ $("#impfile").onchange = async e => {
   const st = o.data.stats ? j("stats").length : 0, ms = o.data.miss ? Object.keys(j("miss")).length : 0;
   const ld = o.data["kd-leitura-done"] ? Object.keys(j("kd-leitura-done")).length : 0;
   const gd = o.data["kd-gram-done"] ? j("kd-gram-done").length : 0;
+  const dk = o.data["kd-deck"] ? j("kd-deck").length : 0;
   const when = o.exportedAt && !isNaN(Date.parse(o.exportedAt)) ? new Date(o.exportedAt).toLocaleString("pt-BR") : "data desconhecida";
   const cur = bkSnapshot();
   bkPending = keys;
-  $("#impsum").textContent = `Backup de ${when}: ${st} respostas no histórico, ${ms} palavras na lista de erros, ${n(k => k.startsWith("best:"))} recordes, ${n(k => k.startsWith("kd-gram-quiz-best:"))} provas de gramática concluídas, ${gd} tópicos estudados, ${ld} textos lidos e ${n(k => k.startsWith("kd-") && !k.startsWith("kd-gram-") && k !== "kd-leitura-done")} preferências. Ao confirmar, TUDO o que está salvo neste aparelho (${Object.keys(cur).length} itens) será substituído por isso. Não dá para desfazer.`;
+  $("#impsum").textContent = `Backup de ${when}: ${st} respostas no histórico, ${ms} palavras na lista de erros, ${n(k => k.startsWith("best:"))} recordes, ${n(k => k.startsWith("kd-gram-quiz-best:"))} provas de gramática concluídas, ${gd} tópicos estudados, ${ld} textos lidos, ${dk} palavras no deck e ${n(k => k.startsWith("kd-") && !k.startsWith("kd-gram-") && k !== "kd-leitura-done" && k !== "kd-deck")} preferências. Ao confirmar, TUDO o que está salvo neste aparelho (${Object.keys(cur).length} itens) será substituído por isso. Não dá para desfazer.`;
   $("#impbox").hidden = false; bkFile = o;
 };
 let bkFile = null;

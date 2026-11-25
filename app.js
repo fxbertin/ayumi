@@ -51,13 +51,14 @@ function sentRows(w){
   return out;
 }
 
-function wordRow(w, tag, noEx){
+function wordRow(w, tag, noEx, onStar){
   const r = document.createElement("div"); r.className = "sw";
   const ja = document.createElement("span"); ja.className = "sw-ja"; ja.lang = "ja"; ja.textContent = w[0];
   const rd = document.createElement("span"); rd.className = "sw-rd"; rd.lang = "ja"; rd.textContent = `${pitch(w)}  ${w[2]}`;
   const pt = document.createElement("span"); pt.className = "sw-pt"; pt.textContent = w[3];
   r.append(ja, rd, pt);
   if (TTS) { const b = document.createElement("button"); b.type = "button"; b.className = "ghost"; b.textContent = "🔊"; b.setAttribute("aria-label", "Ouvir " + w[1]); b.onclick = () => speak(w[1]); r.append(b); }
+  r.append(starBtn(w, onStar ? on => onStar(on, r) : null));
   if (!noEx) r.append(...sentRows(w));
   if (tag) { const c = document.createElement("span"); c.className = "sw-cat"; c.textContent = tag; r.insertBefore(c, r.children[3] || null); }
   return r;
@@ -66,9 +67,18 @@ function wordRow(w, tag, noEx){
 function study(cat){
   S.cat = cat;
   $("#study-title").textContent = `${cat.group}: ${cat.name}`;
-  $("#study-count").textContent = `${cat.words.length} palavras`;
+  $("#study-feed").hidden = false;
   const list = $("#study-list"); list.replaceChildren();
-  list.append(...cat.words.map(w => wordRow(w)));
+  const refresh = () => {
+    const n = cat.words.length;
+    $("#study-count").textContent = `${n} palavra${n === 1 ? "" : "s"}`;
+    $("#study-play").disabled = !n;
+    if (cat.deck && !n) { const p = document.createElement("p"); p.className = "sw-info"; p.textContent = "Seu deck está vazio. Toque em ☆ ao lado de uma palavra para guardá-la aqui."; list.append(p); }
+  };
+  // No deck, tocar em ★ tira a palavra da lista na hora.
+  const onStar = cat.deck ? (on, r) => { if (!on) { r.remove(); cat.words = deckWords(); refresh(); } } : null;
+  list.append(...cat.words.map(w => wordRow(w, null, false, onStar)));
+  refresh();
   show("study"); window.scrollTo(0, 0);
 }
 
@@ -82,6 +92,7 @@ function levelCat(g){
 // Rolagem infinita: mostra cartões de palavras sem parar; ao acabar, recomeça (embaralhando ou não).
 let FEED = null;
 function feedPool(scope){
+  if (scope === "deck") return deckWords();
   const seen = new Set(), out = [];
   for (const c of CATEGORIES) if (scope === "all" || scope === "g:" + c.group || scope === "c:" + c.id)
     for (const w of c.words) { const k = w[0] + "|" + w[1]; if (!seen.has(k)) { seen.add(k); out.push(w); } }
@@ -90,6 +101,7 @@ function feedPool(scope){
 function feedInit(){
   const sel = $("#feed-scope"), add = (p, v, t) => { const o = document.createElement("option"); o.value = v; o.textContent = t; p.append(o); };
   add(sel, "all", "Todas as palavras");
+  add(sel, "deck", "Meu deck");
   const groups = [...new Set(CATEGORIES.map(c => c.group))];
   const og = document.createElement("optgroup"); og.label = "Por grupo";
   for (const g of groups) add(og, "g:" + g, g);
@@ -147,7 +159,7 @@ function feedStart(){
 }
 
 // Busca: kana (hiragana ou katakana), romaji, japonês ou português (sem acento / maiúsculas).
-const norm = t => t.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim();
+const norm = t => t.normalize("NFD").replace(/[\u0300-\u036f]/g, "").normalize("NFC").toLowerCase().trim();   // NFC de volta: sem isso べ, ぎ… (dakuten) ficavam decompostos e a busca em kana não achava nada
 const hira = t => t.replace(/[\u30a1-\u30f6]/g, c => String.fromCharCode(c.charCodeAt(0) - 0x60));
 let INDEX = null;
 function search(q){
@@ -171,7 +183,7 @@ function search(q){
 const openGroups = () => store.get("open") || ["JLPT N5"];
 
 function renderMenu(){
-  updateErr();
+  updateErr(); updateDeck();
   const box = $("#groups"); box.replaceChildren();
   const groups = [...new Set(CATEGORIES.map(c => c.group))];
   const jl = g => g.startsWith("JLPT");
@@ -225,12 +237,41 @@ function updateErr(){
   $("#err-open").hidden = $("#err-clear").hidden = !n;
   $("#err-open").textContent = `Revisar meus erros (${n})`;
 }
+// Meu deck: palavras que a pessoa guarda ("japonês|kana" em "kd-deck"). Adicionar e remover usam o mesmo botão ☆/★.
+const DECK_KEY = "kd-deck";
+function deckGet(){ const d = store.get(DECK_KEY); return Array.isArray(d) ? d.filter(k => typeof k === "string") : []; }
+function deckToggle(w){
+  const k = wkey(w), d = deckGet(), i = d.indexOf(k);
+  if (i >= 0) d.splice(i, 1); else d.push(k);
+  store.set(DECK_KEY, d); updateDeck();
+  return i < 0;
+}
+function deckWords(){   // ignora palavras que não existem mais no dicionário
+  const by = new Map();
+  for (const c of CATEGORIES) for (const w of c.words) by.set(wkey(w), w);
+  return deckGet().filter(k => by.has(k)).map(k => by.get(k));
+}
+function deckCat(){ return { id: "deck", group: "Meu deck", name: "palavras guardadas", words: deckWords(), pool: CATEGORIES.flatMap(c => c.words), errors: true, deck: true }; }   // errors: sem recorde, como "Meus erros"
+function updateDeck(){
+  const n = deckWords().length;
+  $("#deck-open").hidden = $("#deck-clear").hidden = !n;
+  $("#deck-open").textContent = `Meu deck (${n})`;
+}
+function starBtn(w, cb){
+  const b = document.createElement("button"); b.type = "button"; b.className = "ghost sw-star";
+  b.setAttribute("aria-label", "Meu deck: " + w[0]);
+  const set = on => { b.textContent = on ? "★" : "☆"; b.setAttribute("aria-pressed", on); b.title = on ? "Remover do meu deck" : "Guardar no meu deck"; b.classList.toggle("on", on); };
+  set(deckGet().includes(wkey(w)));
+  b.onclick = () => { const on = deckToggle(w); set(on); if (cb) cb(on); };
+  return b;
+}
 function startErrors(){
   const words = missWords();
   if (words.length) start({ id: "erros", group: "Revisão", name: "Meus erros", words, pool: CATEGORIES.flatMap(c => c.words), errors: true });
 }
 
 function start(cat){
+  if (cat.deck) { cat = deckCat(); if (!cat.words.length) return renderMenu(); }   // o deck pode ter mudado desde a última vez
   S.cat = cat; S.n = ROUNDS;
   const words = shuffle(pick(cat.words, ROUNDS));
   S.q = words.map(w => {
@@ -283,6 +324,7 @@ function answer(n){
   recordStat(w, n === S.correct);
   $("#score").textContent = `Acertos: ${S.score}`;
   $("#feedback").textContent = `${w[0]} (${pitch(w)}, ${w[2]}) = ${w[3]}`;
+  $("#feedback").append(starBtn(w));
   showExample(w);
   $("#next").textContent = S.i === S.q.length-1 ? "Ver resultado" : "Próxima";
   $("#next").hidden = false;
@@ -319,9 +361,10 @@ function finish(){
     const h = document.createElement("h2"); h.textContent = "Para revisar"; rv.append(h);
     for (const w of S.wrong) {
       const r = document.createElement("div"); r.className = "rev";
+      const l = document.createElement("div");
       const a = document.createElement("span"); a.lang = "ja"; a.textContent = `${w[0]}  ${pitch(w)}  ${w[2]}`;
       const b = document.createElement("span"); b.textContent = w[3];
-      r.append(a, b); rv.append(r);
+      l.append(a, starBtn(w)); r.append(l, b); rv.append(r);
     }
   }
   show("result");
@@ -341,10 +384,12 @@ for (const b of $("#rounds").children) b.onclick = () => { setRounds(+b.dataset.
 $("#q").oninput = e => search(e.target.value);
 $("#feed-open").onclick = feedStart;
 $("#err-open").onclick = startErrors;
+$("#deck-open").onclick = () => S.mode === "study" ? study(deckCat()) : start(deckCat());
+$("#deck-clear").onclick = () => { if (confirm("Esvaziar o deck? As palavras continuam no vocabulário, só saem do seu deck.")) { store.set(DECK_KEY, []); updateDeck(); } };
 $("#err-clear").onclick = () => { if (confirm("Limpar a lista de palavras erradas?")) { store.set("miss", {}); updateErr(); } };
 $("#feed-scope").onchange = $("#feed-shuffle").onchange = feedStart;
 $("#feed-back").onclick = () => { if (FEED && FEED.io) FEED.io.disconnect(); renderMenu(); };
-$("#study-feed").onclick = () => { $("#feed-scope").value = S.cat.all ? "g:" + S.cat.group : "c:" + S.cat.id; feedStart(); };
+$("#study-feed").onclick = () => { $("#feed-scope").value = S.cat.deck ? "deck" : S.cat.all ? "g:" + S.cat.group : "c:" + S.cat.id; feedStart(); };
 $("#m-play").onclick = () => setMode("play");
 $("#m-study").onclick = () => setMode("study");
 $("#study-back").onclick = renderMenu;
@@ -361,6 +406,7 @@ $("#again").onclick = () => start(S.cat);
 
 document.addEventListener("keydown", e => {
   if ($("#game").hidden) return;
+  if (e.target.closest && e.target.closest(".sw-star")) return;   // Enter/teclas no botão ★ não respondem nem avançam o quiz
   if (e.key >= "1" && e.key <= "4") { const b = $("#opts").children[+e.key-1]; if (b) answer(+e.key-1); }
   else if (e.key === "Enter" && S.locked) { e.preventDefault(); next(); }
 });
