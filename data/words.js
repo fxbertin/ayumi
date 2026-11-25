@@ -206,7 +206,8 @@ const CATEGORIES = [
  ["見積もり","みつもり","mitsumori","orçamento; estimativa"],["報告","ほうこく","houkoku","relatório; informar"],["打ち合わせ","うちあわせ","uchiawase","reunião de alinhamento"],["昇進","しょうしん","shoushin","promoção de cargo"],["異動","いどう","idou","transferência de setor"],
  ["転職","てんしょく","tenshoku","mudança de emprego"],["面接","めんせつ","mensetsu","entrevista"],["履歴書","りれきしょ","rirekisho","currículo"],["有給","ゆうきゅう","yuukyuu","folga remunerada"],["退職","たいしょく","taishoku","deixar a empresa"],
  ["担当","たんとう","tantou","responsável; encarregado"],["納期","のうき","nouki","prazo de entrega"],["段取り","だんどり","dandori","organização das etapas"],["確認","かくにん","kakunin","confirmação; conferir"],
- ["社員","しゃいん","shain","funcionário da empresa"],["就職","しゅうしょく","shuushoku","conseguir emprego"]
+ ["社員","しゃいん","shain","funcionário da empresa"],["就職","しゅうしょく","shuushoku","conseguir emprego"],
+ ["履歴", "りれき", "rireki", "histórico; currículo"]
 ]},
 { id:"comida", group:"Vocabulário", name:"Comida e bebida", words:[
  ["ご飯","ごはん","gohan","arroz cozido / refeição"],["パン","ぱん","pan","pão"],["肉","にく","niku","carne"],["野菜","やさい","yasai","verdura"],["果物","くだもの","kudamono","fruta"],
@@ -217,7 +218,7 @@ const CATEGORIES = [
  ["団子","だんご","dango","dango (bolinho doce)"],["焼き鳥","やきとり","yakitori","yakitori (espetinho de frango)"],["天ぷら","てんぷら","tenpura","tempurá"],["漬物","つけもの","tsukemono","conserva de legumes"],["唐揚げ","からあげ","karaage","karaage (frango frito japonês)"],
  ["餃子","ぎょうざ","gyouza","guioza (pastel japonês)"],["梅干し","うめぼし","umeboshi","umeboshi (ameixa em conserva)"],["胡麻","ごま","goma","gergelim"],["生姜","しょうが","shouga","gengibre"],["蜂蜜","はちみつ","hachimitsu","mel"],
  ["丼","どんぶり","donburi","tigela funda; prato de arroz com cobertura"],["おにぎり","おにぎり","onigiri","onigiri (bolinho de arroz)"],["サンドイッチ","さんどいっち","sandoicchi","sanduíche"],["ハンバーガー","はんばーがー","hanbaagaa","hambúrguer"],["ピザ","ぴざ","piza","pizza"],
- ["パスタ","ぱすた","pasuta","massa; macarrão italiano"],["スープ","すーぷ","suupu","sopa"],["アイス","あいす","aisu","sorvete"],["チョコレート","ちょこれーと","chokoreeto","chocolate"],["注文","ちゅうもん","chuumon","pedido / encomendar"],
+ ["パスタ","ぱすた","pasuta","massa; macarrão italiano"],["スープ","すーぷ","suupu","sopa"],["アイス","あいす","aisu","sorvete"],["チョコレート","ちょこれーと","chokoreeto","chocolate"],
  ["味","あじ","aji","sabor"],["食堂","しょくどう","shokudou","refeitório / restaurante simples"],["弁当","べんとう","bentou","marmita (bentô)"],["油","あぶら","abura","óleo"],["湯","ゆ","yu","água quente"],
  ["氷","こおり","koori","gelo"],["うどん","うどん","udon","udon (macarrão grosso)"],["そば","そば","soba","soba (macarrão de trigo-sarraceno)"],["おでん","おでん","oden","oden (cozido japonês de inverno)"],["せんべい","せんべい","senbei","senbei (biscoito de arroz)"],
  ["お菓子","おかし","okashi","doce; guloseima"],["飲み物","のみもの","nomimono","bebida"],["麺","めん","men","macarrão; massa"],["刺身","さしみ","sashimi","sashimi (peixe cru fatiado)"]
@@ -236,7 +237,8 @@ const CATEGORIES = [
  ["脳","のう","nou","cérebro"],["肺","はい","hai","pulmão"],["心臓","しんぞう","shinzou","coração (órgão)"],["胃","い","i","estômago"],
  ["肝臓","かんぞう","kanzou","fígado"],["腸","ちょう","chou","intestino"],["腎臓","じんぞう","jinzou","rim"],["膀胱","ぼうこう","boukou","bexiga"],
  ["骨","ほね","hone","osso; espinha"],["筋肉","きんにく","kinniku","músculo"],["肌","はだ","hada","pele"],["皮膚","ひふ","hifu","pele (do corpo)"],
- ["汗","あせ","ase","suor"],["息","いき","iki","respiração; fôlego"]
+ ["汗","あせ","ase","suor"],["息","いき","iki","respiração; fôlego"],
+ ["声","こえ","koe","voz"],["髪","かみ","kami","cabelo"]
 ]},
 { id:"familia", group:"Vocabulário", name:"Família", words:[
  ["家族","かぞく","kazoku","família"],["父","ちち","chichi","pai (meu)"],["母","はは","haha","mãe (minha)"],
@@ -290,7 +292,8 @@ const CATEGORIES = [
  ["深い", "ふかい", "fukai", "profundo"],["薄い", "うすい", "usui", "fino / ralo"],["濃い", "こい", "koi", "forte / denso"],
  ["暖かい", "あたたかい", "atatakai", "quente (clima)"],["涼しい", "すずしい", "suzushii", "fresco (clima)"],["欲しい", "ほしい", "hoshii", "querer (ter)"],
  ["可哀想", "かわいそう", "kawaisou", "coitado"],
- ["うるさい", "うるさい", "urusai", "barulhento / irritante"],["まずい", "まずい", "mazui", "ruim (sabor) / desagradável"]
+ ["うるさい", "うるさい", "urusai", "barulhento / irritante"],["まずい", "まずい", "mazui", "ruim (sabor) / desagradável"],
+ ["普通", "ふつう", "futsuu", "comum / normalmente"]
 ]},
 { id:"n3-adjetivos", group:"JLPT N3", name:"Adjetivos", words:[
  ["激しい", "はげしい", "hageshii", "intenso"],["鋭い", "するどい", "surudoi", "afiado / agudo"],["鈍い", "にぶい", "nibui", "embotado / lento"],
@@ -378,7 +381,7 @@ const CATEGORIES = [
  ["駅員", "えきいん", "ekiin", "funcionário da estação"],
  ["配達員", "はいたついん", "haitatsuin", "entregador"]
 ]},
-{ id:"natureza", group:"Vocabulário", name:"Natureza e clima", words:[
+{ id:"natureza", group:"Vocabulário", name:"Natureza, clima, mar e montanha", words:[
  ["天気","てんき","tenki","tempo (clima)"],["雨","あめ","ame","chuva"],["雪","ゆき","yuki","neve"],["風","かぜ","kaze","vento"],
  ["雲","くも","kumo","nuvem"],["空","そら","sora","céu"],["太陽","たいよう","taiyou","sol"],["月","つき","tsuki","lua"],
  ["星","ほし","hoshi","estrela"],["山","やま","yama","montanha"],["川","かわ","kawa","rio"],["海","うみ","umi","mar"],
@@ -406,7 +409,28 @@ const CATEGORIES = [
  ["台風","たいふう","taifuu","tufão"],["天気予報","てんきよほう","tenkiyohou","previsão do tempo"],["晴れ","はれ","hare","tempo limpo"],
  ["曇り","くもり","kumori","nublado"],["島","しま","shima","ilha"],["空気","くうき","kuuki","ar"],
  ["温度","おんど","ondo","temperatura"],["湖","みずうみ","mizuumi","lago"],["虫","むし","mushi","inseto"],
- ["林","はやし","hayashi","bosque"]
+ ["林","はやし","hayashi","bosque"],
+ ["海岸", "かいがん", "kaigan", "litoral; praia"],
+ ["砂浜", "すなはま", "sunahama", "praia de areia"],
+ ["海辺", "うみべ", "umibe", "beira-mar"],
+ ["潮", "しお", "shio", "maré"],
+ ["水平線", "すいへいせん", "suiheisen", "horizonte (no mar)"],
+ ["灯台", "とうだい", "toudai", "farol"],
+ ["岬", "みさき", "misaki", "cabo"],
+ ["崖", "がけ", "gake", "penhasco"],
+ ["谷", "たに", "tani", "vale"],
+ ["洞窟", "どうくつ", "doukutsu", "caverna"],
+ ["火山", "かざん", "kazan", "vulcão"],
+ ["頂上", "ちょうじょう", "choujou", "topo; cume"],
+ ["桜", "さくら", "sakura", "cerejeira"],
+ ["花びら", "はなびら", "hanabira", "pétala"],
+ ["蕾", "つぼみ", "tsubomi", "botão (de flor)"],
+ ["芽", "め", "me", "broto"],
+ ["根", "ね", "ne", "raiz"],
+ ["葉", "は", "ha", "folha"],
+ ["苔", "こけ", "koke", "musgo"],
+ ["竹", "たけ", "take", "bambu"],
+ ["珊瑚", "さんご", "sango", "coral"]
 ]},
 { id:"n5-subst", group:"JLPT N5", name:"Substantivos e objetos", words:[
  ["友達", "ともだち", "tomodachi", "amigo"],["人", "ひと", "hito", "pessoa"],["男", "おとこ", "otoko", "homem"],
@@ -461,12 +485,12 @@ const CATEGORIES = [
 { id:"n4-adv", group:"JLPT N4", name:"Advérbios e expressões", words:[
  ["特に", "とくに", "tokuni", "especialmente"],["必ず", "かならず", "kanarazu", "sem falta"],["きっと", "きっと", "kitto", "com certeza"],
  ["やっと", "やっと", "yatto", "finalmente"],["とうとう", "とうとう", "toutou", "por fim"],["急に", "きゅうに", "kyuu ni", "de repente"],
- ["突然", "とつぜん", "totsuzen", "repentinamente"],["自分", "じぶん", "jibun", "si mesmo"],["例えば", "たとえば", "tatoeba", "por exemplo"],
+ ["突然", "とつぜん", "totsuzen", "repentinamente"],["例えば", "たとえば", "tatoeba", "por exemplo"],
  ["実は", "じつは", "jitsu wa", "na verdade"],["だんだん", "だんだん", "dandan", "gradualmente"],["ずっと", "ずっと", "zutto", "o tempo todo / bem mais"],
  ["そろそろ", "そろそろ", "sorosoro", "já está na hora"],["なるべく", "なるべく", "narubeku", "o máximo possível"],["少なくとも", "すくなくとも", "sukunakutomo", "pelo menos"],
  ["たまに", "たまに", "tamani", "de vez em quando"],["もうすぐ", "もうすぐ", "mousugu", "daqui a pouco"],["大体", "だいたい", "daitai", "mais ou menos / em geral"],
  ["結構", "けっこう", "kekkou", "bastante / está bom"],["一度", "いちど", "ichido", "uma vez"],["初めて", "はじめて", "hajimete", "pela primeira vez"],
- ["十分", "じゅうぶん", "juubun", "suficiente"],["大勢", "おおぜい", "oozei", "muita gente"],["普通", "ふつう", "futsuu", "comum / normalmente"],
+ ["十分", "じゅうぶん", "juubun", "suficiente"],
  ["確か", "たしか", "tashika", "se não me engano / certo"],["多分", "たぶん", "tabun", "provavelmente"],["ちゃんと", "ちゃんと", "chanto", "direito / como deve ser"],
  ["しっかり", "しっかり", "shikkari", "com firmeza"],["はっきり", "はっきり", "hakkiri", "claramente"],["びっくり", "びっくり", "bikkuri", "(ficar) surpreso"],
  ["がっかり", "がっかり", "gakkari", "(ficar) decepcionado"],["うっかり", "うっかり", "ukkari", "sem querer / por descuido"],["のんびり", "のんびり", "nonbiri", "com calma / relaxado"],
@@ -481,15 +505,16 @@ const CATEGORIES = [
  ["ぜひ", "ぜひ", "zehi", "por favor; sem falta"],
  ["あとで", "あとで", "atode", "depois; mais tarde"]
 ]},
-{ id:"saude", group:"Vocabulário", name:"Saúde", words:[
+{ id:"saude", group:"Vocabulário", name:"Saúde e emergência", words:[
  ["熱","ねつ","netsu","febre"],["風邪","かぜ","kaze","resfriado"],["咳","せき","seki","tosse"],["痛い","いたい","itai","dolorido"],
  ["頭痛","ずつう","zutsuu","dor de cabeça"],["怪我","けが","kega","ferimento"],["注射","ちゅうしゃ","chuusha","injeção"],["手術","しゅじゅつ","shujutsu","cirurgia"],
  ["入院","にゅういん","nyuuin","internação"],["予防","よぼう","yobou","prevenção"],["体温","たいおん","taion","temperatura corporal"],["血","ち","chi","sangue"],
  ["歯医者","はいしゃ","haisha","dentista"],["健康","けんこう","kenkou","saúde"],["症状","しょうじょう","shoujou","sintoma"],
  ["保険証", "ほけんしょう", "hokenshou", "cartão do seguro de saúde"],["歯科", "しか", "shika", "odontologia / clínica dentária"],["睡眠", "すいみん", "suimin", "sono"],
- ["具合","ぐあい","guai","estado (de saúde)"],["気分","きぶん","kibun","disposição / humor"],["気持ち","きもち","kimochi","sentimento / sensação"],
- ["注意","ちゅうい","chuui","atenção / cuidado"],["治る","なおる","naoru","curar-se"],["声","こえ","koe","voz"],
- ["髪","かみ","kami","cabelo"]
+ ["具合","ぐあい","guai","estado (de saúde)"],
+ ["治る","なおる","naoru","curar-se"],
+ ["救急車", "きゅうきゅうしゃ", "kyuukyuusha", "ambulância"],["消防車", "しょうぼうしゃ", "shoubousha", "carro de bombeiros"],["消防署", "しょうぼうしょ", "shoubousho", "quartel de bombeiros"],
+ ["避難", "ひなん", "hinan", "evacuação / refúgio"],["非常口", "ひじょうぐち", "hijouguchi", "saída de emergência"],["緊急", "きんきゅう", "kinkyuu", "emergência / urgência"]
 ]},
 { id:"tecnologia", group:"Vocabulário", name:"Tecnologia", words:[
  ["携帯電話","けいたいでんわ","keitai denwa","celular"],["スマホ","すまほ","sumaho","smartphone"],["インターネット","いんたーねっと","intaanetto","internet"],
@@ -514,7 +539,8 @@ const CATEGORIES = [
  ["愛情","あいじょう","aijou","afeto; carinho"],["感謝","かんしゃ","kansha","gratidão"],["後悔","こうかい","koukai","arrependimento"],["孤独","こどく","kodoku","solidão"],["嫉妬","しっと","shitto","ciúme; inveja"],
  ["喧嘩","けんか","kenka","briga"],["仲直り","なかなおり","nakanaori","reconciliação; fazer as pazes"],["秘密","ひみつ","himitsu","segredo"],["本音","ほんね","honne","o que se pensa de verdade"],["恋しい","こいしい","koishii","que faz falta; saudoso"],
  ["照れる","てれる","tereru","ficar sem graça; ficar tímido"],["励ます","はげます","hagemasu","animar; encorajar"],["許す","ゆるす","yurusu","perdoar; permitir"],["気まずい","きまずい","kimazui","constrangedor; desconfortável"],["甘える","あまえる","amaeru","pedir mimo; aproveitar a gentileza de alguém"],
- ["見守る","みまもる","mimamoru","acompanhar com carinho; zelar"]
+ ["見守る","みまもる","mimamoru","acompanhar com carinho; zelar"],
+ ["気分","きぶん","kibun","disposição / humor"],["気持ち","きもち","kimochi","sentimento / sensação"],["注意","ちゅうい","chuui","atenção / cuidado"]
 ]},
 { id:"esportes", group:"Cotidiano", name:"Esportes e lazer", words:[
  ["運動","うんどう","undou","exercício"],["スポーツ","すぽーつ","supootsu","esporte"],["野球","やきゅう","yakyuu","beisebol"],["サッカー","さっかー","sakkaa","futebol"],
@@ -581,7 +607,8 @@ const CATEGORIES = [
  ["こんな", "こんな", "konna", "assim; deste tipo"],
  ["そんな", "そんな", "sonna", "assim; desse tipo"],
  ["あんな", "あんな", "anna", "daquele tipo; tão (como aquilo)"],
- ["どんな", "どんな", "donna", "que tipo de; qual"]
+ ["どんな", "どんな", "donna", "que tipo de; qual"],
+ ["自分", "じぶん", "jibun", "si mesmo"],["僕","ぼく","boku","eu (masculino, informal)"],["君","きみ","kimi","você (informal, íntimo)"],["どこか","どこか","dokoka","algum lugar"],["誰か","だれか","dareka","alguém"],["何か","なにか","nanika","alguma coisa"]
 ]},
 { id:"n5-contadores", group:"JLPT N5", name:"Contadores", words:[
  ["一人","ひとり","hitori","uma pessoa"],["二人","ふたり","futari","duas pessoas"],["何人","なんにん","nannin","quantas pessoas"],["歳","さい","sai","anos de idade"],["〜枚","まい","mai","coisas planas (papel, camisa, prato)"],
@@ -635,8 +662,8 @@ const CATEGORIES = [
  ["おかえり", "おかえり", "okaeri", "bem-vindo de volta"],
  ["いってきます", "いってきます", "ittekimasu", "já vou e volto (ao sair de casa)"],
  ["おやすみ", "おやすみ", "oyasumi", "boa noite (ao ir dormir)"],
- ["僕","ぼく","boku","eu (masculino, informal)"],["君","きみ","kimi","você (informal, íntimo)"],["どこか","どこか","dokoka","algum lugar"],
- ["誰か","だれか","dareka","alguém"],["何か","なにか","nanika","alguma coisa"],["うん","うん","un","sim; ahã (informal)"],
+ 
+ ["うん","うん","un","sim; ahã (informal)"],
  ["ごめん","ごめん","gomen","desculpa (informal)"],["よろしく","よろしく","yoroshiku","conto com você; prazer (ao se apresentar)"],["お疲れ様","おつかれさま","otsukaresama","bom trabalho; obrigado pelo esforço"],
  ["どういたしまして","どういたしまして","douitashimashite","de nada"],["いいね","いいね","iine","legal!; boa!"],["やばい","やばい","yabai","nossa!; que perigo; que demais (gíria)"]
 ]},
@@ -685,12 +712,13 @@ const CATEGORIES = [
  ["親戚", "しんせき", "shinseki", "parente"],["恋人", "こいびと", "koibito", "namorado(a)"],["先輩", "せんぱい", "senpai", "veterano / sênior"],
  ["後輩", "こうはい", "kouhai", "júnior / calouro"],["近所", "きんじょ", "kinjo", "vizinhança"],["客", "きゃく", "kyaku", "cliente / visita"],
  ["赤ちゃん", "あかちゃん", "akachan", "bebê"],["大人", "おとな", "otona", "adulto"],["主人", "しゅじん", "shujin", "marido (meu) / dono"],
- ["奥さん", "おくさん", "okusan", "esposa (de outra pessoa)"],["相談", "そうだん", "soudan", "consulta / conversa para pedir conselho"],["結婚", "けっこん", "kekkon", "casamento"]
+ ["奥さん", "おくさん", "okusan", "esposa (de outra pessoa)"],["相談", "そうだん", "soudan", "consulta / conversa para pedir conselho"],["結婚", "けっこん", "kekkon", "casamento"],
+ ["大勢", "おおぜい", "oozei", "muita gente"]
 ]},
-{ id:"n4-direcao", group:"JLPT N4", name:"Direção e trânsito", words:[
- ["反対","はんたい","hantai","oposto / contrário"],["真ん中","まんなか","mannaka","meio / centro"],["隅","すみ","sumi","canto"],["端","はし","hashi","ponta / beira"],["周り","まわり","mawari","em volta / arredores"],["通り","とおり","toori","rua / avenida"],["道路","どうろ","douro","estrada / via"],["歩道","ほどう","hodou","calçada"],["横断歩道","おうだんほどう","oudanhodou","faixa de pedestres"],["出口","でぐち","deguchi","saída"],["入口","いりぐち","iriguchi","entrada"],["乗り場","のりば","noriba","ponto de embarque"],["改札","かいさつ","kaisatsu","catraca (de estação)"],["地下","ちか","chika","subsolo"],["方向","ほうこう","houkou","direção"]]},
-{ id:"direcoes-caminho", group:"Cotidiano", name:"Pedir e dar direções", words:[
- ["まっすぐ","まっすぐ","massugu","reto / em frente"],["角","かど","kado","esquina"],["突き当たり","つきあたり","tsukiatari","fim da rua"],["行き止まり","いきどまり","ikidomari","beco sem saída"],["次","つぎ","tsugi","próximo; seguinte"],["手前","てまえ","temae","antes (do ponto) / este lado"],["先","さき","saki","adiante / mais à frente"],["近道","ちかみち","chikamichi","atalho"],["遠回り","とおまわり","toomawari","desvio / caminho mais longo"],["道順","みちじゅん","michijun","trajeto / indicações do caminho"],["目的地","もくてきち","mokutekichi","destino"],["通行止め","つうこうどめ","tsuukoudome","via interditada"]]},
+{ id:"direcoes-caminho", group:"Cotidiano", name:"Direções e trânsito", words:[
+ ["まっすぐ","まっすぐ","massugu","reto / em frente"],["角","かど","kado","esquina"],["突き当たり","つきあたり","tsukiatari","fim da rua"],["行き止まり","いきどまり","ikidomari","beco sem saída"],["次","つぎ","tsugi","próximo; seguinte"],["手前","てまえ","temae","antes (do ponto) / este lado"],["先","さき","saki","adiante / mais à frente"],["近道","ちかみち","chikamichi","atalho"],["遠回り","とおまわり","toomawari","desvio / caminho mais longo"],["道順","みちじゅん","michijun","trajeto / indicações do caminho"],["目的地","もくてきち","mokutekichi","destino"],["通行止め","つうこうどめ","tsuukoudome","via interditada"],
+ ["反対","はんたい","hantai","oposto / contrário"],["真ん中","まんなか","mannaka","meio / centro"],["隅","すみ","sumi","canto"],["端","はし","hashi","ponta / beira"],["周り","まわり","mawari","em volta / arredores"],["通り","とおり","toori","rua / avenida"],["道路","どうろ","douro","estrada / via"],["歩道","ほどう","hodou","calçada"],["横断歩道","おうだんほどう","oudanhodou","faixa de pedestres"],["出口","でぐち","deguchi","saída"],["入口","いりぐち","iriguchi","entrada"],["乗り場","のりば","noriba","ponto de embarque"],["改札","かいさつ","kaisatsu","catraca (de estação)"],["地下","ちか","chika","subsolo"],["方向","ほうこう","houkou","direção"]
+]},
 { id:"onomatopeias", group:"Vocabul\u00e1rio", name:"Onomatopeias", words:[
  ["わくわく","わくわく","wakuwaku","empolgado"],["どきどき","どきどき","dokidoki","coração batendo forte"],["にこにこ","にこにこ","nikoniko","sorridente"],["いらいら","いらいら","iraira","irritado"],["ふわふわ","ふわふわ","fuwafuwa","macio e leve"],["ぴかぴか","ぴかぴか","pikapika","brilhando / reluzente"],["ぺらぺら","ぺらぺら","perapera","fluente (em idioma)"],["ざあざあ","ざあざあ","zaazaa","chuva forte"],["ぐるぐる","ぐるぐる","guruguru","girando em círculos"],["ごろごろ","ごろごろ","gorogoro","rolando / à toa"],["きらきら","きらきら","kirakira","cintilando"],["ぺこぺこ","ぺこぺこ","pekopeko","morrendo de fome"]]},
 { id:"n3-adjna", group:"JLPT N3", name:"Adjetivos な (N3)", words:[
@@ -748,7 +776,7 @@ const CATEGORIES = [
  ["柘榴", "ざくろ", "zakuro", "romã"],
  ["枇杷", "びわ", "biwa", "nêspera"]
 ]},
-{ id:"utensilios", group:"Vocabul\u00e1rio", name:"Utensílios de cozinha", words:[
+{ id:"utensilios", group:"Vocabul\u00e1rio", name:"Cozinha: utensílios e preparo", words:[
  ["鍋", "なべ", "nabe", "panela"],["包丁", "ほうちょう", "houchou", "faca de cozinha"],["茶碗", "ちゃわん", "chawan", "tigela (de arroz)"],
  ["湯飲み", "ゆのみ", "yunomi", "xícara de chá japonesa"],["急須", "きゅうす", "kyuusu", "bule de chá"],["炊飯器", "すいはんき", "suihanki", "panela elétrica de arroz"],
  ["まな板", "まないた", "manaita", "tábua de cortar"],["やかん", "やかん", "yakan", "chaleira"],["蓋", "ふた", "futa", "tampa"],
@@ -772,13 +800,30 @@ const CATEGORIES = [
  ["おろし金", "おろしがね", "oroshigane", "ralador"],
  ["菜箸", "さいばし", "saibashi", "hashis de cozinha"],
  ["しゃもじ", "しゃもじ", "shamoji", "pá de arroz"],
- ["コンロ", "こんろ", "konro", "fogão (boca)"]
+ ["コンロ", "こんろ", "konro", "fogão (boca)"],
+ ["炒める", "いためる", "itameru", "refogar; saltear"],
+ ["煮る", "にる", "niru", "cozinhar (ferver)"],
+ ["揚げる", "あげる", "ageru", "fritar (em óleo)"],
+ ["茹でる", "ゆでる", "yuderu", "ferver; escaldar"],
+ ["蒸す", "むす", "musu", "cozinhar no vapor"],
+ ["刻む", "きざむ", "kizamu", "picar"],
+ ["溶かす", "とかす", "tokasu", "derreter; dissolver"],
+ ["冷ます", "さます", "samasu", "deixar esfriar"],
+ ["味見", "あじみ", "ajimi", "provar o tempero"],
+ ["下ごしらえ", "したごしらえ", "shitagoshirae", "preparo prévio"],
+ ["剥く", "むく", "muku", "descascar"],
+ ["注ぐ", "そそぐ", "sosogu", "despejar; servir"],
+ ["漬ける", "つける", "tsukeru", "conservar em salmoura"],
+ ["盛り付け", "もりつけ", "moritsuke", "empratamento"],
+ ["出汁", "だし", "dashi", "caldo (dashi)"],
+ ["炊く", "たく", "taku", "cozinhar (arroz)"]
 ]},
 { id:"dinheiro", group:"Vocabulário", name:"Dinheiro e banco", words:[
  ["預金","よきん","yokin","depósito"],["貯金","ちょきん","chokin","poupança"],["税金","ぜいきん","zeikin","imposto"],["小銭","こぜに","kozeni","trocados"],["現金","げんきん","genkin","dinheiro em espécie"],
  ["硬貨","こうか","kouka","moeda"],["紙幣","しへい","shihei","cédula"],["通帳","つうちょう","tsuuchou","caderneta bancária"],["暗証番号","あんしょうばんごう","anshoubangou","senha (PIN)"],["振り込み","ふりこみ","furikomi","transferência bancária"],
  ["口座","こうざ","kouza","conta bancária"],["借金","しゃっきん","shakkin","dívida"],["割引","わりびき","waribiki","desconto"],["領収書","りょうしゅうしょ","ryoushuusho","recibo"],["生活費","せいかつひ","seikatsuhi","custo de vida"],
- ["円","えん","en","iene"]
+ ["円","えん","en","iene"],
+ ["保険", "ほけん", "hoken", "seguro"]
 ]},
 { id:"musica", group:"Vocabul\u00e1rio", name:"Música e mídia", words:[
  ["楽器", "がっき", "gakki", "instrumento musical"],
@@ -809,11 +854,6 @@ const CATEGORIES = [
  ["湯船", "ゆぶね", "yubune", "banheira (com água quente)"],
  ["浴槽", "よくそう", "yokusou", "banheira; tina"],
  ["体重計", "たいじゅうけい", "taijuukei", "balança (de pesar pessoas)"]
-]},
-{ id:"emergencia", group:"Vocabul\u00e1rio", name:"Polícia e emergência", words:[
- ["救急車", "きゅうきゅうしゃ", "kyuukyuusha", "ambulância"],["消防車", "しょうぼうしゃ", "shoubousha", "carro de bombeiros"],["消防署", "しょうぼうしょ", "shoubousho", "quartel de bombeiros"],
- ["避難", "ひなん", "hinan", "evacuação / refúgio"],["非常口", "ひじょうぐち", "hijouguchi", "saída de emergência"],["緊急", "きんきゅう", "kinkyuu", "emergência / urgência"],
- ["保険", "ほけん", "hoken", "seguro"]
 ]},
 { id:"brinquedos", group:"Vocabulário", name:"Brinquedos e jogos", words:[
  ["おもちゃ", "おもちゃ", "omocha", "brinquedo"],
@@ -987,47 +1027,6 @@ const CATEGORIES = [
  ["響き", "ひびき", "hibiki", "ressonância; eco"],
  ["静けさ", "しずけさ", "shizukesa", "silêncio; calma"]
 ]},
-{ id:"mar-montanha-plantas", group:"Vocabulário", name:"Mar, montanha e plantas", words:[
- ["海岸", "かいがん", "kaigan", "litoral; praia"],
- ["砂浜", "すなはま", "sunahama", "praia de areia"],
- ["海辺", "うみべ", "umibe", "beira-mar"],
- ["潮", "しお", "shio", "maré"],
- ["水平線", "すいへいせん", "suiheisen", "horizonte (no mar)"],
- ["灯台", "とうだい", "toudai", "farol"],
- ["岬", "みさき", "misaki", "cabo"],
- ["崖", "がけ", "gake", "penhasco"],
- ["谷", "たに", "tani", "vale"],
- ["洞窟", "どうくつ", "doukutsu", "caverna"],
- ["火山", "かざん", "kazan", "vulcão"],
- ["頂上", "ちょうじょう", "choujou", "topo; cume"],
- ["桜", "さくら", "sakura", "cerejeira"],
- ["花びら", "はなびら", "hanabira", "pétala"],
- ["蕾", "つぼみ", "tsubomi", "botão (de flor)"],
- ["芽", "め", "me", "broto"],
- ["根", "ね", "ne", "raiz"],
- ["葉", "は", "ha", "folha"],
- ["苔", "こけ", "koke", "musgo"],
- ["竹", "たけ", "take", "bambu"],
- ["珊瑚", "さんご", "sango", "coral"]
-]},
-{ id:"cozinhar-preparo", group:"Cotidiano", name:"Cozinhar: modos de preparo", words:[
- ["炒める", "いためる", "itameru", "refogar; saltear"],
- ["煮る", "にる", "niru", "cozinhar (ferver)"],
- ["揚げる", "あげる", "ageru", "fritar (em óleo)"],
- ["茹でる", "ゆでる", "yuderu", "ferver; escaldar"],
- ["蒸す", "むす", "musu", "cozinhar no vapor"],
- ["刻む", "きざむ", "kizamu", "picar"],
- ["溶かす", "とかす", "tokasu", "derreter; dissolver"],
- ["冷ます", "さます", "samasu", "deixar esfriar"],
- ["味見", "あじみ", "ajimi", "provar o tempero"],
- ["下ごしらえ", "したごしらえ", "shitagoshirae", "preparo prévio"],
- ["剥く", "むく", "muku", "descascar"],
- ["注ぐ", "そそぐ", "sosogu", "despejar; servir"],
- ["漬ける", "つける", "tsukeru", "conservar em salmoura"],
- ["盛り付け", "もりつけ", "moritsuke", "empratamento"],
- ["出汁", "だし", "dashi", "caldo (dashi)"],
- ["炊く", "たく", "taku", "cozinhar (arroz)"]
-]},
 { id:"rotina-dia", group:"Cotidiano", name:"Rotina do dia a dia", words:[
  ["目覚まし", "めざまし", "mezamashi", "despertador"],
  ["寝坊", "ねぼう", "nebou", "acordar tarde; dormir demais"],
@@ -1058,7 +1057,8 @@ const CATEGORIES = [
  ["包装", "ほうそう", "houshou", "embalagem; embrulho"],
  ["送料", "そうりょう", "souryou", "frete"],
  ["特売", "とくばい", "tokubai", "promoção"],
- ["無料", "むりょう", "muryou", "grátis; gratuito"]
+ ["無料", "むりょう", "muryou", "grátis; gratuito"],
+ ["注文","ちゅうもん","chuumon","pedido / encomendar"]
 ]},
 { id:"internet-redes", group:"Vocabulário", name:"Internet e redes sociais", words:[
  ["投稿", "とうこう", "toukou", "postagem; publicar"],
@@ -1070,12 +1070,12 @@ const CATEGORIES = [
  ["共有", "きょうゆう", "kyouyuu", "compartilhamento"],
  ["炎上", "えんじょう", "enjou", "polêmica nas redes"],
  ["拡散", "かくさん", "kakusan", "disseminação; viralização"],
- ["履歴", "りれき", "rireki", "histórico; currículo"],
+ 
  ["通信", "つうしん", "tsuushin", "comunicação; conexão"],
  ["電波", "でんぱ", "denpa", "onda de rádio"],
  ["流行る", "はやる", "hayaru", "estar na moda; ficar popular"]
 ]},
-{ id:"palavrinhas-ligacao", group:"Vocabulário", name:"Palavrinhas de ligação", words:[
+{ id:"palavrinhas-ligacao", group:"Vocabulário", name:"Palavrinhas de ligação e medida", words:[
  ["時", "とき", "toki", "tempo; momento; quando"],
  ["事", "こと", "koto", "coisa (abstrata); assunto; fato"],
  ["物", "もの", "mono", "coisa; objeto"],
@@ -1092,7 +1092,15 @@ const CATEGORIES = [
  ["ころ", "ころ", "koro", "época; por volta de"],
  ["はず", "はず", "hazu", "deve ser; é de se esperar"],
  ["よう", "よう", "you", "jeito; parece que"],
- ["癖", "くせ", "kuse", "mania"]
+ ["癖", "くせ", "kuse", "mania"],
+ ["まるで", "まるで", "marude", "como se; igualzinho a"],
+ ["ずいぶん", "ずいぶん", "zuibun", "bastante; muito (além do esperado)"],
+ ["ちっとも", "ちっとも", "chittomo", "nem um pouco (com negação)"],
+ ["さらに", "さらに", "sarani", "ainda mais; além disso"],
+ ["べつに", "べつに", "betsuni", "nada em especial; não particularmente"],
+ ["しばしば", "しばしば", "shibashiba", "com frequência"],
+ ["ぐらい", "ぐらい", "gurai", "cerca de; mais ou menos"],
+ ["ごろ", "ごろ", "goro", "por volta de (hora, época)"]
 ]},
 { id:"substantivos-de-verbo", group:"Vocabulário", name:"Substantivos que vêm de verbos", words:[
  ["動き", "うごき", "ugoki", "movimento"],
@@ -1114,16 +1122,6 @@ const CATEGORIES = [
  ["悲しみ", "かなしみ", "kanashimi", "tristeza"],
  ["勝ち", "かち", "kachi", "vitória"],
  ["負け", "まけ", "make", "derrota"]
-]},
-{ id:"adverbios-curtos", group:"Vocabulário", name:"Advérbios e palavrinhas de medida", words:[
- ["まるで", "まるで", "marude", "como se; igualzinho a"],
- ["ずいぶん", "ずいぶん", "zuibun", "bastante; muito (além do esperado)"],
- ["ちっとも", "ちっとも", "chittomo", "nem um pouco (com negação)"],
- ["さらに", "さらに", "sarani", "ainda mais; além disso"],
- ["べつに", "べつに", "betsuni", "nada em especial; não particularmente"],
- ["しばしば", "しばしば", "shibashiba", "com frequência"],
- ["ぐらい", "ぐらい", "gurai", "cerca de; mais ou menos"],
- ["ごろ", "ごろ", "goro", "por volta de (hora, época)"]
 ]},
 { id:"flores-arvores", group:"Vocabulário", name:"Flores e árvores", words:[
  ["薔薇", "ばら", "bara", "rosa (flor)"],
