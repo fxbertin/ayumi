@@ -121,7 +121,7 @@ const BODY = (() => {
     PREFER: ["corpo"],                                 // 顔 contém quase tudo do rosto: as alternativas que faltam vêm do corpo
     FALLBACK: ["顔|かお"],
     // Palavras da categoria "corpo" que ficam só no vocabulário (abstratas ou sem desenho simples).
-    EXCLUIDAS: ["汗|あせ", "骨|ほね", "肌|はだ", "皮膚|ひふ", "筋肉|きんにく", "息|いき", "拳|こぶし"],
+    EXCLUIDAS: ["汗|あせ", "骨|ほね", "肌|はだ", "皮膚|ひふ", "筋肉|きんにく", "息|いき", "拳|こぶし", "声|こえ"],
     NEED: [],                                          // valkarada.js preenche com as categorias de corpo
     FRAME: [400, 600], MAX: 10, MIN: 8,
   };
