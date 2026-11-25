@@ -46,6 +46,9 @@ Totais: 95 categorias, 2323 palavras, 2030 frases. Mudanças: `numeros` virou "N
 ## Lote 9 de vocabulário (2026-11-21)
 +42 palavras e +42 frases para o jogo de heróis e lendas (伝説めぐり). As categorias `heroi-guerra` e `fantasia` viraram uma só, `heroi-fantasia` ("Heróis, lendas e aventura", grupo Vocabulário, 72 palavras), e as palavras novas entraram nela: equipamento (剣 弓 杖 鎧 兜 旗 宝箱 松明 毒 ポーション 宝石 金貨), seres e criaturas (王子 女王 魔王 魔女 妖精 天使 悪魔 巨人 ゴブリン ゾンビ お化け 骸骨 人魚), lugares e elementos (村 塔 王国 神殿 砂漠 墓 牢屋 穴 火 炎 焚き火 動物), magia (呪文 呪い 魔力 闇) e ドラゴン (ALIAS de 竜 no jogo). 村 ("vila") e 墓 ("túmulo") têm o mesmo português do kanji-ex, que o `valkex.js` exige. Totais: 94 categorias, 2365 palavras, 2072 frases. O progresso antigo que usa os ids `heroi-guerra` e `fantasia` não foi migrado.
 
+## Gramática: tópicos de consulta (2026-11-25)
+Dois tópicos novos em `data/grammar.js`, sem perguntas na prova (`data/grammar-quiz.js` não mudou; o sorteio só usa tópicos que têm pergunta no banco): `familia` (Básico, logo depois de `no`; minha família x família dos outros x como chamar em casa) e `jidoushi-tadoushi` (Intermediário, logo depois de `ichidan-godan`; pares transitivo x intransitivo, を x が, ～ている x ～てある). Totais: 83 tópicos (Básico 26, Intermediário 28, Avançado 29) e 507 exemplos. Nenhum arquivo novo, então o sw.js continua em kd-v14.
+
 ## Treino de conjugação
 `conjugacao.html` pede uma forma de um verbo (ます, ません, ました, て, た, ない, たい, potencial, volitiva, ば, passiva). O motor em `data/conj.js` gera as respostas a partir do grupo do verbo (ichidan, godan, する, 来る), detectado pelo kana; os godan que parecem ichidan (帰る, 入る, 切る, 知る, 走る, 要る, 減る) ficam na lista `GODAN_RU`. Os verbos vêm das categorias cujo id contém `verbos`, mais algumas palavras listadas em `EXTRA` dentro da página. Dois modos: digitar (romaji vira kana ao vivo; também aceita kana e kanji) e escolher (as alternativas erradas são erros típicos de conjugação).
 

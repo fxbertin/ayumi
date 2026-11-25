@@ -305,6 +305,55 @@ const GRAMMAR = [
   practice: [["Lacuna (modo Partículas)", "lacuna.html"]]
 },
 
+{ id: "familia", title: "Família: a minha e a dos outros",
+  summary: "Palavras diferentes para a minha família e para a família dos outros, e como chamar cada parente em casa.",
+  use: [
+    "No japonês, a palavra para um parente muda conforme **de quem** você fala. Para a **sua própria família**, ao conversar com gente de fora, usam-se as palavras **humildes**: {母|はは} (mãe), {父|ちち} (pai). Para a **família da outra pessoa**, usam-se as palavras **respeitosas**, com **お～さん**: おかあさん, おとうさん.",
+    "É uma forma de respeito: o seu lado fica mais simples, e o lado do outro, mais elevado. Em português “minha mãe” e “sua mãe” usam a mesma palavra, e por isso o assunto parece complicado no começo.",
+    "Este tópico é de consulta e curiosidade: volte a ele quando precisar."
+  ],
+  form: [
+    "**Três situações**: (1) falando da **sua** família com alguém de fora: はは, ちち. (2) falando da família **do outro**: おかあさん, おとうさん. (3) **chamando** um parente dentro de casa: também おかあさん, おとうさん (ou ママ, パパ).",
+    "**Mais velhos e mais novos têm palavras diferentes**: {兄|あに} e {姉|あね} (mais velhos), {弟|おとうと} e {妹|いもうと} (mais novos). Não existe um “irmão” genérico: ao dizer “meu irmão”, você escolhe entre あに e おとうと.",
+    "**Irmãos mais novos** não são chamados de おとうと nem de いもうと em casa: usa-se o **nome** (たろう, たろうくん, はなこ). Já os mais velhos recebem o título: おにいさん, おねえさん (ou おにいちゃん, おねえちゃん, mais carinhoso).",
+    "**Em grupo**: {家族|かぞく} (família), {両親|りょうしん} (pai e mãe, os pais), {兄弟|きょうだい} (irmãos, e também “irmãos e irmãs”), {姉妹|しまい} (irmãs)."
+  ],
+  tables: [
+    { title: "Mesmo parente, três jeitos de dizer",
+      head: ["Parente", "Minha família", "Família dos outros", "Chamando em casa"],
+      rows: [
+        ["pai", "{父|ちち}", "お{父|とう}さん", "おとうさん (パパ)"],
+        ["mãe", "{母|はは}", "お{母|かあ}さん", "おかあさん (ママ)"],
+        ["irmão mais velho", "{兄|あに}", "お{兄|にい}さん", "おにいさん, おにいちゃん"],
+        ["irmã mais velha", "{姉|あね}", "お{姉|ねえ}さん", "おねえさん, おねえちゃん"],
+        ["irmão mais novo", "{弟|おとうと}", "{弟|おとうと}さん", "pelo nome"],
+        ["irmã mais nova", "{妹|いもうと}", "{妹|いもうと}さん", "pelo nome"],
+        ["avô", "{祖父|そふ}", "おじいさん", "おじいちゃん"],
+        ["avó", "{祖母|そぼ}", "おばあさん", "おばあちゃん"],
+        ["filho", "{息子|むすこ}", "{息子|むすこ}さん", "pelo nome"],
+        ["filha", "{娘|むすめ}", "{娘|むすめ}さん, お{嬢|じょう}さん", "pelo nome"],
+        ["família", "{家族|かぞく}", "ご{家族|かぞく}", "—"]
+      ] }
+  ],
+  ex: [
+    ["わたしの **はは**は せんせいです。", "", "Minha mãe é professora.", "Minha própria mãe, falando com alguém de fora: はは."],
+    ["やまださんの **おかあさん**は せんせいです。", "", "A mãe do Yamada é professora.", "Mãe de outra pessoa: おかあさん."],
+    ["**あに**は かいしゃいんです。", "", "Meu irmão mais velho é funcionário de empresa.", "あに: irmão mais velho, o meu."],
+    ["**おにいさん**は なんさいですか。", "", "Quantos anos tem o seu irmão mais velho?", "Irmão mais velho do outro: おにいさん."],
+    ["**おかあさん**、ごはんは まだですか。", "", "Mãe, a comida ainda não está pronta?", "Chamando a própria mãe em casa: おかあさん."],
+    ["**あに**と **いもうと**が います。", "", "Tenho um irmão mais velho e uma irmã mais nova.", "Sempre se diz se é mais velho ou mais novo."],
+    ["**おとうさん**は おげんきですか。", "", "O seu pai está bem?", "Perguntando pelo pai do outro."],
+    ["**ちち**と **はは**は ブラジルに すんで います。", "", "Meus pais moram no Brasil.", "Pais, ao falar com gente de fora: ちち e はは."]
+  ],
+  care: [
+    "Falando com gente de fora, não use **お～さん** para a sua família: ✗ おかあさんは せんせいです (para dizer que a SUA mãe é professora); ✓ はは.",
+    "Em casa é o contrário: você **chama** sua mãe de おかあさん, e não de はは. As palavras humildes servem para **falar dela** com os outros, não para **chamá-la**.",
+    "Na boca de outra pessoa, a sua はは vira おかあさん: cada um usa a palavra humilde para o próprio lado e a respeitosa para o lado dos outros.",
+    "**おにいさん** e **おねえさん** também servem para chamar, com simpatia, um rapaz ou uma moça jovem que não é da família (em lojas, por exemplo)."
+  ],
+  practice: [["Vocabulário (categoria Família)", "vocabulario.html"]]
+},
+
 { id: "kosoado", title: "これ, それ, あれ (este, esse, aquele)",
   summary: "As palavras para apontar: perto de mim, perto de você, longe de nós.",
   use: [
@@ -859,6 +908,67 @@ const GRAMMAR = [
     "Só existe um verbo godan terminado em **ぬ**: {死|し}ぬ. O {行|い}く é exceção na tabela: o て e o た dele são いって e いった."
   ],
   practice: [["Treino de conjugação (verbos)", "conjugacao.html"]]
+},
+
+{ id: "jidoushi-tadoushi", title: "Verbos transitivos e intransitivos",
+  summary: "Pares como {開|あ}ける e {開|あ}く: quem faz a ação (を) e o que acontece sozinho (が).",
+  use: [
+    "Muitos verbos japoneses vêm em **pares**: um diz que **alguém faz** algo (**transitivo**, {他動詞|たどうし}) e o outro diz que algo **acontece sozinho** (**intransitivo**, {自動詞|じどうし}). Em português costumamos usar um verbo só: “abrir” serve para “eu abro a porta” e para “a porta abre”.",
+    "A diferença decide a **partícula**. O transitivo leva **を** na coisa afetada: ドアを {開|あ}ける. O intransitivo leva **が** no que muda: ドアが {開|あ}く.",
+    "Saber o par ajuda a escolher entre を e が, e também a entender frases com ～ている e ～てある."
+  ],
+  form: [
+    "**Transitivo** (alguém faz): **quem faz が + coisa を + verbo**. {私|わたし}が ドアを {開|あ}けます。 (Eu abro a porta.) Muitas vezes quem faz fica subentendido: ドアを {開|あ}けます。",
+    "**Intransitivo** (acontece sozinho, sem falar de quem causou): **coisa が + verbo**. ドアが {開|あ}きます。 (A porta abre.)",
+    "**Aprenda em pares**: o verbo do par que termina em **～ける, ～める, ～す** costuma ser o transitivo; o que termina em **～く, ～まる, ～れる** costuma ser o intransitivo. São **tendências**, não regra: confira a tabela.",
+    "**Estado resultante**: o intransitivo com **～ている** mostra o resultado que continua: ドアが {開|あ}いて います (a porta está aberta). O transitivo com **～てある** mostra que alguém deixou assim de propósito: ドアが {開|あ}けて あります (a porta foi aberta e está assim)."
+  ],
+  tables: [
+    { title: "Pares comuns (intransitivo が ↔ transitivo を)",
+      head: ["Intransitivo (が)", "Transitivo (を)", "Significado"],
+      rows: [
+        ["{開|あ}く", "{開|あ}ける", "abrir (a porta abre / eu abro a porta)"],
+        ["{閉|し}まる", "{閉|し}める", "fechar"],
+        ["つく", "つける", "ligar (a luz acende / eu acendo a luz)"],
+        ["{消|き}える", "{消|け}す", "apagar (a luz apaga / eu apago a luz)"],
+        ["{始|はじ}まる", "{始|はじ}める", "começar"],
+        ["{止|と}まる", "{止|と}める", "parar (o carro para / eu paro o carro)"],
+        ["{続|つづ}く", "{続|つづ}ける", "continuar"],
+        ["{集|あつ}まる", "{集|あつ}める", "juntar-se / juntar"],
+        ["{決|き}まる", "{決|き}める", "ficar decidido / decidir"],
+        ["{変|か}わる", "{変|か}える", "mudar (por si / alguém muda algo)"],
+        ["{落|お}ちる", "{落|お}とす", "cair / derrubar"],
+        ["{壊|こわ}れる", "{壊|こわ}す", "quebrar (estragar) / quebrar algo"],
+        ["{割|わ}れる", "{割|わ}る", "partir-se / partir"],
+        ["{入|はい}る", "{入|い}れる", "entrar / pôr dentro"],
+        ["{出|で}る", "{出|だ}す", "sair / tirar, pôr para fora"],
+        ["{起|お}きる", "{起|お}こす", "acordar, levantar / acordar alguém"],
+        ["{冷|ひ}える", "{冷|ひ}やす", "esfriar / esfriar algo"],
+        ["{沸|わ}く", "{沸|わ}かす", "ferver (a água ferve) / ferver algo"],
+        ["{動|うご}く", "{動|うご}かす", "mover-se / mover algo"],
+        ["{増|ふ}える", "{増|ふ}やす", "aumentar / aumentar algo"]
+      ] }
+  ],
+  ex: [
+    ["ドアを {開|あ}けます。", "", "Eu abro a porta.", "Transitivo: alguém faz, e a coisa leva を."],
+    ["ドアが {開|あ}きます。", "", "A porta abre.", "Intransitivo: a porta se abre, e vem com が."],
+    ["{電気|でんき}を {消|け}して ください。", "", "Apague a luz, por favor.", "{消|け}す é transitivo: を."],
+    ["{電気|でんき}が {消|き}えました。", "", "A luz apagou.", "{消|き}える é intransitivo: が. O kanji 消 lê け ou き."],
+    ["{子供|こども}が コップを {落|お}としました。", "", "A criança derrubou o copo.", "{落|お}とす: transitivo, com を."],
+    ["コップが {落|お}ちました。", "", "O copo caiu.", "{落|お}ちる: intransitivo, com が."],
+    ["{窓|まど}が {開|あ}いて います。", "", "A janela está aberta.", "Intransitivo + ～ている: o resultado que continua."],
+    ["{窓|まど}が {開|あ}けて あります。", "", "A janela foi deixada aberta.", "Transitivo + ～てある: alguém abriu de propósito e ficou assim."],
+    ["{会議|かいぎ}が {九時|くじ}に {始|はじ}まります。", "", "A reunião começa às nove.", "{始|はじ}まる: intransitivo. A reunião “começa sozinha”."],
+    ["{先生|せんせい}が {授業|じゅぎょう}を {始|はじ}めます。", "", "O professor começa a aula.", "{始|はじ}める: transitivo. Alguém inicia a aula."]
+  ],
+  care: [
+    "Não troque as partículas: ✗ ドアを {開|あ}きます; ✓ ドアが {開|あ}きます ou ドアを {開|あ}けます. O intransitivo **nunca** leva を na coisa que muda.",
+    "Aprenda **o par junto** quando encontrar um verbo novo: {壊|こわ}れる (quebrar sozinho) e {壊|こわ}す (quebrar algo), {直|なお}る (ser consertado) e {直|なお}す (consertar).",
+    "Nem todo verbo tem par: {行|い}く, {来|く}る, {泣|な}く e {笑|わら}う, por exemplo, só têm uma forma.",
+    "Verbos de **movimento** são intransitivos, mas o を marca **por onde** se passa ou **de onde** se sai: {道|みち}を {歩|ある}く, {橋|はし}を {渡|わた}る, {家|いえ}を {出|で}る, {電車|でんしゃ}を {降|お}りる. Esse を não marca o objeto da ação.",
+    "A tabela mostra o que é mais comum, e os padrões de terminação têm exceções (por exemplo, {入|はい}る ↔ {入|い}れる). Na dúvida, o par certo é o do dicionário."
+  ],
+  practice: [["Vocabulário (categoria Verbos)", "vocabulario.html"]]
 },
 
 { id: "ta", title: "Forma た (passado informal)",
