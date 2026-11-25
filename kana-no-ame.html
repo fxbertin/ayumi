@@ -55,6 +55,8 @@
 #overlay h2{margin:0;font-size:1.8rem}
 #overlay p{margin:0;color:var(--muted);max-width:30ch;font-size:.95rem}
 #overlay select,.sel{font:inherit;color:var(--ink);background:var(--card);border:1.5px solid var(--line);border-radius:8px;padding:8px 10px;max-width:100%}
+#overlay .catlbl{display:flex;flex-direction:column;align-items:stretch;gap:4px;width:100%;min-width:0}
+#overlay .catlbl select{width:100%;min-width:0;text-overflow:ellipsis}
 .pad{display:flex;gap:8px}
 .pad button{min-width:56px;padding:12px}
 @media (hover:hover){.pad{display:none}}
@@ -88,7 +90,7 @@
       <div id="overlay">
         <h2 lang="ja">かなの雨</h2>
         <p id="msg">Mova com ← →, acelere com ↓ e solte com a barra de espaço. Junte kanas para formar palavras da esquerda para a direita ou de cima para baixo.</p>
-        <label>Categoria <select id="cat"></select></label>
+        <label class="catlbl">Categoria <select id="cat"></select></label>
         <label class="opt"><input type="checkbox" id="conj"> Incluir conjugações de verbos e adjetivos</label>
         <details id="fdet" hidden><summary>Formas incluídas</summary><b>Verbos</b><div id="fv"></div><b>Adjetivos</b><div id="fa"></div></details>
         <button id="go" type="button" class="primary">Jogar</button>
