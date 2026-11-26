@@ -159,3 +159,11 @@ Em `progresso.html`, “Exportar progresso” baixa um `.json` (app, version, ex
 - Regra de ouro: na dúvida, não vira tocável. `SB` (palavras em kana que começam com partícula, como とても e できる, puladas inteiras) e `LB` (ごはん, 子ども, こと, その…) vêm da auditoria das 2072 frases; ao achar um falso positivo, acrescente a palavra a uma das duas listas. Os itens e textos estão em `FW`.
 - Não entram: ない, たい, て e た soltos (ficam dentro da marca), ditado, lacuna e leitura. Sem dado novo do usuário. `sw.js` subiu para `kd-v15` por causa do arquivo novo.
 
+## Frases divididas em palavras (Tarefa 2, Fase 2)
+
+`data/sent-tokens-n5.js` (e, depois, `-n4`, `-n3`) guarda `SENTTOK[frase] = [[palavra, leitura, significado], ...]`, uma palavra por token, sem a pontuação (`、。？！「」`). Leitura omitida = a própria palavra; significado omitido = vem de `FW` (`data/fw.js`) ou de `data/words.js` (chave `palavra|leitura`, katakana e hiragana tratados como iguais). Frases com tokens têm todas as palavras tocáveis (traço pontilhado leve; as funções gramaticais continuam com o traço forte e o link); frases sem tokens seguem com a varredura da Fase 1. A `mark.hl` sempre ganha: tokens que a tocam deixam de ser tocáveis.
+- **Convenções:** verbos e adjetivos conjugados são escritos como `forma/leitura/tradução no contexto (dicionário, forma)`, por exemplo `飲んで/のんで/beber (飲む, forma て)`; nas formas educadas a raiz fica separada de ます, ました, ません, ませんか e ましょう (que já têm balão em `FW`); contadores ficam separados do número (一 + 杯). Não use `;` nem `/` dentro de um significado.
+- **Fluxo de uma rodada:** `node valtok.js --next 80` lista as próximas frases do N5 sem tokens (`--nivel N4` para outro nível); escreva um `lote.txt` com `frase<TAB>palavra/leitura/significado; ...`; `node add-tok.js n5 lote.txt` acrescenta ao arquivo; `node valtok.js` precisa terminar com "erros 0" (checa que palavras e leituras reproduzem a frase e o kana, que todo token tem significado e que nenhum cruza a marca de uma palavra-alvo). Só um arquivo novo muda `sw.js` (agora `kd-v16`); lotes dentro do mesmo arquivo, não.
+- **Teclado:** um único tab-stop por frase; ← e → andam entre as palavras, Enter ou espaço abre o painel, Esc fecha.
+- **Estado:** N5 com 60 de 480 frases.
+

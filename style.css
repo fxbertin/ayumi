@@ -122,3 +122,4 @@ mark.hl{background:rgba(47,125,91,.22);background:color-mix(in srgb,var(--ok) 22
 .fw-l{margin-top:6px;display:flex;flex-wrap:wrap;gap:4px 16px}
 .fw-g{display:inline-block;padding:6px 0}
 .fw-x{position:absolute;top:0;right:0;width:44px;height:44px;background:none;border:0;font-size:1.1rem;color:var(--muted)}
+.fw.tk{border-bottom-color:color-mix(in srgb,var(--muted) 35%,transparent)}

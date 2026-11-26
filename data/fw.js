@@ -1,5 +1,6 @@
 // Explicação por toque nas frases de exemplo (vocabulário). API: KDFW.wrap(el, jp, spans, w), KDFW.close(), KDFW.scan(jp, spans).
 // Depois de KDHL.fill, deixa tocáveis: a palavra-alvo (mark.hl) e ~40 partículas/auxiliares conhecidos.
+// Se existir SENTTOK[frase] (data/sent-tokens-*.js), os limites vêm dos tokens [palavra, leitura, significado]; senão vale a varredura abaixo.
 // Regra de ouro: na dúvida, NÃO vira tocável (perder um toque é melhor do que mostrar um balão errado).
 // Cada item: pt = rótulo curto, u = explicação, r = leitura quando difere da escrita, g/g2 = ids de data/grammar.js,
 // st = versão para início de frase (só "でも" e "では").
@@ -19,7 +20,7 @@ const KDFW = (() => {
     "や": { pt: "e (lista parcial)", u: "Lista exemplos sem esgotar: りんごやバナナ = maçã, banana e outras coisas." },
     "よ": { pt: "ênfase", u: "No fim da frase, dá ênfase ou avisa algo que a pessoa talvez não saiba." },
     "ね": { pt: "busca de concordância", u: "No fim da frase pede confirmação: “não é?”, “né?”." },
-    "から": { pt: "desde / porque", u: "Depois de substantivo, “a partir de” (9時から). Depois de uma frase, “porque” (寒いから).", g: "kara-made" },
+    "から": { pt: "desde / porque", u: "Depois de substantivo, “a partir de” (9時から). Depois de uma frase, “porque” (寒いから). Depois de て, “depois de” (食べてから = depois de comer).", g: "kara-made" },
     "まで": { pt: "até", u: "“Até”: marca o limite no tempo ou no espaço (5時まで).", g: "kara-made" },
     "ので": { pt: "porque", u: "“Porque / como”: dá o motivo de modo mais suave e objetivo que から.", g: "node-noni" },
     "のに": { pt: "apesar de", u: "“Embora / apesar de”: o resultado contraria o esperado, muitas vezes com surpresa ou queixa.", g: "node-noni" },
@@ -60,6 +61,7 @@ const KDFW = (() => {
   const CLAUSE = "、。？?！!「」\n ";
   const END = new Set(["", "。", "、", "？", "?", "！", "!", "」", "…", " "]);
   const VEND = /[うくぐすつぬぶむるいたんだな]/;   // fim plausível de verbo/adjetivo/な (antes de ので/のに)
+  const FOCUSABLE = ".fw, mark.hl[role=button]";
   const ONE = new Set(["は", "が", "を", "に", "で", "と", "も", "の", "か", "へ", "や", "よ", "ね"]);
 
   function ok(tk, t, i) {
@@ -127,6 +129,28 @@ const KDFW = (() => {
     return null;
   }
 
+  // ---- frases divididas em palavras (data/sent-tokens-*.js) ----
+  const hira = x => x.replace(/[\u30a1-\u30f6]/g, c => String.fromCharCode(c.charCodeAt(0) - 0x60));
+  const PUNCT = "、。？?！!「」『』…・,. \u3000";
+  let WIDX = null;
+  function widx() {
+    if (WIDX) return WIDX; WIDX = {};
+    if (typeof CATEGORIES !== "undefined") for (const c of CATEGORIES) for (const w of c.words) { const k = w[0] + "|" + hira(w[1]); if (!(k in WIDX)) WIDX[k] = w[3]; }
+    return WIDX;
+  }
+  // Devolve [ini, fim, palavra] (função gramatical, sem significado próprio) ou [ini, fim, palavra, leitura, significado]; null se não bater.
+  function fromTokens(jp, T, spans) {
+    const out = []; let p = 0;
+    for (const t of T) {
+      const s = t[0]; while (p < jp.length && PUNCT.includes(jp[p])) p++;
+      if (!jp.startsWith(s, p)) return null;
+      const e = p + s.length, m = t[2] || "";
+      if (!(spans || []).some(x => x[0] < e && x[1] > p)) out.push(!m && FW[s] ? [p, e, s] : [p, e, s, t[1] || s, m]);
+      p = e;
+    }
+    return out;
+  }
+
   // ---- DOM ----
   let tip = null, cur = null;
   const mk = (tag, cls, txt) => { const e = document.createElement(tag); if (cls) e.className = cls; if (txt != null) e.textContent = txt; return e; };
@@ -153,6 +177,9 @@ const KDFW = (() => {
       const m = el.textContent, f = formOf(m, w);
       head = w[0]; sub = `${typeof pitch === "function" ? pitch(w) : w[1]} · ${w[2]}`; body = w[3];
       if (f) { body += ` — forma usada: ${f[1]}.`; g = [f[0]]; }
+    } else if (el.dataset.k === "t") {
+      const r = el.dataset.r; head = el.dataset.t; sub = r !== head ? r : "";
+      body = el.dataset.m || widx()[head + "|" + hira(r)] || "(sem tradução)";
     } else {
       const it = FW[el.dataset.t], atStart = el.dataset.s === "1", v = (atStart && it.st) || it;
       head = el.dataset.t; sub = it.r ? it.r + " · " + v.pt : v.pt; body = v.u;
@@ -165,13 +192,15 @@ const KDFW = (() => {
     t.hidden = false; box.append(t);
     cur = el; el.setAttribute("aria-expanded", "true"); el.setAttribute("aria-describedby", "kd-tip");
   }
-  function arm(e) { e.setAttribute("role", "button"); e.tabIndex = 0; e.setAttribute("aria-expanded", "false"); }
+  function arm(e) { e.setAttribute("role", "button"); e.tabIndex = -1; e.setAttribute("aria-expanded", "false"); }
 
   function wrap(el, jp, spans, w) {
     el._kdw = w;
     el.querySelectorAll("mark.hl").forEach(arm);
-    const toks = scan(jp, spans);
-    if (!toks.length) return;
+    const T = typeof SENTTOK !== "undefined" ? SENTTOK[jp] : null;
+    const toks = (T && fromTokens(jp, T, spans)) || scan(jp, spans);
+    const first = () => { const l = el.querySelectorAll(FOCUSABLE); l.forEach((x, i) => x.tabIndex = i ? -1 : 0); };
+    if (!toks.length) { first(); return; }
     let pos = 0;
     for (const node of [...el.childNodes]) {
       const len = node.textContent.length, a = pos, b = pos + len; pos = b;
@@ -179,15 +208,17 @@ const KDFW = (() => {
       const mine = toks.filter(x => x[0] >= a && x[1] <= b);
       if (!mine.length) continue;
       const frag = document.createDocumentFragment(); let p = a;
-      for (const [s, e, tk] of mine) {
+      for (const [s, e, tk, r, m] of mine) {
         if (s > p) frag.append(jp.slice(p, s));
-        const sp = mk("span", "fw", tk); sp.dataset.t = tk;
-        if (s === 0 || CLAUSE.includes(jp[s - 1])) sp.dataset.s = "1";
+        const sp = mk("span", r === undefined ? "fw" : "fw tk", tk); sp.dataset.t = tk;
+        if (r !== undefined) { sp.dataset.k = "t"; sp.dataset.r = r; sp.dataset.m = m; }
+        else if (s === 0 || CLAUSE.includes(jp[s - 1])) sp.dataset.s = "1";
         arm(sp); frag.append(sp); p = e;
       }
       if (p < b) frag.append(jp.slice(p, b));
       node.replaceWith(frag);
     }
+    first();
   }
 
   if (typeof document !== "undefined") {
@@ -197,7 +228,15 @@ const KDFW = (() => {
       if (f) { e.preventDefault(); open(f, f.closest(".sw-exj, #ex-jp")); return; }
       if (cur && !(tip && tip.contains(e.target))) close();
     });
+    const hostOf = f => f.closest(".sw-exj, #ex-jp");
+    document.addEventListener("focusin", e => {
+      const f = target(e); if (f) hostOf(f).querySelectorAll(FOCUSABLE).forEach(x => x.tabIndex = x === f ? 0 : -1);
+    });
     document.addEventListener("keydown", e => {
+      if ((e.key === "ArrowRight" || e.key === "ArrowLeft") && target(e)) {
+        const f = target(e), l = [...hostOf(f).querySelectorAll(FOCUSABLE)], n = l[l.indexOf(f) + (e.key === "ArrowRight" ? 1 : -1)];
+        if (n) { e.preventDefault(); n.focus(); } return;
+      }
       if (e.key === "Escape" && cur) { close(true); return; }
       if ((e.key === "Enter" || e.key === " ") && target(e)) { e.preventDefault(); target(e).click(); }
     });
