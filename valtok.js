@@ -15,6 +15,8 @@ const hira = x => x.replace(/[\u30a1-\u30f6]/g, c => String.fromCharCode(c.charC
 const PUN = /[、。？?！!「」『』…・,. \u3000]/;
 const strip = x => x.replace(new RegExp(PUN.source, "g"), "");
 const widx = new Set(); for (const c of C) for (const w of c.words) widx.add(w[0] + "|" + hira(w[1]));
+// Frases com erro no campo kana de sentences.js (o validador acusa leitura diferente); ficam de fora de --next até a correção.
+const PENDENTES = new Set([]);
 const bySent = new Map(S.map(s => [s[0], s]));
 const arg = n => { const i = process.argv.indexOf(n); return i < 0 ? null : process.argv[i + 1]; };
 
@@ -26,7 +28,7 @@ function order(group) {
 }
 if (process.argv.includes("--next")) {
   const lv = (arg("--nivel") || "N5").toUpperCase(), n = +arg("--next") || 80;
-  const lista = order("JLPT " + lv).filter(i => !T[S[i][0]]).slice(0, n);
+  const lista = order("JLPT " + lv).filter(i => !T[S[i][0]] && !PENDENTES.has(S[i][0])).slice(0, n);
   console.log(`# ${lv}: ${lista.length} frases sem tokens (japonês | kana | português | palavras)`);
   for (const i of lista) console.log(S[i].slice(0, 3).join(" | ") + " | " + (S[i][3] || []).join(","));
   process.exit(0);
