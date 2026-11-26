@@ -14,7 +14,7 @@ function pitch(w){
 const SENT = {};
 if (typeof SENTENCES !== "undefined") for (const s of SENTENCES) for (const k of s[3]) (SENT[k] = SENT[k] || []).push(s);
 const shuffle = a => { a = [...a]; for (let i = a.length-1; i > 0; i--) { const j = Math.floor(Math.random()*(i+1)); [a[i],a[j]] = [a[j],a[i]]; } return a; };
-const show = id => ["menu","game","study","feed","result"].forEach(s => $("#"+s).hidden = s !== id);
+const show = id => { KDFW.close(); ["menu","game","study","feed","result"].forEach(s => $("#"+s).hidden = s !== id); };
 
 const S = { mode: store.get("mode") === "play" ? "play" : "study", cat:null, dir: store.get("dir") || "jp2pt", reading: store.get("reading") !== false, auto: store.get("auto") === true,
             q:[], i:0, score:0, wrong:[], locked:false, correct:0 };
@@ -41,7 +41,7 @@ function sentRows(w){
   for (const s of SENT[w[0] + "|" + w[1]] || []) {
     const e = document.createElement("div"); e.className = "sw-ex";
     const t = document.createElement("div");
-    const j = document.createElement("div"); j.lang = "ja"; j.className = "sw-exj"; KDHL.fill(j, s[0], KDHL.find(s[0], w[0] + "|" + w[1]));
+    const j = document.createElement("div"); j.lang = "ja"; j.className = "sw-exj"; const sp = KDHL.find(s[0], w[0] + "|" + w[1]); KDHL.fill(j, s[0], sp); KDFW.wrap(j, s[0], sp, w);
     const k = document.createElement("div"); k.lang = "ja"; k.className = "sw-exk"; k.textContent = s[1]; k.hidden = !S.reading;
     const p = document.createElement("div"); p.textContent = s[2];
     t.append(j, k, p); e.append(t);
@@ -345,7 +345,7 @@ function render(){
     box.append(b);
   });
   $("#feedback").textContent = "";
-  $("#ex").hidden = true; S.sent = null;
+  KDFW.close(); $("#ex").hidden = true; S.sent = null;
   $("#next").hidden = true;
   $("#speak").hidden = !TTS || !jp;
   if (S.auto && jp) speak(w[1]);
@@ -377,7 +377,9 @@ function showExample(w){
   const list = SENT[w[0] + "|" + w[1]];
   if (!list) return;
   const s = S.sent = list[Math.floor(Math.random() * list.length)];
-  KDHL.fill($("#ex-jp"), s[0], KDHL.find(s[0], w[0] + "|" + w[1]));
+  const sp = KDHL.find(s[0], w[0] + "|" + w[1]);
+  KDHL.fill($("#ex-jp"), s[0], sp);
+  KDFW.wrap($("#ex-jp"), s[0], sp, w);
   $("#ex-kana").textContent = s[1];
   $("#ex-kana").hidden = !S.reading;
   $("#ex-pt").textContent = s[2];

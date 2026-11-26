@@ -151,3 +151,11 @@ Botão "Revisar hoje (N)" no menu do `vocabulario.html` (escondido quando N = 0)
 ## Backup do progresso
 
 Em `progresso.html`, “Exportar progresso” baixa um `.json` (app, version, exportedAt, data) com `stats`, `miss`, `best:*` e todas as chaves `kd-*` (menos `kd-voice-note`). “Importar progresso” valida o arquivo, mostra um resumo e, ao confirmar, SUBSTITUI tudo o que está salvo no aparelho (não há mesclagem).
+
+## Explicação por toque nas frases (Tarefa 2, Fase 1)
+
+`data/fw.js` (global `KDFW`, também `module.exports` no node) deixa tocáveis, nas frases do vocabulário (estudo, busca e quiz), a palavra-alvo (`mark.hl`) e cerca de 40 partículas e auxiliares (は, が, を, に, で, と, も, の, か, へ, から, まで, ので, のに, です, ます, ました, ください…). Ao tocar, abre um painel abaixo da frase (um só por vez; fecha ao tocar fora, com Esc, no ✕, em "Próxima" e ao trocar de tela) com leitura, significado curto em português e link `grammar.html#t-<id>`. Na palavra-alvo, mostra o significado e, se ela aparece conjugada, a forma e o tópico correspondente.
+- `KDFW.wrap(el, jp, spans, w)` roda depois de `KDHL.fill` e só divide nós de texto; `highlight.js` não mudou.
+- Regra de ouro: na dúvida, não vira tocável. `SB` (palavras em kana que começam com partícula, como とても e できる, puladas inteiras) e `LB` (ごはん, 子ども, こと, その…) vêm da auditoria das 2072 frases; ao achar um falso positivo, acrescente a palavra a uma das duas listas. Os itens e textos estão em `FW`.
+- Não entram: ない, たい, て e た soltos (ficam dentro da marca), ditado, lacuna e leitura. Sem dado novo do usuário. `sw.js` subiu para `kd-v15` por causa do arquivo novo.
+

@@ -109,3 +109,16 @@ mark.hl{background:rgba(47,125,91,.22);background:color-mix(in srgb,var(--ok) 22
 .hlinks{margin:.5em 0 0;font-size:.9rem}
 .hlinks a{margin-right:12px}
 .hub a:not(.hcard){color:var(--ink);text-underline-offset:3px}
+/* Explicação por toque nas frases (data/fw.js) */
+.fw,mark.hl[role=button]{cursor:pointer;padding:.3em .12em;margin:0 -.12em;-webkit-tap-highlight-color:transparent}
+.fw{border-bottom:1px dotted var(--muted)}
+.fw[aria-expanded=true]{background:color-mix(in srgb,var(--muted) 22%,transparent);border-radius:3px}
+.fw:focus-visible,mark.hl[role=button]:focus-visible{outline:2px solid var(--ink);outline-offset:1px;border-radius:3px}
+.fw-tip{position:relative;margin:8px 0 2px;padding:10px 44px 10px 12px;background:var(--paper);border:1.5px solid var(--line);border-radius:8px;font-size:.95rem;line-height:1.45}
+.fw-tip[hidden]{display:none}
+.fw-h b{font-size:1.2rem;margin-right:8px}
+.fw-h span{color:var(--muted)}
+.fw-b{margin-top:4px}
+.fw-l{margin-top:6px;display:flex;flex-wrap:wrap;gap:4px 16px}
+.fw-g{display:inline-block;padding:6px 0}
+.fw-x{position:absolute;top:0;right:0;width:44px;height:44px;background:none;border:0;font-size:1.1rem;color:var(--muted)}
