@@ -2,7 +2,7 @@
 // Estratégia: responde na hora com a cópia guardada e atualiza essa cópia em segundo plano
 // (stale-while-revalidate); assim, uma atualização do site aparece na visita seguinte, sem precisar trocar nada aqui.
 // Quando ADICIONAR ou REMOVER arquivos do site, atualize CORE e aumente VERSION (kd-v2, kd-v3...).
-const VERSION = "kd-v18";
+const VERSION = "kd-v19";
 const CORE = [
   "./",
   "conjugacao-adjetivos.html",
@@ -58,6 +58,8 @@ const CORE = [
   "data/sent-tokens-n5.js",
   "data/sent-tokens-n4.js",
   "data/sent-tokens-n3.js",
+  "data/sent-tokens-n2.js",
+  "data/sent-tokens-n1.js",
   "data/sentences.js",
   "data/taxi.js",
   "data/words.js",

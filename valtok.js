@@ -1,6 +1,6 @@
 // Valida data/sent-tokens-*.js e lista as próximas frases sem tokens.
 //   node valtok.js              valida tudo (deve terminar com "erros 0")
-//   node valtok.js --next 80    mostra as próximas 80 frases do N5 sem tokens (ou --nivel N4 / N3)
+//   node valtok.js --next 80    mostra as próximas 80 frases do N5 sem tokens (ou --nivel N4 / N3 / N2 / N1)
 // Formato: SENTTOK["frase"] = [[palavra, leitura, significado], ...]; leitura vazia = a própria palavra;
 // significado vazio só vale para função gramatical (FW em data/fw.js) ou palavra que está em data/words.js.
 const fs = require("fs"), path = require("path");
@@ -59,7 +59,7 @@ for (const [jp, list] of Object.entries(T)) {
       if (ta < b && tb > a && (ta < a || tb > b) && /[\u4e00-\u9faf0-9]/.test(tt.slice(0, Math.max(0, a - ta)) + tt.slice(Math.max(0, b - ta)))) warn(`token "${tt}" cruza a marca de ${k.split("|")[0]} em ${jp}`);
   }
 }
-const cob = {}; for (const lv of ["N5", "N4", "N3"]) { const o = order("JLPT " + lv); cob[lv] = `${o.filter(i => T[S[i][0]]).length}/${o.length}`; }
+const cob = {}; for (const lv of ["N5", "N4", "N3", "N2", "N1"]) { const o = order("JLPT " + lv); cob[lv] = `${o.filter(i => T[S[i][0]]).length}/${o.length}`; }
 console.log(`arquivos ${files.length}, frases ${Object.keys(T).length}, tokens ${tokens}, cobertura ${JSON.stringify(cob)}`);
 console.log(`avisos ${avisos}, erros ${erros}`);
 process.exit(erros ? 1 : 0);
