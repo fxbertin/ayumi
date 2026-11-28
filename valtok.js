@@ -16,7 +16,7 @@ const PUN = /[、。？?！!「」『』…・,. \u3000]/;
 const strip = x => x.replace(new RegExp(PUN.source, "g"), "");
 const widx = new Set(); for (const c of C) for (const w of c.words) widx.add(w[0] + "|" + hira(w[1]));
 // Frases com erro no campo kana de sentences.js (o validador acusa leitura diferente); ficam de fora de --next até a correção.
-const PENDENTES = new Set([]);
+const PENDENTES = new Set(["囲碁は将棋よりルールが難しいと聞きました。"]);
 const bySent = new Map(S.map(s => [s[0], s]));
 const arg = n => { const i = process.argv.indexOf(n); return i < 0 ? null : process.argv[i + 1]; };
 
