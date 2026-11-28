@@ -1299,7 +1299,7 @@ const SENTENCES = [
 ["祖母からもらった人形を、棚に飾っています。","そぼからもらったにんぎょうを、たなにかざっています。","Deixo exposta na estante a boneca que ganhei da minha avó.",["人形|にんぎょう"]],
 ["折り紙で鶴を折る方法を教えてもらいました。","おりがみでつるをおるほうほうをおしえてもらいました。","Me ensinaram como dobrar um tsuru de origami.",["折り紙|おりがみ"]],
 ["祖父はよく近所の人と将棋をさしています。","そふはよくきんじょのひととしょうぎをさしています。","Meu avô costuma jogar shogi com os vizinhos.",["将棋|しょうぎ"]],
-["囲碁は将棋よりルールが難しいと聞きました。","いごはしょうぎよりルールがむずかしいときいました。","Ouvi dizer que as regras do go são mais difíceis que as do shogi.",["囲碁|いご","将棋|しょうぎ"]],
+["囲碁は将棋よりルールが難しいと聞きました。","いごはしょうぎよりルールがむずかしいとききました。","Ouvi dizer que as regras do go são mais difíceis que as do shogi.",["囲碁|いご","将棋|しょうぎ"]],
 ["旅行中、夜はみんなでトランプをして遊びました。","りょこうちゅう、よるはみんなでトランプをしてあそびました。","Durante a viagem, à noite todo mundo jogava baralho.",["トランプ|とらんぷ"]],
 ["公園で子どもたちがかくれんぼをしています。","こうえんでこどもたちがかくれんぼをしています。","As crianças estão brincando de esconde-esconde no parque.",["かくれんぼ|かくれんぼ"]],
 ["娘はぬいぐるみを抱いて寝ます。","むすめはぬいぐるみをだいてねます。","Minha filha dorme abraçada a um bicho de pelúcia.",["ぬいぐるみ|ぬいぐるみ"]],
