@@ -249,7 +249,8 @@ const CATEGORIES = [
  ["口座","こうざ","kouza","conta bancária"],["借金","しゃっきん","shakkin","dívida"],["割引","わりびき","waribiki","desconto"],["領収書","りょうしゅうしょ","ryoushuusho","recibo"],["生活費","せいかつひ","seikatsuhi","custo de vida"],
  ["円","えん","en","iene"],
  ["保険", "ほけん", "hoken", "seguro"],
- ["金庫","きんこ","kinko","cofre"]
+ ["金庫","きんこ","kinko","cofre"],
+ ["市場","しじょう","shijou","mercado (economia)"],["物価","ぶっか","bukka","preços (em geral)"]
 ]},
 { id:"roupas", group:"Vocabulário", name:"Roupas e acessórios", words:[
  ["服","ふく","fuku","roupa"],["シャツ","しゃつ","shatsu","camisa"],["ズボン","ずぼん","zubon","calça"],["スカート","すかーと","sukaato","saia"],
@@ -347,7 +348,8 @@ const CATEGORIES = [
  ["パスタ","ぱすた","pasuta","massa; macarrão italiano"],["スープ","すーぷ","suupu","sopa"],["アイス","あいす","aisu","sorvete"],["チョコレート","ちょこれーと","chokoreeto","chocolate"],
  ["味","あじ","aji","sabor"],["食堂","しょくどう","shokudou","refeitório / restaurante simples"],["弁当","べんとう","bentou","marmita (bentô)"],["油","あぶら","abura","óleo"],["湯","ゆ","yu","água quente"],
  ["氷","こおり","koori","gelo"],["うどん","うどん","udon","udon (macarrão grosso)"],["そば","そば","soba","soba (macarrão de trigo-sarraceno)"],["おでん","おでん","oden","oden (cozido japonês de inverno)"],["せんべい","せんべい","senbei","senbei (biscoito de arroz)"],
- ["お菓子","おかし","okashi","doce; guloseima"],["飲み物","のみもの","nomimono","bebida"],["麺","めん","men","macarrão; massa"],["刺身","さしみ","sashimi","sashimi (peixe cru fatiado)"]
+ ["お菓子","おかし","okashi","doce; guloseima"],["飲み物","のみもの","nomimono","bebida"],["麺","めん","men","macarrão; massa"],["刺身","さしみ","sashimi","sashimi (peixe cru fatiado)"],
+ ["食べ物","たべもの","tabemono","comida"]
 ]},
 { id:"frutas", group:"Vocabulário", name:"Frutas e verduras", words:[
  ["みかん", "みかん", "mikan", "tangerina"],["ぶどう", "ぶどう", "budou", "uva"],["いちご", "いちご", "ichigo", "morango"],
@@ -408,7 +410,8 @@ const CATEGORIES = [
  ["救急車", "きゅうきゅうしゃ", "kyuukyuusha", "ambulância"],["消防車", "しょうぼうしゃ", "shoubousha", "carro de bombeiros"],["消防署", "しょうぼうしょ", "shoubousho", "quartel de bombeiros"],
  ["避難", "ひなん", "hinan", "evacuação / refúgio"],["非常口", "ひじょうぐち", "hijouguchi", "saída de emergência"],["緊急", "きんきゅう", "kinkyuu", "emergência / urgência"],
  ["患者","かんじゃ","kanja","paciente"],
- ["体重","たいじゅう","taijuu","peso (corporal)"]
+ ["体重","たいじゅう","taijuu","peso (corporal)"],
+ ["栄養","えいよう","eiyou","nutrição"],["ビタミン","びたみん","bitamin","vitamina"]
 ]},
 { id:"n5-subst", group:"JLPT N5", name:"Substantivos e objetos", words:[
  ["友達", "ともだち", "tomodachi", "amigo"],["人", "ひと", "hito", "pessoa"],["男", "おとこ", "otoko", "homem"],
@@ -571,7 +574,8 @@ const CATEGORIES = [
  ["俳優", "はいゆう", "haiyuu", "ator; atriz"],
  ["作家", "さっか", "sakka", "escritor"],
  ["駅員", "えきいん", "ekiin", "funcionário da estação"],
- ["配達員", "はいたついん", "haitatsuin", "entregador"]
+ ["配達員", "はいたついん", "haitatsuin", "entregador"],
+ ["医師","いし","ishi","médico (formal)"]
 ]},
 { id:"n3-subst", group:"JLPT N3", name:"Substantivos", words:[
  ["環境","かんきょう","kankyou","meio ambiente"],["政治","せいじ","seiji","política"],["経済","けいざい","keizai","economia"],["歴史","れきし","rekishi","história"],
@@ -599,17 +603,20 @@ const CATEGORIES = [
  ["品質","ひんしつ","hinshitsu","qualidade"],
  ["成果","せいか","seika","resultado, fruto do esforço"],
  ["実力","じつりょく","jitsuryoku","capacidade real"],
- ["摂取","せっしゅ","sesshu","ingestão"]
+ ["摂取","せっしゅ","sesshu","ingestão"],
+ ["手続き","てつづき","tetsuzuki","trâmite / procedimento"],["効率化","こうりつか","kouritsuka","ganho de eficiência"],["ゲスト","げすと","gesuto","convidado"],["宴会","えんかい","enkai","banquete; festa"],["命","いのち","inochi","vida"],["完成","かんせい","kansei","conclusão"]
 ]},
 { id:"n2-adjetivos", group:"JLPT N2", name:"Adjetivos", words:[
  ["適切","てきせつ","tekisetsu","adequado"],["明確","めいかく","meikaku","claro / preciso"],["貴重","きちょう","kichou","valioso"],["深刻","しんこく","shinkoku","grave / sério"],
  ["膨大","ぼうだい","boudai","enorme / vasto"],["不可欠","ふかけつ","fukaketsu","indispensável"],["慎重","しんちょう","shinchou","prudente"],
  ["積極的","せっきょくてき","sekkyokuteki","proativo"],["消極的","しょうきょくてき","shoukyokuteki","passivo / reticente"],["勇ましい","いさましい","isamashii","corajoso"],
  ["著しい","いちじるしい","ichijirushii","notável / marcante"],["厚かましい","あつかましい","atsukamashii","descarado"],
- ["かわいらしい", "かわいらしい", "kawairashii", "adorável"],["もったいない", "もったいない", "mottainai", "desperdício / que pena desperdiçar"],["だるい", "だるい", "darui", "indisposto / sem energia"]]},
+ ["かわいらしい", "かわいらしい", "kawairashii", "adorável"],["もったいない", "もったいない", "mottainai", "desperdício / que pena desperdiçar"],["だるい", "だるい", "darui", "indisposto / sem energia"],
+ ["豪華","ごうか","gouka","luxuoso"],["無駄","むだ","muda","desperdício; em vão"]]},
 { id:"n2-adv", group:"JLPT N2", name:"Advérbios e expressões (N2)", words:[
  ["いきなり", "いきなり", "ikinari", "de repente"],["なお", "なお", "nao", "além disso / ainda"],["せめて", "せめて", "semete", "pelo menos"],["まさか", "まさか", "masaka", "não pode ser! / impossível!"],["おそらく", "おそらく", "osoraku", "provavelmente"],["どうやら", "どうやら", "douyara", "aparentemente / ao que parece"],
- ["無暗に","むやみに","muyamini","sem critério, à toa"]
+ ["無暗に","むやみに","muyamini","sem critério, à toa"],
+ ["自ら","みずから","mizukara","por conta própria"]
 ]},
 { id:"n1-subst", group:"JLPT N1", name:"Substantivos", words:[
  ["概念","がいねん","gainen","conceito"],["枠組み","わくぐみ","wakugumi","estrutura / arcabouço"],["趣旨","しゅし","shushi","propósito / teor"],["見解","けんかい","kenkai","ponto de vista"],
@@ -617,7 +624,8 @@ const CATEGORIES = [
  ["妥協","だきょう","dakyou","concessão"],["偏見","へんけん","henken","preconceito"],["本質","ほんしつ","honshitsu","essência"],["前提","ぜんてい","zentei","premissa"],
  ["抑制","よくせい","yokusei","contenção / controle"],["弊害","へいがい","heigai","efeito nocivo"],["基盤","きばん","kiban","base / alicerce"],
  ["信念","しんねん","shinnen","convicção"],
- ["購買意欲","こうばいいよく","koubaiiyoku","vontade de comprar"]
+ ["購買意欲","こうばいいよく","koubaiiyoku","vontade de comprar"],
+ ["言動","げんどう","gendou","fala e conduta"],["功績","こうせき","kouseki","feitos, mérito"],["実現","じつげん","jitsugen","realização"],["陰","かげ","kage","sombra"],["お互い","おたがい","otagai","ambos, um ao outro"],["上昇","じょうしょう","joushou","alta, subida"],["変化","へんか","henka","mudança"],["デザイン","でざいん","dezain","design"],["ガラス","がらす","garasu","vidro"]
 ]},
 { id:"n1-adjetivos", group:"JLPT N1", name:"Adjetivos", words:[
  ["曖昧","あいまい","aimai","vago / ambíguo"],["斬新","ざんしん","zanshin","inovador"],["顕著","けんちょ","kencho","notável / evidente"],["緻密","ちみつ","chimitsu","minucioso"],
@@ -626,7 +634,8 @@ const CATEGORIES = [
  ["丁重", "ていちょう", "teichou", "cortês / muito educado"],["鋭敏", "えいびん", "eibin", "aguçado / sensível"],
  ["純粋","じゅんすい","junsui","puro"],
  ["巧み","たくみ","takumi","habilidoso"],
- ["不条理","ふじょうり","fujouri","absurdo, injusto"],["理不尽","りふじん","rifujin","absurdo, irracional"]
+ ["不条理","ふじょうり","fujouri","absurdo, injusto"],["理不尽","りふじん","rifujin","absurdo, irracional"],
+ ["軽率","けいそつ","keisotsu","leviano"],["偉大","いだい","idai","grandioso"]
 ]},
 { id:"n5-pron", group:"JLPT N5", name:"Pronomes e perguntas", words:[
  ["私","わたし","watashi","eu"],["あなた","あなた","anata","você"],["彼","かれ","kare","ele / namorado"],["彼女","かのじょ","kanojo","ela / namorada"],
@@ -840,7 +849,8 @@ const CATEGORIES = [
  ["伝統", "でんとう", "dentou", "tradição"],["宗教", "しゅうきょう", "shuukyou", "religião"],["世代", "せだい", "sedai", "geração"],
  ["交通事故", "こうつうじこ", "koutsuu jiko", "acidente de trânsito"],
  ["強盗","ごうとう","goutou","assaltante"],["犯人","はんにん","hannin","criminoso, suspeito"],["裁判所","さいばんしょ","saibansho","tribunal"],["石油","せきゆ","sekiyu","petróleo"],["輸出量","ゆしゅつりょう","yushutsuryou","volume de exportação"],["対策","たいさく","taisaku","medida; contramedida"],
- ["政策","せいさく","seisaku","política (governamental)"]
+ ["政策","せいさく","seisaku","política (governamental)"],
+ ["判決","はんけつ","hanketsu","sentença"]
 ]},
 { id:"n3-mente", group:"JLPT N3", name:"Mente, atitudes e relações (N3)", words:[
  ["感情", "かんじょう", "kanjou", "emoção / sentimento"],["感覚", "かんかく", "kankaku", "sensação / senso"],["態度", "たいど", "taido", "atitude"],
